@@ -45,11 +45,17 @@
   <div class="container">
 
     <!-- Banner Premium (visible solo si es premium) -->
-    <div id="banner-premium-activo" style="display:none; background:linear-gradient(90deg, #FFD700, #FFC107); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center; border:2px solid #0038A8;">
-      <h3 style="color:#0038A8; margin:0 0 10px 0;">⭐ CLIENTE PREMIUM</h3>
-      <p style="margin:5px 0;">✅ Ofertas exclusivas | ✅ Alertas de precios | ✅ Lista de compras optimizada</p>
-      <p style="margin:5px 0;">✅ Navegación GPS | ✅ Sin anuncios | ✅ WhatsApp directo para consultas</p>
-      <div id="premium-whatsapp" style="margin-top:15px;"></div>
+    <div id="banner-premium-activo" style="display:none; background:linear-gradient(135deg, #FFD700, #FFA500); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center; border:3px solid #FF6B00; box-shadow:0 4px 15px rgba(255,165,0,0.4);">
+      <h2 style="color:#FFF; margin:0 0 10px 0; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">⭐ CLIENTE PREMIUM ⭐</h2>
+      <p style="color:#FFF; font-size:1.1rem; margin:10px 0;">¡Gracias por ser parte de Precios Chuy Premium!</p>
+      <div style="background:rgba(255,255,255,0.2); padding:15px; border-radius:10px; margin-top:15px;">
+        <p style="color:#FFF; margin:5px 0;">✅ Ofertas exclusivas</p>
+        <p style="color:#FFF; margin:5px 0;">✅ Alertas de precios</p>
+        <p style="color:#FFF; margin:5px 0;">✅ Lista de compras optimizada</p>
+        <p style="color:#FFF; margin:5px 0;">✅ Navegación GPS</p>
+        <p style="color:#FFF; margin:5px 0;">✅ Sin anuncios</p>
+        <p style="color:#FFF; margin:5px 0;">✅ Soporte prioritario por WhatsApp</p>
+      </div>
     </div>
 
     <!-- Banner contador de usuarios -->
@@ -74,7 +80,17 @@
         ✅ Ofertas exclusivas | ✅ Alertas de precios | ✅ Lista de compras optimizada<br>
         ✅ Navegación GPS | ✅ Sin anuncios
       </p>
-      <button class="btn btn-primary"> Ver opciones de pago</button>
+      <button class="btn btn-primary">👉 Ver opciones de pago</button>
+    </div>
+
+    <!-- Sección WhatsApp para Premium -->
+    <div id="seccion-whatsapp-premium" style="display:none; margin-bottom:20px;">
+      <div class="card" style="background:linear-gradient(135deg, #E8F5E9, #C8E6C9); border-left:5px solid #25D366; box-shadow:0 4px 15px rgba(37,211,102,0.2);">
+        <h3 style="color:#1B5E20; margin-top:0;"> Consultas Premium por WhatsApp</h3>
+        <p style="color:#2E7D32; font-size:1.05rem;">¿Tenés alguna pregunta sobre productos, precios o comercios?</p>
+        <p style="color:#2E7D32;">Nuestro equipo te responde de forma prioritaria:</p>
+        <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20quiero%20hacer%20una%20consulta" target="_blank" class="btn" style="background:#25D366; color:white; text-decoration:none; margin-top:10px; font-size:1.1rem; padding:12px 25px;">📱 Contactar Soporte Premium</a>
+      </div>
     </div>
 
     <!-- TAB: Ofertas -->
@@ -144,5 +160,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d34900ef7e5040',t:'MTc4NzA4MDkyNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d3a3344daf14a0',t:'MTc4NzA4NDYxOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
