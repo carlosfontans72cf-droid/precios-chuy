@@ -23,19 +23,29 @@ async function loadStats() {
     if (el2) el2.textContent = comsSnap.size;
     if (el3) el3.textContent = prodsSnap.size;
 
-    // LEER PLAN DIRECTAMENTE DE FIRESTORE (no de sessionStorage)
+    // VERIFICAR SI EL USUARIO ES PREMIUM - LEER DIRECTAMENTE DE FIRESTORE
     let esPremium = false;
     if (userId) {
       try {
-        const userDocSnap = await getDocs(collection(db, 'users'));
-        userDocSnap.forEach(d => {
-          if (d.id === userId) {
-            const data = d.data();
-            if (data.plan === 'premium') esPremium = true;
-            // Actualizar sessionStorage también
-            sessionStorage.setItem('userPlan', data.plan === 'premium' ? 'premium' : 'gratis');
+        // Importar doc y getDoc dinámicamente
+        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const userDocRef = doc(db, 'users', userId);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('Datos del usuario:', userData);
+          console.log('Plan del usuario:', userData.plan);
+          
+          if (userData.plan === 'premium') {
+            esPremium = true;
+            sessionStorage.setItem('userPlan', 'premium');
+            console.log('✅ Usuario es PREMIUM');
+          } else {
+            sessionStorage.setItem('userPlan', 'gratis');
+            console.log('Usuario es GRATIS');
           }
-        });
+        }
       } catch (e) {
         console.error('Error leyendo plan:', e);
         // Fallback a sessionStorage
@@ -46,20 +56,19 @@ async function loadStats() {
     const bannerPremium = document.getElementById('premium-banner');
     const bannerActivo = document.getElementById('banner-premium-activo');
     const seccionWhatsapp = document.getElementById('seccion-whatsapp-premium');
+    const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
 
     if (esPremium) {
       // Es premium: mostrar banner activo, sección WhatsApp y ofertas exclusivas
       if (bannerPremium) bannerPremium.style.display = 'none';
       if (bannerActivo) bannerActivo.style.display = 'block';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'block';
-      const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
       if (ofertasExclusivas) ofertasExclusivas.style.display = 'block';
     } else {
       // No es premium: mostrar banner de upgrade
       if (bannerPremium) bannerPremium.style.display = 'block';
       if (bannerActivo) bannerActivo.style.display = 'none';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'none';
-      const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
       if (ofertasExclusivas) ofertasExclusivas.style.display = 'none';
     }
   } catch (err) {
