@@ -223,16 +223,19 @@ async function loadExcursiones() {
     cont.innerHTML = '';
     excursiones.forEach(exc => {
       const porcentaje = (exc.lugaresOcupados / exc.lugaresTotales) * 100;
+      const whatsappLink = exc.adminWhatsapp ? `https://wa.me/${exc.adminWhatsapp.replace(/[^0-9]/g, '')}` : '#';
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
-        <h3> ${exc.ruta || 'Excursión'}</h3>
+        <h3>🚌 ${exc.ruta || 'Excursión'}</h3>
         <p><strong>Admin:</strong> ${exc.adminNombre || 'Sin nombre'}</p>
         <div class="grid grid-2" style="margin:10px 0;">
           <div><strong>Fecha:</strong> ${exc.fecha}</div>
           <div><strong>Horario:</strong> ${exc.horaSalida} - ${exc.horaRetorno}</div>
           <div><strong>Punto:</strong> ${exc.punto}</div>
           <div><strong>Precio:</strong> $${exc.precio}</div>
+          ${exc.sena ? `<div><strong>Seña:</strong> $${exc.sena} por persona</div>` : ''}
+          ${exc.adminWhatsapp ? `<div><strong>Contacto:</strong> <a href="${whatsappLink}" target="_blank" style="color:#25D366; font-weight:bold;">WhatsApp</a></div>` : ''}
         </div>
         ${exc.descripcion ? `<p style="color:#666;">${exc.descripcion}</p>` : ''}
         <div style="margin:10px 0;">
@@ -241,16 +244,27 @@ async function loadExcursiones() {
             <div style="width:${porcentaje}%; background:#009C3B; height:100%;"></div>
           </div>
         </div>
-        <button class="btn btn-success" onclick="reservarExcursion('${exc.id}', '${exc.adminNombre}', '${exc.fecha}', '${exc.ruta}', '${exc.adminEmail || ''}')">
-          ${exc.lugaresOcupados >= exc.lugaresTotales ? 'Completa' : 'Reservar lugar'}
-        </button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-success" onclick="reservarExcursion('${exc.id}', '${exc.adminNombre}', '${exc.fecha}', '${exc.ruta}', '${exc.adminEmail || ''}', ${exc.sena || 0}, '${exc.adminWhatsapp || ''}')">
+            ${exc.lugaresOcupados >= exc.lugaresTotales ? 'Completa' : 'Reservar lugar'}
+          </button>
+          ${exc.adminWhatsapp ? `<a href="${whatsappLink}" target="_blank" class="btn" style="background:#25D366; color:white; text-decoration:none;">💬 Contactar Admin</a>` : ''}
+        </div>
       `;
       cont.appendChild(div);
     });
   } catch (err) { console.error('Error excursiones:', err); }
 }
 
-window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail) => {
+window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail, sena, adminWhatsapp) => {
+  const senaInfo = sena > 0 ? `
+    <div style="background:#fff3cd; padding:15px; border-radius:8px; margin:15px 0; border-left:4px solid #ffc107;">
+      <strong>Seña requerida:</strong> $${sena} por persona<br>
+      <small>Contactá al admin por WhatsApp para coordinar el pago de la seña.</small>
+      ${adminWhatsapp ? `<br><a href="https://wa.me/${adminWhatsapp.replace(/[^0-9]/g, '')}" target="_blank" style="color:#25D366; font-weight:bold;">WhatsApp del admin</a>` : ''}
+    </div>
+  ` : '';
+  
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML = `
@@ -258,6 +272,7 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail) => {
       <h2 style="color:#0038A8;">Reservar lugar</h2>
       <p><strong>${ruta}</strong> - ${fecha}</p>
       <p>Admin: ${adminNombre}</p>
+      ${senaInfo}
       <div class="form-group"><label>Tu nombre</label><input type="text" id="res-nombre" class="form-control" value="${sessionStorage.getItem('userName') || ''}"></div>
       <div class="form-group"><label>Teléfono / WhatsApp</label><input type="text" id="res-telefono" class="form-control" placeholder="+598 99..."></div>
       <div class="form-group"><label>Cantidad de personas</label><input type="number" id="res-personas" class="form-control" value="1" min="1"></div>
@@ -289,8 +304,10 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail) => {
         adminId: userId,
         adminNombre,
         adminEmail,
+        adminWhatsapp,
         ruta,
         fechaExcursion: fecha,
+        sena: sena,
         clienteId: userId,
         clienteNombre: nombre,
         clienteTelefono: telefono,
@@ -308,7 +325,7 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail) => {
       }
 
       modal.remove();
-      showAlert('Reserva enviada. El admin te contactará.', 'success');
+      showAlert('Reserva enviada. Contactá al admin por WhatsApp para pagar la seña.', 'success');
       loadExcursiones();
     } catch (err) {
       errDiv.textContent = `Error: ${err.message}`;

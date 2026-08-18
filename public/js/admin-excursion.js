@@ -44,6 +44,8 @@ async function addExcursion() {
   const punto = document.getElementById('exc-punto').value.trim();
   const horaRetorno = document.getElementById('exc-hora-retorno').value;
   const precio = parseFloat(document.getElementById('exc-precio').value) || 0;
+  const sena = parseFloat(document.getElementById('exc-sena').value) || 0;
+  const whatsapp = document.getElementById('exc-whatsapp').value.trim();
   const lugares = parseInt(document.getElementById('exc-lugares').value) || 0;
   const descripcion = document.getElementById('exc-descripcion').value.trim();
 
@@ -51,17 +53,23 @@ async function addExcursion() {
     return showAlert('Completá fecha, hora y punto de encuentro', 'warning');
   }
 
+  if (!whatsapp) {
+    return showAlert('Agregá tu WhatsApp para que los clientes puedan contactarte', 'warning');
+  }
+
   try {
     await addDoc(collection(db, 'excursiones'), {
       adminId: userId,
       adminNombre: sessionStorage.getItem('userName'),
       adminEmail: userEmail,
+      adminWhatsapp: whatsapp,
       ruta: sessionStorage.getItem('userRuta') || 'Sin ruta definida',
       fecha,
       horaSalida,
       horaRetorno,
       punto,
       precio,
+      sena,
       lugaresTotales: lugares,
       lugaresOcupados: 0,
       descripcion,
@@ -75,6 +83,8 @@ async function addExcursion() {
     document.getElementById('exc-punto').value = '';
     document.getElementById('exc-hora-retorno').value = '';
     document.getElementById('exc-precio').value = '';
+    document.getElementById('exc-sena').value = '';
+    document.getElementById('exc-whatsapp').value = '';
     document.getElementById('exc-lugares').value = '';
     document.getElementById('exc-descripcion').value = '';
 
@@ -106,6 +116,7 @@ async function loadExcursiones() {
 
     excursiones.forEach(exc => {
       const porcentaje = (exc.lugaresOcupados / exc.lugaresTotales) * 100;
+      const whatsappLink = exc.adminWhatsapp ? `https://wa.me/${exc.adminWhatsapp.replace(/[^0-9]/g, '')}` : '#';
       const div = document.createElement('div');
       div.className = 'card';
       div.style.marginBottom = '15px';
@@ -116,6 +127,8 @@ async function loadExcursiones() {
           <div><strong>Horario:</strong> ${exc.horaSalida} - ${exc.horaRetorno}</div>
           <div><strong>Punto:</strong> ${exc.punto}</div>
           <div><strong>Precio:</strong> $${exc.precio}</div>
+          <div><strong>Seña:</strong> $${exc.sena || 0} por persona</div>
+          <div><strong>WhatsApp:</strong> ${exc.adminWhatsapp || 'No configurado'}</div>
         </div>
         <div style="margin-top:10px;">
           <strong>Lugares:</strong> ${exc.lugaresOcupados}/${exc.lugaresTotales}
@@ -125,6 +138,7 @@ async function loadExcursiones() {
         </div>
         ${exc.descripcion ? `<p style="margin-top:10px; color:#666;">${exc.descripcion}</p>` : ''}
         <div style="margin-top:15px;">
+          <a href="${whatsappLink}" target="_blank" class="btn btn-sm" style="background:#25D366; color:white; margin-right:10px;"> WhatsApp</a>
           <button class="btn btn-sm btn-danger" onclick="deleteExcursion('${exc.id}')">Cancelar excursión</button>
         </div>
       `;
@@ -171,9 +185,11 @@ async function loadReservas() {
       div.className = 'reserva-card';
       const estadoClass = res.estado === 'confirmada' ? 'badge-active' : 
                          res.estado === 'cancelada' ? 'badge-inactive' : 'badge-warning';
+      const whatsappLink = res.clienteTelefono ? `https://wa.me/${res.clienteTelefono.replace(/[^0-9]/g, '')}` : '#';
+      const senaTotal = (res.sena || 0) * (res.personas || 1);
       div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:start;">
-          <div>
+        <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">
+          <div style="flex:1; min-width:250px;">
             <h4>${res.clienteNombre}</h4>
             <p style="margin:5px 0; color:#666;">
                ${res.clienteTelefono} |  ${res.personas} persona(s)
@@ -181,9 +197,11 @@ async function loadReservas() {
             <p style="margin:5px 0; color:#666;">
               🚌 ${res.ruta} |  ${res.fechaExcursion}
             </p>
+            ${res.sena ? `<p style="margin:5px 0; color:#009C3B; font-weight:bold;">💰 Seña: $${senaTotal} ($${res.sena} x ${res.personas})</p>` : ''}
             <span class="badge ${estadoClass}">${res.estado}</span>
           </div>
-          <div>
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <a href="${whatsappLink}" target="_blank" class="btn btn-sm" style="background:#25D366; color:white; text-decoration:none;">💬 WhatsApp</a>
             <button class="btn btn-sm btn-success" onclick="confirmarReserva('${res.id}')">Confirmar</button>
             <button class="btn btn-sm btn-danger" onclick="cancelarReserva('${res.id}')">Cancelar</button>
           </div>
