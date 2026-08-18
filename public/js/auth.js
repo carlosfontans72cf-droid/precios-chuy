@@ -42,6 +42,13 @@ btnLogin.addEventListener('click', async () => {
       throw new Error('Cuenta inactiva');
     }
 
+    // Verificar si está aprobado (para admin_excursion)
+    if (userData.role === 'admin_excursion' && !userData.aprobado) {
+      errorDiv.textContent = 'Tu cuenta está pendiente de aprobación';
+      await auth.signOut();
+      throw new Error('Cuenta pendiente');
+    }
+
     // Guardar sesión
     sessionStorage.setItem('userId', user.uid);
     sessionStorage.setItem('userEmail', userData.email);
@@ -53,6 +60,7 @@ btnLogin.addEventListener('click', async () => {
     let destino = '/pages/cliente.html';
     if (userData.role === 'admin') destino = '/pages/admin.html';
     else if (userData.role === 'comerciante') destino = '/pages/comerciante.html';
+    else if (userData.role === 'admin_excursion') destino = '/pages/admin-excursion.html';
 
     window.location.href = destino;
 
@@ -73,12 +81,13 @@ btnLogin.addEventListener('click', async () => {
   }
 });
 
-// Verificar sesión activa
+// Verificar sesión activa al cargar
 auth.onAuthStateChanged((user) => {
   if (user) {
     const role = sessionStorage.getItem('userRole');
     if (role === 'admin') window.location.href = '/pages/admin.html';
     else if (role === 'comerciante') window.location.href = '/pages/comerciante.html';
+    else if (role === 'admin_excursion') window.location.href = '/pages/admin-excursion.html';
     else if (role === 'cliente') window.location.href = '/pages/cliente.html';
   }
 });
