@@ -318,27 +318,72 @@ async function addExcursion() {
 async function loadExcursiones() {
   const cont = document.getElementById('lista-excursiones');
   if (!cont) return;
-  cont.innerHTML = '';
+  cont.innerHTML = '<p>Cargando...</p>';
   try {
     const snap = await getDocs(collection(db, 'excursiones'));
-    snap.forEach(d => {
-      const data = d.data();
+    const excursiones = [];
+    snap.forEach(d => excursiones.push({ id: d.id, ...d.data() }));
+    excursiones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    if (excursiones.length === 0) {
+      cont.innerHTML = '<p style="color:#666;">Sin excursiones programadas</p>';
+      return;
+    }
+
+    cont.innerHTML = '';
+    excursiones.forEach(exc => {
       const div = document.createElement('div');
-      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-      div.innerHTML = `<strong>${data.fecha}</strong> - ${data.horaSalida} hs<br>
-        ${data.punto} → Retorno: ${data.horaRetorno} hs<br>
-        Precio: $${data.precio} | Lugares: ${data.lugaresOcupados || 0}/${data.lugares}<br>
-        Van: ${data.van || '-'}<br>
-        <button class="btn btn-sm btn-danger" onclick="deleteExc(${d.id}')">Eliminar</button>`;
+      div.className = 'card';
+      div.style.marginBottom = '15px';
+      const totalLugares = exc.lugaresTotales || exc.lugares || 0;
+      const ocupados = exc.lugaresOcupados || 0;
+      const esAdminExcursion = exc.adminId ? true : false;
+      div.innerHTML = `
+        <h3>${esAdminExcursion ? '🚌' : '🚐'} ${exc.ruta || 'Excursión'} ${esAdminExcursion ? '<small style="color:#666;">(Admin: ' + (exc.adminNombre || '') + ')</small>' : ''}</h3>
+        <div class="grid grid-2">
+          <div><strong>Fecha:</strong> ${exc.fecha || '-'}</div>
+          <div><strong>Horario:</strong> ${exc.horaSalida || '-'} → ${exc.horaRetorno || '-'}</div>
+          <div><strong>Punto:</strong> ${exc.punto || '-'}</div>
+          <div><strong>Precio:</strong> $${exc.precio || 0}</div>
+          ${exc.sena ? `<div><strong>Seña:</strong> $${exc.sena} por persona</div>` : ''}
+          <div><strong>Lugares:</strong> ${ocupados}/${totalLugares}</div>
+          ${exc.adminWhatsapp ? `<div><strong>WhatsApp:</strong> ${exc.adminWhatsapp}</div>` : ''}
+          ${exc.van ? `<div><strong>Van:</strong> ${exc.van}</div>` : ''}
+        </div>
+        ${exc.descripcion ? `<p style="margin-top:10px; color:#666;">${exc.descripcion}</p>` : ''}
+        <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-warning" onclick="cancelarExcursion('${exc.id}')">Cancelar (ocultar)</button>
+          <button class="btn btn-sm btn-danger" onclick="borrarExcursion('${exc.id}')"> Borrar definitivamente</button>
+        </div>
+      `;
       cont.appendChild(div);
     });
-  } catch (err) { console.error('Error excursiones:', err); }
+  } catch (err) {
+    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+  }
 }
 
-window.deleteExc = async (id) => {
-  if (!confirm('¿Eliminar?')) return;
-  try { await deleteDoc(doc(db, 'excursiones', id)); loadExcursiones(); }
-  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+window.cancelarExcursion = async (id) => {
+  if (!confirm('¿Cancelar (ocultar) esta excursión? Los clientes ya no la verán, pero quedará en la base de datos.')) return;
+  try {
+    await updateDoc(doc(db, 'excursiones', id), { activa: false, publicada: false });
+    showAlert('Excursión cancelada (oculta)', 'warning');
+    loadExcursiones();
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  }
+};
+
+window.borrarExcursion = async (id) => {
+  if (!confirm('⚠️ ATENCIÓN: Esto borrará la excursión DEFINITIVAMENTE de la base de datos. ¿Continuar?')) return;
+  if (!confirm('¿Estás SEGURO? Esta acción no se puede deshacer.')) return;
+  try {
+    await deleteDoc(doc(db, 'excursiones', id));
+    showAlert('Excursión borrada definitivamente', 'danger');
+    loadExcursiones();
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  }
 };
 
 // ========== VIDEOS ==========
