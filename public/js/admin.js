@@ -180,9 +180,9 @@ async function loadPagos() {
           const estado = c.plan === 'vencido' ? '⚠️ Vencido' : (c.plan === 'activo' ? '✅ Activo' : '🆓 Prueba');
           div.innerHTML = `<strong>${c.comercio || c.nombre}</strong><br>
             <small>${c.email} | ${estado} | Días: ${dias}</small><br>
-            <button class="btn btn-sm btn-success" onclick="extenderCom(${c.id},30)">+30 días</button>
-            <button class="btn btn-sm btn-warning" onclick="habilitarCom(${c.id},30)">Habilitar</button>
-            <button class="btn btn-sm btn-danger" onclick="suspenderCom(${c.id})">Suspender</button>`;
+            <button class="btn btn-sm btn-success" onclick="extenderCom('${c.id}',30)">+30 días</button>
+            <button class="btn btn-sm btn-warning" onclick="habilitarCom('${c.id}',30)">Habilitar</button>
+            <button class="btn btn-sm btn-danger" onclick="suspenderCom('${c.id}')">Suspender</button>`;
           contCom.appendChild(div);
         });
       }
@@ -206,8 +206,8 @@ async function loadPagos() {
           const plan = c.plan === 'premium' ? '⭐ Premium' : '🆓 Gratis';
           div.innerHTML = `<strong>${c.nombre}</strong><br>
             <small>${c.email} | ${plan}</small><br>
-            <button class="btn btn-sm btn-success" onclick="activarPrem(${c.id},30)">+30 días Premium</button>
-            <button class="btn btn-sm btn-warning" onclick="quitarPrem(${c.id})">Volver a gratis</button>`;
+            <button class="btn btn-sm btn-success" onclick="activarPrem('${c.id}',30)">+30 días Premium</button>
+            <button class="btn btn-sm btn-warning" onclick="quitarPrem('${c.id}')">Volver a gratis</button>`;
           contCli.appendChild(div);
         });
       }
