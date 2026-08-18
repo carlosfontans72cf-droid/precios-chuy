@@ -116,7 +116,9 @@ async function loadExcursiones() {
 
     excursiones.forEach(exc => {
       const porcentaje = (exc.lugaresOcupados / exc.lugaresTotales) * 100;
-      const whatsappLink = exc.adminWhatsapp ? `https://wa.me/${exc.adminWhatsapp.replace(/[^0-9]/g, '')}` : '#';
+      const whatsappNum = exc.adminWhatsapp ? exc.adminWhatsapp.replace(/[^0-9]/g, '') : '';
+      const whatsappMsg = encodeURIComponent(`Hola! Quiero info sobre la excursión:\n\n ${exc.ruta}\n📅 Fecha: ${exc.fecha}\n💰 Precio: $${exc.precio}\n${exc.sena ? `💵 Seña: $${exc.sena}\n` : ''}`);
+      const whatsappLink = whatsappNum ? `https://wa.me/${whatsappNum}?text=${whatsappMsg}` : '#';
       const div = document.createElement('div');
       div.className = 'card';
       div.style.marginBottom = '15px';
@@ -185,7 +187,7 @@ async function loadReservas() {
       div.className = 'reserva-card';
       const estadoClass = res.estado === 'confirmada' ? 'badge-active' : 
                          res.estado === 'cancelada' ? 'badge-inactive' : 'badge-warning';
-      const whatsappLink = res.clienteTelefono ? `https://wa.me/${res.clienteTelefono.replace(/[^0-9]/g, '')}` : '#';
+      const whatsappLink = res.clienteTelefono ? `https://wa.me/${res.clienteTelefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${res.clienteNombre}! Soy ${res.adminNombre}, admin de la excursión ${res.ruta} del ${res.fechaExcursion}. Te contacto sobre tu reserva.`)}` : '#';
       const senaTotal = (res.sena || 0) * (res.personas || 1);
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">

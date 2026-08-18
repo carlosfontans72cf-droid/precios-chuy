@@ -261,7 +261,7 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail, sena, a
     <div style="background:#fff3cd; padding:15px; border-radius:8px; margin:15px 0; border-left:4px solid #ffc107;">
       <strong>Seña requerida:</strong> $${sena} por persona<br>
       <small>Contactá al admin por WhatsApp para coordinar el pago de la seña.</small>
-      ${adminWhatsapp ? `<br><a href="https://wa.me/${adminWhatsapp.replace(/[^0-9]/g, '')}" target="_blank" style="color:#25D366; font-weight:bold;">WhatsApp del admin</a>` : ''}
+      ${adminWhatsapp ? `<br><a href="https://wa.me/${adminWhatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola! Quiero reservar lugar para la excursión ${ruta} del ${fecha}. Quiero coordinar el pago de la seña de $${sena} por persona.`)}" target="_blank" style="color:#25D366; font-weight:bold;">WhatsApp del admin</a>` : ''}
     </div>
   ` : '';
   
