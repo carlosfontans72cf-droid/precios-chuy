@@ -55,6 +55,8 @@ btnLogin.addEventListener('click', async () => {
     sessionStorage.setItem('userName', userData.nombre);
     sessionStorage.setItem('userRole', userData.role);
     if (userData.ruta) sessionStorage.setItem('userRuta', userData.ruta);
+    if (userData.plan === 'premium') sessionStorage.setItem('userPlan', 'premium');
+    else sessionStorage.setItem('userPlan', 'gratis');
 
     // Redirección según rol
     let destino = '/pages/cliente.html';

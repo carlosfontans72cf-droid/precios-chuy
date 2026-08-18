@@ -23,11 +23,22 @@ async function loadStats() {
     if (el2) el2.textContent = comsSnap.size;
     if (el3) el3.textContent = prodsSnap.size;
 
-    // Mostrar banner premium solo si NO es premium
-    const banner = document.getElementById('premium-banner');
-    if (banner) {
-      // Por ahora siempre visible (después lo conectamos con el plan real del usuario)
-      banner.style.display = 'block';
+    // Verificar si el usuario es premium
+    const userPlan = sessionStorage.getItem('userPlan');
+    const bannerPremium = document.getElementById('premium-banner');
+    const bannerActivo = document.getElementById('banner-premium-activo');
+    const seccionWhatsapp = document.getElementById('seccion-whatsapp-premium');
+
+    if (userPlan === 'premium') {
+      // Es premium: mostrar banner activo y sección WhatsApp
+      if (bannerPremium) bannerPremium.style.display = 'none';
+      if (bannerActivo) bannerActivo.style.display = 'block';
+      if (seccionWhatsapp) seccionWhatsapp.style.display = 'block';
+    } else {
+      // No es premium: mostrar banner de upgrade
+      if (bannerPremium) bannerPremium.style.display = 'block';
+      if (bannerActivo) bannerActivo.style.display = 'none';
+      if (seccionWhatsapp) seccionWhatsapp.style.display = 'none';
     }
   } catch (err) {
     console.error('Error cargando stats:', err);

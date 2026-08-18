@@ -241,9 +241,11 @@ window.activarPrem = async (id, dias) => {
   fecha.setDate(fecha.getDate() + dias);
   try {
     await updateDoc(doc(db, 'users', id), {
-      plan: 'premium', fechaVencimientoPremium: fecha.toISOString()
+      plan: 'premium', 
+      fechaVencimientoPremium: fecha.toISOString(),
+      premiumActivo: true
     });
-    showAlert('Premium activado', 'success');
+    showAlert('✅ Premium activado por 30 días', 'success');
     loadPagos();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
@@ -251,8 +253,12 @@ window.activarPrem = async (id, dias) => {
 window.quitarPrem = async (id) => {
   if (!confirm('¿Quitar premium?')) return;
   try {
-    await updateDoc(doc(db, 'users', id), { plan: 'gratis', fechaVencimientoPremium: null });
-    showAlert('Vuelto a gratis', 'info');
+    await updateDoc(doc(db, 'users', id), { 
+      plan: 'gratis', 
+      fechaVencimientoPremium: null,
+      premiumActivo: false
+    });
+    showAlert('Vuelto a plan gratis', 'info');
     loadPagos();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
