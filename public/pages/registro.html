@@ -12,9 +12,9 @@
     .role-card:hover { border-color: #009C3B; transform: translateY(-5px); }
     .role-card.selected { border-color: #0038A8; background: #f0f4ff; }
     .role-card .icon { font-size: 3rem; margin-bottom: 10px; }
-    .benefits { text-align: left; margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+    .benefits { text-align: left; margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; list-style: none; }
     .benefits li { margin: 8px 0; color: #666; }
-    .benefits li::before { content: "✅ "; }
+    .benefits li::before { content: "OK "; color: green; font-weight: bold; }
     .price-tag { font-size: 1.5rem; font-weight: bold; color: #0038A8; margin: 10px 0; }
   </style>
 </head>
@@ -22,22 +22,22 @@
 
   <div class="login-container">
     <div class="login-card" style="max-width: 900px;">
-      <div class="logo">🛒</div>
+      <div class="logo">Taxi</div>
       <h2>Registro - Precios Chuy</h2>
       <p style="text-align:center; color:#666; margin-bottom:20px;">
-        Elegí cómo querés usar la app
+        Elegi como queres usar la app
       </p>
 
       <div class="role-selector">
         <div class="role-card" onclick="selectRole('cliente')" id="role-cliente">
-          <div class="icon"></div>
+          <div class="icon">Carrito</div>
           <h3>Soy Cliente</h3>
           <p>Comparar precios y ahorrar</p>
           <div class="price-tag">GRATIS</div>
           <ul class="benefits">
             <li>Comparar precios Uruguay vs Brasil</li>
             <li>Mapa de comercios</li>
-            <li>Ver ofertas básicas</li>
+            <li>Ver ofertas basicas</li>
             <li>Reservar excursiones</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
@@ -47,37 +47,37 @@
         </div>
 
         <div class="role-card" onclick="selectRole('comerciante')" id="role-comerciante">
-          <div class="icon"></div>
+          <div class="icon">Tienda</div>
           <h3>Soy Comerciante</h3>
           <p>Vender mis productos</p>
-          <div class="price-tag">60 DÍAS GRATIS</div>
+          <div class="price-tag">60 DIAS GRATIS</div>
           <ul class="benefits">
             <li>Productos ilimitados</li>
-            <li>1 video por día (90 seg)</li>
+            <li>1 video por dia (90 seg)</li>
             <li>Perfil destacado</li>
-            <li>Estadísticas</li>
-            <li>Ver excursiones próximas</li>
+            <li>Estadisticas</li>
+            <li>Ver excursiones proximas</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
-            Después: $5/mes<br>
-            Sin contratos. Pagás y usás.
+            Despues: $5/mes<br>
+            Sin contratos. Pagas y usas.
           </p>
         </div>
 
         <div class="role-card" onclick="selectRole('admin_excursion')" id="role-admin-excursion">
-          <div class="icon"></div>
-          <h3>Admin de Excursión</h3>
+          <div class="icon">Bus</div>
+          <h3>Admin de Excursion</h3>
           <p>Organizar viajes</p>
           <div class="price-tag">$1/persona</div>
           <ul class="benefits">
             <li>Crear y gestionar excursiones</li>
             <li>Ver reservas en tiempo real</li>
-            <li>Panel de estadísticas</li>
+            <li>Panel de estadisticas</li>
             <li>Soporte prioritario</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
-            Pagás $1 por cada persona<br>
-            que reserve tu excursión
+            Pagas $1 por cada persona<br>
+            que reserve tu excursion
           </p>
         </div>
       </div>
@@ -92,9 +92,9 @@
           <input type="email" id="reg-email" class="form-control" placeholder="tu@email.com">
         </div>
         <div class="form-group" style="position:relative;">
-          <label>Contraseña</label>
-          <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 6 caracteres" style="padding-right:42px;">
-          <button type="button" style="position:absolute;right:12px;bottom:10px;background:transparent;border:none;font-size:18px;cursor:pointer;" onclick="togglePassword()">👁</button>
+          <label>Contrasena</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="Minimo 6 caracteres" style="padding-right:42px;">
+          <button type="button" style="position:absolute;right:12px;bottom:10px;background:transparent;border:none;font-size:18px;cursor:pointer;" onclick="togglePassword()">Ver</button>
         </div>
 
         <div id="comercio-fields" style="display:none;">
@@ -106,11 +106,11 @@
             <label>Tipo de comercio</label>
             <select id="reg-tipo" class="form-control">
               <option value="supermercado">Supermercado</option>
-              <option value="carniceria">Carnicería</option>
+              <option value="carniceria">Carniceria</option>
               <option value="farmacia">Farmacia</option>
               <option value="bebidas">Bebidas</option>
               <option value="ropa">Ropa</option>
-              <option value="electronica">Electrónica</option>
+              <option value="electronica">Electronica</option>
               <option value="otro">Otro</option>
             </select>
           </div>
@@ -119,15 +119,15 @@
         <div id="excursion-fields" style="display:none;">
           <div class="form-group">
             <label>Ruta que vas a gestionar</label>
-            <input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado → Chui">
+            <input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado a Chui">
           </div>
           <div class="form-group">
-            <label>Teléfono / WhatsApp</label>
+            <label>Telefono / WhatsApp</label>
             <input type="text" id="reg-telefono" class="form-control" placeholder="+598 99...">
           </div>
           <p style="background:#fff3cd; padding:15px; border-radius:8px; border-left:4px solid #ffc107; margin-top:10px;">
-            <strong>Nota:</strong> Después de registrarte, el admin general aprobará tu cuenta.<br>
-            Costo: $1 USD por cada persona que reserve tu excursión.
+            <strong>Nota:</strong> Despues de registrarte, el admin general aprobara tu cuenta.<br>
+            Costo: $1 USD por cada persona que reserve tu excursion.
           </p>
         </div>
 
@@ -138,7 +138,7 @@
         </button>
 
         <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">
-          ¿Ya tenés cuenta? <a href="/index.html" style="color:#0038A8;">Iniciá sesión</a>
+          Ya tenes cuenta? <a href="/index.html" style="color:#0038A8;">Inicia sesion</a>
         </p>
       </div>
     </div>
@@ -152,13 +152,30 @@
     }
 
     function selectRole(role) {
-      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-      document.getElementById('role-' + role).classList.add('selected');
+      console.log('Rol seleccionado:', role);
+      
+      // Quitar seleccion de todos
+      const cards = document.querySelectorAll('.role-card');
+      for (let i = 0; i < cards.length; i++) {
+        cards[i].classList.remove('selected');
+      }
+      
+      // Seleccionar el correcto
+      const selectedCard = document.getElementById('role-' + role);
+      if (selectedCard) {
+        selectedCard.classList.add('selected');
+      }
+      
+      // Mostrar formulario
       document.getElementById('registro-form').style.display = 'block';
-      document.getElementById('comercio-fields').style.display = role === 'comerciante' ? 'block' : 'none';
-      document.getElementById('excursion-fields').style.display = role === 'admin_excursion' ? 'block' : 'none';
+      
+      // Mostrar campos segun rol
+      document.getElementById('comercio-fields').style.display = (role === 'comerciante') ? 'block' : 'none';
+      document.getElementById('excursion-fields').style.display = (role === 'admin_excursion') ? 'block' : 'none';
+      
+      // Guardar rol
       sessionStorage.setItem('selectedRole', role);
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d24763998383fc',t:'MTc4NzA3MDM3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d271c19babc1a3',t:'MTc4NzA3MjEwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
