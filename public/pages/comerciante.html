@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comerciante - Precios Chuy</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <meta name="theme-color" content="#009C3B">
   <style>
     .com-nav { background: #009C3B; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -103,6 +104,19 @@
             <input type="text" id="perfil-horarios" class="form-control" placeholder="Lun-Sáb 8-20hs">
           </div>
         </div>
+        
+        <div class="form-group" style="margin-top:20px;">
+          <label>📍 Ubicación en el mapa</label>
+          <p style="color:#666; font-size:0.9rem; margin-bottom:10px;">
+            Hacé click en el mapa para marcar la ubicación de tu comercio
+          </p>
+          <div id="mapa-perfil" style="height:300px; width:100%; border-radius:8px; border:2px solid #ddd;"></div>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <input type="text" id="perfil-lat" class="form-control" placeholder="Latitud" readonly style="flex:1;">
+            <input type="text" id="perfil-lng" class="form-control" placeholder="Longitud" readonly style="flex:1;">
+          </div>
+        </div>
+        
         <button id="btn-save-perfil" class="btn btn-success">💾 Guardar Perfil</button>
       </div>
     </div>
@@ -206,6 +220,7 @@
     document.getElementById('user-info').textContent = nombre || 'Comerciante';
   </script>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d182da4c7235c2',t:'MTc4NzA2MjMyMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d1cea0ea2dd786',t:'MTc4NzA2NTQyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

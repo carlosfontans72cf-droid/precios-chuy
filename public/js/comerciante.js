@@ -60,6 +60,40 @@ async function loadSuscripcion() {
   } catch (err) { console.error('Error suscripción:', err); }
 }
 
+// ========== MAPA DE PERFIL ==========
+let mapaPerfil;
+let markerPerfil;
+
+function initMapaPerfil() {
+  const contenedor = document.getElementById('mapa-perfil');
+  if (!contenedor || mapaPerfil) return;
+  
+  // Centro del Chui
+  mapaPerfil = L.map('mapa-perfil').setView([-33.7574, -53.4614], 14);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(mapaPerfil);
+  
+  // Click en el mapa para poner el pin
+  mapaPerfil.on('click', function(e) {
+    const { lat, lng } = e.latlng;
+    
+    // Eliminar marker anterior si existe
+    if (markerPerfil) {
+      mapaPerfil.removeLayer(markerPerfil);
+    }
+    
+    // Agregar nuevo marker
+    markerPerfil = L.marker([lat, lng]).addTo(mapaPerfil);
+    markerPerfil.bindPopup('📍 Tu comercio').openPopup();
+    
+    // Actualizar campos
+    document.getElementById('perfil-lat').value = lat.toFixed(6);
+    document.getElementById('perfil-lng').value = lng.toFixed(6);
+  });
+}
+
 // ========== PERFIL ==========
 document.getElementById('btn-save-perfil')?.addEventListener('click', savePerfil);
 async function savePerfil() {
@@ -67,11 +101,14 @@ async function savePerfil() {
   if (!nombre) return showAlert('Ingresá el nombre', 'warning');
 
   try {
+    const lat = parseFloat(document.getElementById('perfil-lat').value);
+    const lng = parseFloat(document.getElementById('perfil-lng').value);
+    
     // Buscar el documento del usuario por email
     const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
     if (!userDoc.empty) {
       const docId = userDoc.docs[0].id;
-      await updateDoc(doc(db, 'users', docId), {
+      const dataToUpdate = {
         nombreComercio: nombre,
         tipo: document.getElementById('perfil-tipo').value,
         direccion: document.getElementById('perfil-direccion').value.trim(),
@@ -79,7 +116,15 @@ async function savePerfil() {
         logo: document.getElementById('perfil-logo').value.trim(),
         horarios: document.getElementById('perfil-horarios').value.trim(),
         updatedAt: serverTimestamp()
-      });
+      };
+      
+      // Agregar coordenadas si se seleccionaron
+      if (!isNaN(lat) && !isNaN(lng)) {
+        dataToUpdate.lat = lat;
+        dataToUpdate.lng = lng;
+      }
+      
+      await updateDoc(doc(db, 'users', docId), dataToUpdate);
       showAlert('Perfil actualizado', 'success');
     }
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
@@ -214,3 +259,4 @@ loadStatsGenerales();
 loadSuscripcion();
 loadProductos();
 loadVideos();
+initMapaPerfil();
