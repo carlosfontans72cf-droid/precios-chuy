@@ -13,6 +13,12 @@
     .com-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .stats-banner { background: linear-gradient(90deg, #009C3B, #0038A8); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+    .stats-banner .num { font-size: 1.8rem; font-weight: bold; color: #FFDF00; }
+    .suscripcion-box { background: linear-gradient(135deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #0038A8; }
+    .suscripcion-box h3 { color: #0038A8; margin: 0 0 10px 0; }
+    .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
+    .contador-fill { background: #0038A8; height: 100%; transition: width 0.3s; }
   </style>
 </head>
 <body>
@@ -26,17 +32,46 @@
   </nav>
 
   <div class="com-nav">
-    <button class="active" onclick="showTab('perfil')">🏪 Mi Perfil</button>
+    <button class="active" onclick="showTab('perfil')"> Mi Perfil</button>
     <button onclick="showTab('productos')">🛍️ Mis Productos</button>
-    <button onclick="showTab('videos')"> Videos/Ofertas</button>
-    <button onclick="showTab('stats')">📊 Estadísticas</button>
+    <button onclick="showTab('videos')">📹 Videos/Ofertas</button>
+    <button onclick="showTab('stats')"> Estadísticas</button>
   </div>
 
   <div class="container">
 
+    <!-- Banner contador de usuarios -->
+    <div class="stats-banner" id="stats-banner">
+      <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:15px;">
+        <div>
+          <div class="num" id="stat-total-users">0</div>
+          <div>Usuarios activos</div>
+        </div>
+        <div>
+          <div class="num" id="stat-comercios">0</div>
+          <div>Comercios</div>
+        </div>
+        <div>
+          <div class="num" id="stat-productos">0</div>
+          <div>Productos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Caja de suscripción -->
+    <div class="suscripcion-box" id="suscripcion-box">
+      <h3 id="sub-titulo"> Período de prueba activo</h3>
+      <p id="sub-texto">Te quedan <strong id="sub-dias">--</strong> días gratis</p>
+      <div class="contador-bar">
+        <div class="contador-fill" id="sub-barra" style="width:100%"></div>
+      </div>
+      <p style="font-size:0.9rem;">Después: $5/mes — Sin contratos, sin deudas</p>
+      <button class="btn btn-primary" onclick="mostrarPago()" style="margin-top:10px;"> Ver opciones de pago</button>
+    </div>
+
     <!-- TAB: Perfil -->
     <div id="tab-perfil" class="tab-content active">
-      <h3 class="section-title">🏪 Datos del Comercio</h3>
+      <h3 class="section-title"> Datos del Comercio</h3>
       <div class="card">
         <div class="grid grid-2">
           <div class="form-group">
@@ -57,11 +92,11 @@
           </div>
           <div class="form-group">
             <label>Dirección</label>
-            <input type="text" id="perfil-direccion" class="form-control">
+            <input type="text" id="perfil-direccion" class="form-control" placeholder="Rua...">
           </div>
           <div class="form-group">
             <label>Teléfono / WhatsApp</label>
-            <input type="text" id="perfil-telefono" class="form-control">
+            <input type="text" id="perfil-telefono" class="form-control" placeholder="+55...">
           </div>
           <div class="form-group">
             <label>Logo (URL)</label>
@@ -78,7 +113,7 @@
 
     <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">🛍️ Mis Productos</h3>
+      <h3 class="section-title">️ Mis Productos</h3>
       <div class="card">
         <div class="card-header">Agregar Producto</div>
         <div class="grid grid-2">
@@ -91,7 +126,7 @@
             <input type="number" id="prod-precio" class="form-control" step="0.01">
           </div>
           <div class="form-group">
-            <label>Imagen</label>
+            <label>Imagen (URL)</label>
             <input type="text" id="prod-imagen" class="form-control">
           </div>
           <div class="form-group">
@@ -145,15 +180,11 @@
       <div class="card">
         <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">
           <div class="stat-card">
-            <div class="number" id="stat-productos">0</div>
+            <div class="number" id="stat-productos-com" style="font-size:2.5rem;font-weight:bold;color:#0038A8;">0</div>
             <div class="label">Productos</div>
           </div>
           <div class="stat-card">
-            <div class="number" id="stat-vistas">0</div>
-            <div class="label">Vistas del perfil</div>
-          </div>
-          <div class="stat-card">
-            <div class="number" id="stat-ofertas">0</div>
+            <div class="number" id="stat-ofertas-com" style="font-size:2.5rem;font-weight:bold;color:#009C3B;">0</div>
             <div class="label">Ofertas activas</div>
           </div>
         </div>
@@ -180,5 +211,5 @@
   </script>
 
   <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2cf9be38be235c2',t:'MTc4NzA0MjM3Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d166717901db36',t:'MTc4NzA2MTE1OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

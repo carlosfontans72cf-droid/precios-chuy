@@ -17,6 +17,11 @@
     .oferta-card video, .oferta-card img { width: 100%; max-height: 300px; object-fit: cover; }
     .oferta-info { padding: 15px; }
     .ahorro-badge { background: #009C3B; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; display: inline-block; }
+    .stats-banner { background: linear-gradient(90deg, #0038A8, #009C3B); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+    .stats-banner .num { font-size: 1.8rem; font-weight: bold; color: #FFDF00; }
+    .premium-banner { background: linear-gradient(90deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; cursor: pointer; border: 2px solid #0038A8; }
+    .premium-banner:hover { transform: scale(1.02); }
+    .premium-banner h3 { color: #0038A8; margin: 0 0 10px 0; }
   </style>
 </head>
 <body>
@@ -31,12 +36,41 @@
 
   <div class="main-nav">
     <button class="active" onclick="showTab('ofertas')">🔥 Ofertas</button>
-    <button onclick="showTab('productos')">️ Productos</button>
+    <button onclick="showTab('productos')">🛍️ Productos</button>
     <button onclick="showTab('mapa')">🗺️ Mapa</button>
     <button onclick="showTab('excursiones')">🚌 Excursiones</button>
   </div>
 
   <div class="container">
+
+    <!-- Banner contador de usuarios -->
+    <div class="stats-banner" id="stats-banner">
+      <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:15px;">
+        <div>
+          <div class="num" id="stat-total-users">0</div>
+          <div>Usuarios activos</div>
+        </div>
+        <div>
+          <div class="num" id="stat-comercios">0</div>
+          <div>Comercios</div>
+        </div>
+        <div>
+          <div class="num" id="stat-productos">0</div>
+          <div>Productos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner Premium (solo si no es premium) -->
+    <div class="premium-banner" id="premium-banner" onclick="mostrarPremium()" style="display:none;">
+      <h3>⭐ ¿Querés más beneficios?</h3>
+      <p>Hacete Premium por solo <strong>$2/mes</strong> — Sin contratos, sin deudas.</p>
+      <p style="margin:10px 0;">
+        ✅ Ofertas exclusivas | ✅ Alertas de precios | ✅ Lista de compras optimizada<br>
+        ✅ Navegación GPS | ✅ Sin anuncios
+      </p>
+      <button class="btn btn-primary"> Ver opciones de pago</button>
+    </div>
 
     <!-- TAB: Ofertas -->
     <div id="tab-ofertas" class="tab-content active">
@@ -48,7 +82,7 @@
 
     <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">️ Comparar Precios</h3>
+      <h3 class="section-title">🛍️ Comparar Precios</h3>
       <div class="card">
         <div class="form-group">
           <label>Buscar producto</label>
@@ -97,11 +131,11 @@
       window.location.href = '/index.html';
     }
 
-    // Cargar info
     const nombre = sessionStorage.getItem('userName');
+    const userId = sessionStorage.getItem('userId');
     document.getElementById('user-info').textContent = nombre || 'Cliente';
   </script>
 
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2cf9e24fbfff1ca',t:'MTc4NzA0MjQ2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d169264f7e203e',t:'MTc4NzA2MTI2OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
