@@ -254,9 +254,51 @@ window.deleteVideo = async (id) => {
   catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
+// ========== EXCURSIONES (vista comerciante) ==========
+async function loadExcursionesComerciante() {
+  const cont = document.getElementById('lista-excursiones-com');
+  if (!cont) return;
+  try {
+    const snap = await getDocs(collection(db, 'excursiones'));
+    const excursiones = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.publicada && data.activa) excursiones.push({ id: d.id, ...data });
+    });
+    excursiones.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    if (excursiones.length === 0) {
+      cont.innerHTML = '<p style="text-align:center;color:#666;">No hay excursiones programadas</p>';
+      return;
+    }
+    cont.innerHTML = '';
+    excursiones.forEach(exc => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <h3> ${exc.ruta || 'Excursión'}</h3>
+        <div class="grid grid-2" style="margin:10px 0;">
+          <div><strong>Fecha:</strong> ${exc.fecha}</div>
+          <div><strong>Horario:</strong> ${exc.horaSalida} - ${exc.horaRetorno}</div>
+          <div><strong>Punto:</strong> ${exc.punto}</div>
+          <div><strong>Pasajeros:</strong> ${exc.lugaresOcupados || 0}/${exc.lugaresTotales}</div>
+        </div>
+        <p style="color:#666;font-size:0.9rem;">
+          Admin: ${exc.adminNombre} | ${exc.adminTelefono || ''}
+        </p>
+        <div style="background:#fff3cd;padding:10px;border-radius:8px;margin-top:10px;">
+          💡 <strong>Ideas:</strong> Ofrecé descuentos esos días, prepará combos especiales, o promocioná productos destacados.
+        </div>
+      `;
+      cont.appendChild(div);
+    });
+  } catch (err) { console.error('Error excursiones:', err); }
+}
+
 // ========== INICIALIZACIÓN ==========
 loadStatsGenerales();
 loadSuscripcion();
 loadProductos();
 loadVideos();
+loadExcursionesComerciante();
 initMapaPerfil();

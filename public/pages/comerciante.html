@@ -36,7 +36,8 @@
     <button class="active" onclick="showTab('perfil')"> Mi Perfil</button>
     <button onclick="showTab('productos')">🛍️ Mis Productos</button>
     <button onclick="showTab('videos')">📹 Videos/Ofertas</button>
-    <button onclick="showTab('stats')"> Estadísticas</button>
+    <button onclick="showTab('excursiones')">🚌 Excursiones</button>
+    <button onclick="showTab('stats')">📊 Estadísticas</button>
   </div>
 
   <div class="container">
@@ -184,6 +185,15 @@
       </div>
     </div>
 
+    <!-- TAB: Excursiones -->
+    <div id="tab-excursiones" class="tab-content">
+      <h3 class="section-title">🚌 Próximas Excursiones</h3>
+      <p style="color:#666;margin-bottom:15px;">
+        Prepará ofertas especiales para los días de excursiones.
+      </p>
+      <div id="lista-excursiones-com"></div>
+    </div>
+
     <!-- TAB: Stats -->
     <div id="tab-stats" class="tab-content">
       <h3 class="section-title">📊 Estadísticas</h3>
@@ -222,5 +232,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d1cea0ea2dd786',t:'MTc4NzA2NTQyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d252c7aa6890c1',t:'MTc4NzA3MDgzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

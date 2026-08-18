@@ -367,6 +367,68 @@ window.deleteVid = async (id) => {
   catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
+// ========== APROBACIONES ==========
+async function loadAprobaciones() {
+  const cont = document.getElementById('lista-aprobaciones');
+  if (!cont) return;
+  cont.innerHTML = '<p>Cargando...</p>';
+
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    const pendientes = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.role === 'admin_excursion' && !data.aprobado) {
+        pendientes.push({ id: d.id, ...data });
+      }
+    });
+
+    if (pendientes.length === 0) {
+      cont.innerHTML = '<p style="color:#666;">No hay aprobaciones pendientes</p>';
+      return;
+    }
+
+    cont.innerHTML = '';
+    pendientes.forEach(p => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:15px; border-bottom:1px solid #eee; background:#fff3cd; border-radius:8px; margin-bottom:10px;';
+      div.innerHTML = `
+        <strong>${p.nombre}</strong><br>
+        <small>${p.email}</small><br>
+        <small>🚌 Ruta: ${p.ruta || 'Sin definir'}</small><br>
+        <small> ${p.telefono || 'Sin teléfono'}</small><br>
+        <button class="btn btn-sm btn-success" onclick="aprobarAdmin('${p.id}', '${p.email}')">✅ Aprobar</button>
+        <button class="btn btn-sm btn-danger" onclick="rechazarAdmin('${p.id}', '${p.email}')">❌ Rechazar</button>
+      `;
+      cont.appendChild(div);
+    });
+  } catch (err) {
+    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+  }
+}
+
+window.aprobarAdmin = async (id, email) => {
+  if (!confirm(`¿Aprobar a ${email} como admin de excursión?`)) return;
+  try {
+    await updateDoc(doc(db, 'users', id), { aprobado: true });
+    showAlert('Admin aprobado', 'success');
+    loadAprobaciones();
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  }
+};
+
+window.rechazarAdmin = async (id, email) => {
+  if (!confirm(`¿Rechazar a ${email}?`)) return;
+  try {
+    await deleteDoc(doc(db, 'users', id));
+    showAlert('Admin rechazado', 'warning');
+    loadAprobaciones();
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  }
+};
+
 // ========== GENERAR USUARIOS FICTICIOS ==========
 document.getElementById('btn-generar-usuarios')?.addEventListener('click', generarFicticios);
 
@@ -445,3 +507,4 @@ loadPagos();
 loadUsuarios();
 loadExcursiones();
 loadVideos();
+loadAprobaciones();

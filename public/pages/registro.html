@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="/css/styles.css">
   <meta name="theme-color" content="#0038A8">
   <style>
-    .role-selector { display: flex; gap: 20px; margin: 20px 0; }
-    .role-card { flex: 1; padding: 30px; border: 3px solid #ddd; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .role-selector { display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
+    .role-card { flex: 1; min-width: 250px; padding: 30px; border: 3px solid #ddd; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; }
     .role-card:hover { border-color: #009C3B; transform: translateY(-5px); }
     .role-card.selected { border-color: #0038A8; background: #f0f4ff; }
     .role-card .icon { font-size: 3rem; margin-bottom: 10px; }
@@ -21,7 +21,7 @@
 <body>
 
   <div class="login-container">
-    <div class="login-card" style="max-width: 600px;">
+    <div class="login-card" style="max-width: 900px;">
       <div class="logo">🛒</div>
       <h2>Registro - Precios Chuy</h2>
       <p style="text-align:center; color:#666; margin-bottom:20px;">
@@ -38,6 +38,7 @@
             <li>Comparar precios Uruguay vs Brasil</li>
             <li>Mapa de comercios</li>
             <li>Ver ofertas básicas</li>
+            <li>Reservar excursiones</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
             <strong>Opcional:</strong> Premium $2/mes<br>
@@ -55,17 +56,35 @@
             <li>1 video por día (90 seg)</li>
             <li>Perfil destacado</li>
             <li>Estadísticas</li>
+            <li>Ver excursiones próximas</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
-            Después: $5/mes (R$25)<br>
+            Después: $5/mes<br>
             Sin contratos. Pagás y usás.
+          </p>
+        </div>
+
+        <div class="role-card" onclick="selectRole('admin_excursion')" id="role-admin-excursion">
+          <div class="icon"></div>
+          <h3>Admin de Excursión</h3>
+          <p>Organizar viajes</p>
+          <div class="price-tag">$1/persona</div>
+          <ul class="benefits">
+            <li>Crear y gestionar excursiones</li>
+            <li>Ver reservas en tiempo real</li>
+            <li>Panel de estadísticas</li>
+            <li>Soporte prioritario</li>
+          </ul>
+          <p style="font-size:0.9rem; color:#666;">
+            Pagás $1 por cada persona<br>
+            que reserve tu excursión
           </p>
         </div>
       </div>
 
       <div id="registro-form" style="display:none;">
         <div class="form-group">
-          <label>Nombre</label>
+          <label>Nombre completo</label>
           <input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre">
         </div>
         <div class="form-group">
@@ -97,6 +116,21 @@
           </div>
         </div>
 
+        <div id="excursion-fields" style="display:none;">
+          <div class="form-group">
+            <label>Ruta que vas a gestionar</label>
+            <input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado → Chui">
+          </div>
+          <div class="form-group">
+            <label>Teléfono / WhatsApp</label>
+            <input type="text" id="reg-telefono" class="form-control" placeholder="+598 99...">
+          </div>
+          <p style="background:#fff3cd; padding:15px; border-radius:8px; border-left:4px solid #ffc107; margin-top:10px;">
+            <strong>Nota:</strong> Después de registrarte, el admin general aprobará tu cuenta.<br>
+            Costo: $1 USD por cada persona que reserve tu excursión.
+          </p>
+        </div>
+
         <div id="registro-error" style="color:#EF3340; text-align:center; margin-bottom:10px; min-height:20px;"></div>
 
         <button id="btn-registro" class="btn btn-primary btn-block">
@@ -122,8 +156,9 @@
       document.getElementById('role-' + role).classList.add('selected');
       document.getElementById('registro-form').style.display = 'block';
       document.getElementById('comercio-fields').style.display = role === 'comerciante' ? 'block' : 'none';
+      document.getElementById('excursion-fields').style.display = role === 'admin_excursion' ? 'block' : 'none';
       sessionStorage.setItem('selectedRole', role);
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d052fcafa345d6',t:'MTc4NzA0OTg3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d24763998383fc',t:'MTc4NzA3MDM3Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

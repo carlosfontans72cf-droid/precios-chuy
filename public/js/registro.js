@@ -13,7 +13,7 @@ btnRegistro.addEventListener('click', async () => {
   const role = sessionStorage.getItem('selectedRole');
 
   if (!role) {
-    errorDiv.textContent = 'Seleccioná si sos Cliente o Comerciante';
+    errorDiv.textContent = 'Seleccioná un tipo de cuenta';
     return;
   }
 
@@ -53,7 +53,6 @@ btnRegistro.addEventListener('click', async () => {
         throw new Error('Falta nombre del comercio');
       }
 
-      // Período de prueba: 60 días
       const fechaInicio = new Date();
       const fechaVencimiento = new Date();
       fechaVencimiento.setDate(fechaVencimiento.getDate() + 60);
@@ -64,6 +63,18 @@ btnRegistro.addEventListener('click', async () => {
       userData.fechaInicio = fechaInicio.toISOString();
       userData.fechaVencimiento = fechaVencimiento.toISOString();
       userData.diasRestantes = 60;
+    } else if (role === 'admin_excursion') {
+      const ruta = document.getElementById('reg-ruta').value.trim();
+      const telefono = document.getElementById('reg-telefono').value.trim();
+
+      if (!ruta) {
+        errorDiv.textContent = 'Ingresá la ruta que vas a gestionar';
+        throw new Error('Falta la ruta');
+      }
+
+      userData.ruta = ruta;
+      userData.telefono = telefono;
+      userData.aprobado = false; // Requiere aprobación del admin general
     } else {
       // Cliente
       userData.plan = 'gratis';
@@ -76,6 +87,8 @@ btnRegistro.addEventListener('click', async () => {
     // Redirección según rol
     if (role === 'comerciante') {
       window.location.href = '/pages/comerciante.html';
+    } else if (role === 'admin_excursion') {
+      window.location.href = '/pages/admin-excursion.html';
     } else {
       window.location.href = '/pages/cliente.html';
     }

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Excursión - Precios Chuy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="theme-color" content="#009C3B">
+  <style>
+    .admin-nav { background: #009C3B; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .admin-nav button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    .admin-nav button:hover { background: rgba(255,255,255,0.3); }
+    .admin-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .reserva-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #009C3B; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>Admin Excursión</h1>
+    <div>
+      <span class="user-info" id="user-info">Cargando...</span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
+    </div>
+  </nav>
+
+  <div id="aprobacion-pendiente" style="display:none; padding:40px; text-align:center;">
+    <div style="font-size:4rem;">⏳</div>
+    <h2>Cuenta en revisión</h2>
+    <p>Tu solicitud está siendo revisada por el administrador general.</p>
+    <p>Te contactaremos pronto para activar tu cuenta.</p>
+  </div>
+
+  <div id="panel-activo" style="display:none;">
+    <div class="admin-nav">
+      <button class="active" onclick="showTab('excursiones')">🚌 Mis Excursiones</button>
+      <button onclick="showTab('reservas')"> Reservas</button>
+      <button onclick="showTab('stats')">📊 Estadísticas</button>
+    </div>
+
+    <div class="container">
+
+      <!-- TAB: Excursiones -->
+      <div id="tab-excursiones" class="tab-content active">
+        <h3 class="section-title">🚌 Gestionar Excursiones</h3>
+        
+        <div class="card">
+          <div class="card-header">Crear Nueva Excursión</div>
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="date" id="exc-fecha" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Hora salida</label>
+              <input type="time" id="exc-hora-salida" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Punto de encuentro</label>
+              <input type="text" id="exc-punto" class="form-control" placeholder="Ej: Terminal Maldonado">
+            </div>
+            <div class="form-group">
+              <label>Hora retorno</label>
+              <input type="time" id="exc-hora-retorno" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Precio del pasaje ($)</label>
+              <input type="number" id="exc-precio" class="form-control" step="0.01">
+            </div>
+            <div class="form-group">
+              <label>Lugares disponibles</label>
+              <input type="number" id="exc-lugares" class="form-control" min="1">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Descripción / Detalles</label>
+              <textarea id="exc-descripcion" class="form-control" rows="3" placeholder="Información adicional sobre la excursión"></textarea>
+            </div>
+          </div>
+          <button id="btn-add-excursion" class="btn btn-success">Publicar Excursión</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">Mis Excursiones Publicadas</div>
+          <div id="lista-excursiones"></div>
+        </div>
+      </div>
+
+      <!-- TAB: Reservas -->
+      <div id="tab-reservas" class="tab-content">
+        <h3 class="section-title">📋 Reservas Recibidas</h3>
+        <div id="lista-reservas"></div>
+      </div>
+
+      <!-- TAB: Stats -->
+      <div id="tab-stats" class="tab-content">
+        <h3 class="section-title">📊 Estadísticas</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="number" id="stat-excursiones">0</div>
+            <div class="label">Excursiones activas</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="stat-reservas">0</div>
+            <div class="label">Reservas totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="stat-personas">0</div>
+            <div class="label">Personas transportadas</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = '/index.html';
+    }
+
+    const nombre = sessionStorage.getItem('userName');
+    const role = sessionStorage.getItem('userRole');
+    document.getElementById('user-info').textContent = `${nombre} (${role})`;
+  </script>
+
+  <script type="module" src="/js/admin-excursion.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d24a5b1fe67842',t:'MTc4NzA3MDQ5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

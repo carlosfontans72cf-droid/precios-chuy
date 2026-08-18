@@ -209,29 +209,112 @@ async function loadExcursiones() {
   if (!cont) return;
   try {
     const snap = await getDocs(collection(db, 'excursiones'));
-    if (snap.empty) {
+    const excursiones = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.publicada && data.activa) excursiones.push({ id: d.id, ...data });
+    });
+    excursiones.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    if (excursiones.length === 0) {
       cont.innerHTML = '<p style="text-align:center;color:#666;">No hay excursiones programadas</p>';
       return;
     }
     cont.innerHTML = '';
-    snap.forEach(d => {
-      const data = d.data();
-      if (!data.publicada) return;
+    excursiones.forEach(exc => {
+      const porcentaje = (exc.lugaresOcupados / exc.lugaresTotales) * 100;
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
-        <h3>🚌 ${data.fecha} - ${data.horaSalida} hs</h3>
-        <p><strong>Punto:</strong> ${data.punto}</p>
-        <p><strong>Retorno:</strong> ${data.horaRetorno} hs</p>
-        <p><strong>Precio:</strong> $${data.precio}</p>
-        <p><strong>Lugares:</strong> ${data.lugaresOcupados || 0}/${data.lugares}</p>
-        ${data.van ? `<p><small>Van: ${data.van}</small></p>` : ''}
-        <button class="btn btn-success" style="margin-top:10px;">Reservar lugar</button>
+        <h3> ${exc.ruta || 'Excursión'}</h3>
+        <p><strong>Admin:</strong> ${exc.adminNombre || 'Sin nombre'}</p>
+        <div class="grid grid-2" style="margin:10px 0;">
+          <div><strong>Fecha:</strong> ${exc.fecha}</div>
+          <div><strong>Horario:</strong> ${exc.horaSalida} - ${exc.horaRetorno}</div>
+          <div><strong>Punto:</strong> ${exc.punto}</div>
+          <div><strong>Precio:</strong> $${exc.precio}</div>
+        </div>
+        ${exc.descripcion ? `<p style="color:#666;">${exc.descripcion}</p>` : ''}
+        <div style="margin:10px 0;">
+          <strong>Lugares:</strong> ${exc.lugaresOcupados}/${exc.lugaresTotales}
+          <div style="background:#ddd; border-radius:10px; overflow:hidden; height:20px; margin-top:5px;">
+            <div style="width:${porcentaje}%; background:#009C3B; height:100%;"></div>
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="reservarExcursion('${exc.id}', '${exc.adminNombre}', '${exc.fecha}', '${exc.ruta}', '${exc.adminEmail || ''}')">
+          ${exc.lugaresOcupados >= exc.lugaresTotales ? 'Completa' : 'Reservar lugar'}
+        </button>
       `;
       cont.appendChild(div);
     });
   } catch (err) { console.error('Error excursiones:', err); }
 }
+
+window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail) => {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+      <h2 style="color:#0038A8;">Reservar lugar</h2>
+      <p><strong>${ruta}</strong> - ${fecha}</p>
+      <p>Admin: ${adminNombre}</p>
+      <div class="form-group"><label>Tu nombre</label><input type="text" id="res-nombre" class="form-control" value="${sessionStorage.getItem('userName') || ''}"></div>
+      <div class="form-group"><label>Teléfono / WhatsApp</label><input type="text" id="res-telefono" class="form-control" placeholder="+598 99..."></div>
+      <div class="form-group"><label>Cantidad de personas</label><input type="number" id="res-personas" class="form-control" value="1" min="1"></div>
+      <div id="res-error" style="color:#EF3340;text-align:center;min-height:20px;"></div>
+      <button id="res-confirmar" class="btn btn-success btn-block">Confirmar reserva</button>
+      <button onclick="this.closest('div[style*=fixed]').remove()" class="btn btn-block" style="margin-top:10px;background:#ddd;">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  document.getElementById('res-confirmar').addEventListener('click', async () => {
+    const nombre = document.getElementById('res-nombre').value.trim();
+    const telefono = document.getElementById('res-telefono').value.trim();
+    const personas = parseInt(document.getElementById('res-personas').value) || 1;
+    const errDiv = document.getElementById('res-error');
+
+    if (!nombre || !telefono) {
+      errDiv.textContent = 'Completá nombre y teléfono';
+      return;
+    }
+
+    try {
+      const { addDoc, collection, serverTimestamp, updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { db } = await import("./firebase-config.js");
+
+      await addDoc(collection(db, 'reservas'), {
+        excursionId: excId,
+        adminId: userId,
+        adminNombre,
+        adminEmail,
+        ruta,
+        fechaExcursion: fecha,
+        clienteId: userId,
+        clienteNombre: nombre,
+        clienteTelefono: telefono,
+        personas,
+        fechaReserva: new Date().toISOString(),
+        estado: 'pendiente'
+      });
+
+      // Actualizar lugares ocupados
+      const excRef = doc(db, 'excursiones', excId);
+      const excSnap = await (await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")).getDoc(excRef);
+      if (excSnap.exists()) {
+        const data = excSnap.data();
+        await updateDoc(excRef, { lugaresOcupados: (data.lugaresOcupados || 0) + personas });
+      }
+
+      modal.remove();
+      showAlert('Reserva enviada. El admin te contactará.', 'success');
+      loadExcursiones();
+    } catch (err) {
+      errDiv.textContent = `Error: ${err.message}`;
+    }
+  });
+};
 
 // ========== INICIALIZACIÓN ==========
 loadStats();

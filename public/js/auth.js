@@ -47,6 +47,7 @@ btnLogin.addEventListener('click', async () => {
     sessionStorage.setItem('userEmail', userData.email);
     sessionStorage.setItem('userName', userData.nombre);
     sessionStorage.setItem('userRole', userData.role);
+    if (userData.ruta) sessionStorage.setItem('userRuta', userData.ruta);
 
     // Redirección según rol
     let destino = '/pages/cliente.html';
