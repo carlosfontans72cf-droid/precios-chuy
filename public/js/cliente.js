@@ -109,6 +109,73 @@ async function loadProductos() {
   } catch (err) { console.error('Error productos:', err); }
 }
 
+// ========== MAPA ==========
+let mapa;
+function initMapa() {
+  if (mapa) return; // Ya inicializado
+  
+  // Coordenadas del Chui, Brasil
+  const chuiCenter = [-33.7574, -53.4614];
+  
+  mapa = L.map('mapa-comercios').setView(chuiCenter, 14);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(mapa);
+}
+
+async function loadMapa() {
+  initMapa();
+  
+  try {
+    const snap = await getDocs(collection(db, 'comercios'));
+    
+    if (snap.empty) {
+      console.log('No hay comercios para mostrar en el mapa');
+      return;
+    }
+    
+    snap.forEach(d => {
+      const data = d.data();
+      if (!data.activo) return;
+      
+      // Usar coordenadas del comercio o default al Chui
+      const lat = data.lat || -33.7574;
+      const lng = data.lng || -53.4614;
+      
+      // Color del pin según tipo
+      const colores = {
+        supermercado: '🛒',
+        carniceria: '🥩',
+        farmacia: '💊',
+        bebidas: '',
+        ropa: '👕',
+        electronica: '📱',
+        panaderia: '🍞',
+        ferreteria: '🔧',
+        otro: '🏪'
+      };
+      
+      const icono = colores[data.tipo] || '';
+      
+      const marker = L.marker([lat, lng]).addTo(mapa);
+      marker.bindPopup(`
+        <div style="min-width:200px;">
+          <h3 style="margin:0 0 10px 0; color:#0038A8;">${icono} ${data.nombre}</h3>
+          <p style="margin:5px 0;"><strong>Tipo:</strong> ${data.tipo}</p>
+          <p style="margin:5px 0;"><strong>📍</strong> ${data.direccion || 'Dirección no disponible'}</p>
+          <p style="margin:5px 0;"><strong>📱</strong> ${data.telefono || 'No disponible'}</p>
+          <p style="margin:5px 0;"><strong>⏰</strong> ${data.horarios || 'No disponible'}</p>
+          ${data.metodos_pago && data.metodos_pago.length > 0 ? 
+            `<p style="margin:5px 0;"><strong>💳</strong> ${data.metodos_pago.join(', ')}</p>` : ''}
+        </div>
+      `);
+    });
+  } catch (err) {
+    console.error('Error cargando mapa:', err);
+  }
+}
+
 // ========== COMERCIOS ==========
 async function loadComercios() {
   const cont = document.getElementById('lista-comercios-cliente');
@@ -170,5 +237,6 @@ async function loadExcursiones() {
 loadStats();
 loadOfertas();
 loadProductos();
+loadMapa();
 loadComercios();
 loadExcursiones();
