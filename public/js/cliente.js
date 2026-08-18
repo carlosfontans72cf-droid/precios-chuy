@@ -223,7 +223,9 @@ async function loadExcursiones() {
     cont.innerHTML = '';
     excursiones.forEach(exc => {
       const porcentaje = (exc.lugaresOcupados / exc.lugaresTotales) * 100;
-      const whatsappLink = exc.adminWhatsapp ? `https://wa.me/${exc.adminWhatsapp.replace(/[^0-9]/g, '')}` : '#';
+      const whatsappNum = exc.adminWhatsapp ? exc.adminWhatsapp.replace(/[^0-9]/g, '') : '';
+      const whatsappMsg = encodeURIComponent(`Hola! Quiero reservar lugar para la excursión:\n\n🚌 ${exc.ruta || 'Excursión'}\n📅 Fecha: ${exc.fecha}\n Horario: ${exc.horaSalida} - ${exc.horaRetorno}\n📍 Punto: ${exc.punto}\n💰 Precio: $${exc.precio}\n${exc.sena ? `💵 Seña: $${exc.sena} por persona\n` : ''}\nQuiero coordinar el pago de la seña.`);
+      const whatsappLink = whatsappNum ? `https://wa.me/${whatsappNum}?text=${whatsappMsg}` : '#';
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
