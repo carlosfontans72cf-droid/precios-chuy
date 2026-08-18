@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Precios Chuy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="theme-color" content="#0038A8">
+  <style>
+    .admin-nav { background: #0038A8; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .admin-nav button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    .admin-nav button:hover { background: rgba(255,255,255,0.3); }
+    .admin-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
+    .contador-fill { background: #009C3B; height: 100%; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>Admin</h1>
+    <div>
+      <span class="user-info" id="user-info">Cargando...</span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
+    </div>
+  </nav>
+
+  <div class="admin-nav">
+    <button class="active" onclick="showTab('secciones')">Secciones</button>
+    <button onclick="showTab('productos')">Productos</button>
+    <button onclick="showTab('comercios')">Comercios</button>
+    <button onclick="showTab('pagos')">Pagos</button>
+    <button onclick="showTab('usuarios')">Usuarios</button>
+    <button onclick="showTab('excursiones')">Excursiones</button>
+    <button onclick="showTab('videos')">Videos</button>
+  </div>
+
+  <div class="container">
+
+    <!-- TAB: Secciones -->
+    <div id="tab-secciones" class="tab-content active">
+      <h3 class="section-title">Gestion de Secciones</h3>
+      <div class="card">
+        <div class="card-header">Agregar Nueva Seccion</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Nombre de la seccion</label>
+            <input type="text" id="seccion-nombre" class="form-control" placeholder="Ej: Comestibles, Farmacia...">
+          </div>
+          <div class="form-group">
+            <label>Icono (emoji)</label>
+            <input type="text" id="seccion-icono" class="form-control" placeholder="Ej: carrito">
+          </div>
+        </div>
+        <button id="btn-add-seccion" class="btn btn-success">Agregar Seccion</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Secciones Existentes</div>
+        <div id="lista-secciones"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Productos -->
+    <div id="tab-productos" class="tab-content">
+      <h3 class="section-title">Gestion de Productos</h3>
+      <div class="card">
+        <div class="card-header">Agregar Producto</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Nombre del producto</label>
+            <input type="text" id="prod-nombre" class="form-control" placeholder="Ej: Arroz 1kg">
+          </div>
+          <div class="form-group">
+            <label>Seccion</label>
+            <select id="prod-seccion" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label>Precio Uruguay ($UYU)</label>
+            <input type="number" id="prod-precio-uy" class="form-control" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Precio Brasil (R$)</label>
+            <input type="number" id="prod-precio-br" class="form-control" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Comercio (Brasil)</label>
+            <select id="prod-comercio" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label>Imagen (URL)</label>
+            <input type="text" id="prod-imagen" class="form-control" placeholder="https://...">
+          </div>
+        </div>
+        <button id="btn-add-producto" class="btn btn-success">Agregar Producto</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Subir productos desde Excel</div>
+        <p style="margin-bottom:10px;color:#666;">Formato: nombre, seccion, precio_uy, precio_br, comercio</p>
+        <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" class="form-control">
+        <button id="btn-upload-excel" class="btn btn-warning" style="margin-top:10px;">Subir Excel</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Productos Cargados</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Producto</th><th>Seccion</th><th>UYU</th><th>R$</th><th>Comercio</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="lista-productos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Comercios -->
+    <div id="tab-comercios" class="tab-content">
+      <h3 class="section-title">Gestion de Comercios</h3>
+      <div class="card">
+        <div class="card-header">Agregar Comercio</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Nombre del comercio</label>
+            <input type="text" id="com-nombre" class="form-control" placeholder="Ej: Supermercado Central">
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="com-tipo" class="form-control">
+              <option value="supermercado">Supermercado</option>
+              <option value="carniceria">Carniceria</option>
+              <option value="farmacia">Farmacia</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="ropa">Ropa</option>
+              <option value="electronica">Electronica</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Direccion</label>
+            <input type="text" id="com-direccion" class="form-control" placeholder="Rua...">
+          </div>
+          <div class="form-group">
+            <label>Telefono / WhatsApp</label>
+            <input type="text" id="com-telefono" class="form-control" placeholder="+55...">
+          </div>
+          <div class="form-group">
+            <label>Email del comerciante</label>
+            <input type="email" id="com-email" class="form-control" placeholder="comercio@email.com">
+          </div>
+          <div class="form-group">
+            <label>Metodos de pago</label>
+            <select id="com-pago" class="form-control" multiple>
+              <option value="pix">PIX</option>
+              <option value="efectivo_r">Efectivo R$</option>
+              <option value="efectivo_u">Efectivo $U</option>
+              <option value="prex">PREX</option>
+              <option value="tarjeta">Tarjeta</option>
+            </select>
+          </div>
+        </div>
+        <button id="btn-add-comercio" class="btn btn-success">Agregar Comercio</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Comercios Registrados</div>
+        <div id="lista-comercios"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Pagos -->
+    <div id="tab-pagos" class="tab-content">
+      <h3 class="section-title">Gestion de Pagos</h3>
+      <div class="card">
+        <div class="card-header">Comerciantes con suscripcion</div>
+        <p style="margin-bottom:15px;color:#666;">
+          Gestion de pagos de comerciantes. Podes extender, habilitar o suspender.
+        </p>
+        <div id="lista-pagos-comerciantes"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Clientes Premium</div>
+        <div id="lista-pagos-clientes"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Usuarios -->
+    <div id="tab-usuarios" class="tab-content">
+      <h3 class="section-title">Gestion de Usuarios</h3>
+      <div class="card">
+        <div class="card-header">Generar usuarios ficticios</div>
+        <p style="margin-bottom:15px;color:#666;">
+          Crea 250 usuarios de prueba (200 clientes + 50 comercios).
+          Utiles para mostrar la app con datos realistas.
+        </p>
+        <button id="btn-generar-usuarios" class="btn btn-warning">
+          Generar 250 usuarios ficticios
+        </button>
+        <div id="resultado-generacion" style="margin-top:15px;"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Usuarios en el sistema</div>
+        <div id="lista-todos-usuarios"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Excursiones -->
+    <div id="tab-excursiones" class="tab-content">
+      <h3 class="section-title">Gestion de Excursiones</h3>
+      <div class="card">
+        <div class="card-header">Nueva Excursion</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="exc-fecha" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Hora salida</label>
+            <input type="time" id="exc-hora-salida" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Punto de encuentro</label>
+            <input type="text" id="exc-punto" class="form-control" placeholder="Terminal Maldonado">
+          </div>
+          <div class="form-group">
+            <label>Hora retorno</label>
+            <input type="time" id="exc-hora-retorno" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Precio del pasaje ($)</label>
+            <input type="number" id="exc-precio" class="form-control" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Lugares disponibles</label>
+            <input type="number" id="exc-lugares" class="form-control" min="1">
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Nombre de la van / conductor</label>
+            <input type="text" id="exc-van" class="form-control" placeholder="Van El Rapido">
+          </div>
+        </div>
+        <button id="btn-add-excursion" class="btn btn-success">Publicar Excursion</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Excursiones Programadas</div>
+        <div id="lista-excursiones"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Videos -->
+    <div id="tab-videos" class="tab-content">
+      <h3 class="section-title">Gestion de Videos</h3>
+      <div class="card">
+        <div class="card-header">Videos de Comerciantes</div>
+        <div id="lista-videos"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = '/index.html';
+    }
+
+    const nombre = sessionStorage.getItem('userName');
+    const role = sessionStorage.getItem('userRole');
+    document.getElementById('user-info').textContent = nombre + ' (' + role + ')';
+  </script>
+
+  <script type="module" src="/js/admin.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d0586bfaee2ddb',t:'MTc4NzA1MDA5OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

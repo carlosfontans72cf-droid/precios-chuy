@@ -1,0 +1,10 @@
+{
+  "name": "precios-chuy",
+  "version": "1.0.0",
+  "description": "Comparador de precios frontera Uruguay-Brasil",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site'",
+    "deploy": "vercel --prod"
+  }
+}

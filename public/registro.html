@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Precios Chuy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="theme-color" content="#0038A8">
+  <style>
+    .role-selector { display: flex; gap: 20px; margin: 20px 0; }
+    .role-card { flex: 1; padding: 30px; border: 3px solid #ddd; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; }
+    .role-card:hover { border-color: #009C3B; transform: translateY(-5px); }
+    .role-card.selected { border-color: #0038A8; background: #f0f4ff; }
+    .role-card .icon { font-size: 3rem; margin-bottom: 10px; }
+    .benefits { text-align: left; margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+    .benefits li { margin: 8px 0; color: #666; }
+    .benefits li::before { content: "✅ "; }
+    .price-tag { font-size: 1.5rem; font-weight: bold; color: #0038A8; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-card" style="max-width: 600px;">
+      <div class="logo">🛒</div>
+      <h2>Registro - Precios Chuy</h2>
+      <p style="text-align:center; color:#666; margin-bottom:20px;">
+        Elegí cómo querés usar la app
+      </p>
+
+      <div class="role-selector">
+        <div class="role-card" onclick="selectRole('cliente')" id="role-cliente">
+          <div class="icon"></div>
+          <h3>Soy Cliente</h3>
+          <p>Comparar precios y ahorrar</p>
+          <div class="price-tag">GRATIS</div>
+          <ul class="benefits">
+            <li>Comparar precios Uruguay vs Brasil</li>
+            <li>Mapa de comercios</li>
+            <li>Ver ofertas básicas</li>
+          </ul>
+          <p style="font-size:0.9rem; color:#666;">
+            <strong>Opcional:</strong> Premium $2/mes<br>
+            Ofertas exclusivas, alertas, GPS
+          </p>
+        </div>
+
+        <div class="role-card" onclick="selectRole('comerciante')" id="role-comerciante">
+          <div class="icon"></div>
+          <h3>Soy Comerciante</h3>
+          <p>Vender mis productos</p>
+          <div class="price-tag">60 DÍAS GRATIS</div>
+          <ul class="benefits">
+            <li>Productos ilimitados</li>
+            <li>1 video por día (90 seg)</li>
+            <li>Perfil destacado</li>
+            <li>Estadísticas</li>
+          </ul>
+          <p style="font-size:0.9rem; color:#666;">
+            Después: $5/mes (R$25)<br>
+            Sin contratos. Pagás y usás.
+          </p>
+        </div>
+      </div>
+
+      <div id="registro-form" style="display:none;">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="tu@email.com">
+        </div>
+        <div class="form-group" style="position:relative;">
+          <label>Contraseña</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 6 caracteres" style="padding-right:42px;">
+          <button type="button" style="position:absolute;right:12px;bottom:10px;background:transparent;border:none;font-size:18px;cursor:pointer;" onclick="togglePassword()">👁</button>
+        </div>
+
+        <div id="comercio-fields" style="display:none;">
+          <div class="form-group">
+            <label>Nombre del comercio</label>
+            <input type="text" id="reg-comercio" class="form-control" placeholder="Ej: Supermercado Central">
+          </div>
+          <div class="form-group">
+            <label>Tipo de comercio</label>
+            <select id="reg-tipo" class="form-control">
+              <option value="supermercado">Supermercado</option>
+              <option value="carniceria">Carnicería</option>
+              <option value="farmacia">Farmacia</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="ropa">Ropa</option>
+              <option value="electronica">Electrónica</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="registro-error" style="color:#EF3340; text-align:center; margin-bottom:10px; min-height:20px;"></div>
+
+        <button id="btn-registro" class="btn btn-primary btn-block">
+          Crear cuenta
+        </button>
+
+        <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">
+          ¿Ya tenés cuenta? <a href="/index.html" style="color:#0038A8;">Iniciá sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/registro.js"></script>
+  <script>
+    function togglePassword() {
+      const p = document.getElementById('reg-password');
+      p.type = p.type === 'password' ? 'text' : 'password';
+    }
+
+    function selectRole(role) {
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('role-' + role).classList.add('selected');
+      document.getElementById('registro-form').style.display = 'block';
+      document.getElementById('comercio-fields').style.display = role === 'comerciante' ? 'block' : 'none';
+      sessionStorage.setItem('selectedRole', role);
+    }
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d052fcafa345d6',t:'MTc4NzA0OTg3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comerciante - Precios Chuy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="theme-color" content="#009C3B">
+  <style>
+    .com-nav { background: #009C3B; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .com-nav button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+    .com-nav button:hover { background: rgba(255,255,255,0.3); }
+    .com-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>Mi Comercio</h1>
+    <div>
+      <span class="user-info" id="user-info">Cargando...</span>
+      <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
+    </div>
+  </nav>
+
+  <div class="com-nav">
+    <button class="active" onclick="showTab('perfil')">🏪 Mi Perfil</button>
+    <button onclick="showTab('productos')">🛍️ Mis Productos</button>
+    <button onclick="showTab('videos')"> Videos/Ofertas</button>
+    <button onclick="showTab('stats')">📊 Estadísticas</button>
+  </div>
+
+  <div class="container">
+
+    <!-- TAB: Perfil -->
+    <div id="tab-perfil" class="tab-content active">
+      <h3 class="section-title">🏪 Datos del Comercio</h3>
+      <div class="card">
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="perfil-nombre" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="perfil-tipo" class="form-control">
+              <option value="supermercado">Supermercado</option>
+              <option value="carniceria">Carnicería</option>
+              <option value="farmacia">Farmacia</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="ropa">Ropa</option>
+              <option value="electronica">Electrónica</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" id="perfil-direccion" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Teléfono / WhatsApp</label>
+            <input type="text" id="perfil-telefono" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Logo (URL)</label>
+            <input type="text" id="perfil-logo" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Horarios</label>
+            <input type="text" id="perfil-horarios" class="form-control" placeholder="Lun-Sáb 8-20hs">
+          </div>
+        </div>
+        <button id="btn-save-perfil" class="btn btn-success">💾 Guardar Perfil</button>
+      </div>
+    </div>
+
+    <!-- TAB: Productos -->
+    <div id="tab-productos" class="tab-content">
+      <h3 class="section-title">🛍️ Mis Productos</h3>
+      <div class="card">
+        <div class="card-header">Agregar Producto</div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="prod-nombre" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Precio Brasil (R$)</label>
+            <input type="number" id="prod-precio" class="form-control" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Imagen</label>
+            <input type="text" id="prod-imagen" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Es oferta</label>
+            <select id="prod-es-oferta" class="form-control">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+        </div>
+        <button id="btn-add-producto" class="btn btn-success">Agregar Producto</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Productos Cargados</div>
+        <div id="lista-mis-productos"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Videos -->
+    <div id="tab-videos" class="tab-content">
+      <h3 class="section-title">📹 Videos y Ofertas</h3>
+      <div class="card">
+        <div class="card-header">Subir nueva oferta (1 por día, máx 90 seg)</div>
+        <div class="form-group">
+          <label>Grabar video</label>
+          <input type="file" id="video-file" accept="video/*" capture="environment" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Título de la oferta</label>
+          <input type="text" id="video-titulo" class="form-control" placeholder="Ej: Whisky con 30% OFF">
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="video-desc" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Válido hasta</label>
+          <input type="date" id="video-vence" class="form-control">
+        </div>
+        <button id="btn-upload-video" class="btn btn-success">📤 Publicar Oferta</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Mis Ofertas Activas</div>
+        <div id="lista-mis-videos"></div>
+      </div>
+    </div>
+
+    <!-- TAB: Stats -->
+    <div id="tab-stats" class="tab-content">
+      <h3 class="section-title">📊 Estadísticas</h3>
+      <div class="card">
+        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">
+          <div class="stat-card">
+            <div class="number" id="stat-productos">0</div>
+            <div class="label">Productos</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="stat-vistas">0</div>
+            <div class="label">Vistas del perfil</div>
+          </div>
+          <div class="stat-card">
+            <div class="number" id="stat-ofertas">0</div>
+            <div class="label">Ofertas activas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.com-nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = '/index.html';
+    }
+
+    const nombre = sessionStorage.getItem('userName');
+    document.getElementById('user-info').textContent = nombre || 'Comerciante';
+  </script>
+
+  <script type="module" src="/js/comerciante.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2cf9be38be235c2',t:'MTc4NzA0MjM3Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

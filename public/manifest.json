@@ -1,0 +1,10 @@
+{
+  "name": "Precios Chuy",
+  "short_name": "Precios Chuy",
+  "description": "Comparador de precios Uruguay vs Brasil",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0038A8",
+  "icons": []
+}

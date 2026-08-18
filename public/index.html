@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precios Chuy - Comparador de Precios Frontera</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/styles.css">
+  <meta name="theme-color" content="#0038A8">
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo"></div>
+      <h2>Precios Chuy</h2>
+      <p style="text-align:center; color:#666; margin-bottom:20px;">
+        Compará precios Uruguay 🇺🇾 vs Brasil 🇷
+      </p>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" class="form-control" placeholder="tu@email.com" autocomplete="off">
+      </div>
+
+      <div class="form-group" style="position: relative;">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" class="form-control" placeholder="Contraseña" style="padding-right:42px;">
+        <button type="button" class="btn btn-sm" style="position:absolute;right:12px;bottom:10px;background:transparent;" onclick="togglePassword()">👁</button>
+      </div>
+
+      <div id="login-error" style="color: #EF3340; text-align:center; margin-bottom:10px; min-height:20px;"></div>
+
+      <button id="btn-login" class="btn btn-primary btn-block">
+        Iniciar Sesión
+      </button>
+
+      <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">
+        ¿No tenés cuenta? <a href="/pages/registro.html" style="color:#0038A8;">Registrate gratis</a>
+      </p>
+
+      <p style="text-align:center; margin-top:10px; color:#888; font-size:0.85rem;">
+        ¿Sos comerciante? <a href="/pages/registro-comercio.html" style="color:#009C3B;">Registrá tu comercio</a>
+      </p>
+    </div>
+  </div>
+
+  <script type="module" src="/js/auth.js"></script>
+  <script>
+    function togglePassword() {
+      const p = document.getElementById('password');
+      p.type = p.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2cf912d4e71c7ff',t:'MTc4NzA0MTkzNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
