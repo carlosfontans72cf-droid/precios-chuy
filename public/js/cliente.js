@@ -23,22 +23,44 @@ async function loadStats() {
     if (el2) el2.textContent = comsSnap.size;
     if (el3) el3.textContent = prodsSnap.size;
 
-    // Verificar si el usuario es premium
-    const userPlan = sessionStorage.getItem('userPlan');
+    // LEER PLAN DIRECTAMENTE DE FIRESTORE (no de sessionStorage)
+    let esPremium = false;
+    if (userId) {
+      try {
+        const userDocSnap = await getDocs(collection(db, 'users'));
+        userDocSnap.forEach(d => {
+          if (d.id === userId) {
+            const data = d.data();
+            if (data.plan === 'premium') esPremium = true;
+            // Actualizar sessionStorage también
+            sessionStorage.setItem('userPlan', data.plan === 'premium' ? 'premium' : 'gratis');
+          }
+        });
+      } catch (e) {
+        console.error('Error leyendo plan:', e);
+        // Fallback a sessionStorage
+        esPremium = sessionStorage.getItem('userPlan') === 'premium';
+      }
+    }
+
     const bannerPremium = document.getElementById('premium-banner');
     const bannerActivo = document.getElementById('banner-premium-activo');
     const seccionWhatsapp = document.getElementById('seccion-whatsapp-premium');
 
-    if (userPlan === 'premium') {
-      // Es premium: mostrar banner activo y sección WhatsApp
+    if (esPremium) {
+      // Es premium: mostrar banner activo, sección WhatsApp y ofertas exclusivas
       if (bannerPremium) bannerPremium.style.display = 'none';
       if (bannerActivo) bannerActivo.style.display = 'block';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'block';
+      const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
+      if (ofertasExclusivas) ofertasExclusivas.style.display = 'block';
     } else {
       // No es premium: mostrar banner de upgrade
       if (bannerPremium) bannerPremium.style.display = 'block';
       if (bannerActivo) bannerActivo.style.display = 'none';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'none';
+      const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
+      if (ofertasExclusivas) ofertasExclusivas.style.display = 'none';
     }
   } catch (err) {
     console.error('Error cargando stats:', err);

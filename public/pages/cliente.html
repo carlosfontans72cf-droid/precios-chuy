@@ -45,16 +45,40 @@
   <div class="container">
 
     <!-- Banner Premium (visible solo si es premium) -->
-    <div id="banner-premium-activo" style="display:none; background:linear-gradient(135deg, #FFD700, #FFA500); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center; border:3px solid #FF6B00; box-shadow:0 4px 15px rgba(255,165,0,0.4);">
-      <h2 style="color:#FFF; margin:0 0 10px 0; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">⭐ CLIENTE PREMIUM ⭐</h2>
-      <p style="color:#FFF; font-size:1.1rem; margin:10px 0;">¡Gracias por ser parte de Precios Chuy Premium!</p>
-      <div style="background:rgba(255,255,255,0.2); padding:15px; border-radius:10px; margin-top:15px;">
-        <p style="color:#FFF; margin:5px 0;">✅ Ofertas exclusivas</p>
-        <p style="color:#FFF; margin:5px 0;">✅ Alertas de precios</p>
-        <p style="color:#FFF; margin:5px 0;">✅ Lista de compras optimizada</p>
-        <p style="color:#FFF; margin:5px 0;">✅ Navegación GPS</p>
-        <p style="color:#FFF; margin:5px 0;">✅ Sin anuncios</p>
-        <p style="color:#FFF; margin:5px 0;">✅ Soporte prioritario por WhatsApp</p>
+    <div id="banner-premium-activo" style="display:none;">
+      <div style="background:linear-gradient(135deg, #FFD700, #FFA500); padding:25px; border-radius:20px; margin-bottom:20px; text-align:center; border:4px solid #FF6B00; box-shadow:0 8px 25px rgba(255,165,0,0.5);">
+        <div style="font-size:3rem; margin-bottom:10px;">⭐👑⭐</div>
+        <h2 style="color:#FFF; margin:0 0 15px 0; text-shadow:3px 3px 6px rgba(0,0,0,0.4); font-size:2rem;">¡GRACIAS POR SER PREMIUM!</h2>
+        <p style="color:#FFF; font-size:1.2rem; margin:10px 0; font-weight:bold;">Sos parte de los usuarios más especiales de Precios Chuy</p>
+        <div style="background:rgba(255,255,255,0.95); padding:20px; border-radius:15px; margin-top:20px; text-align:left;">
+          <h4 style="color:#FF6B00; margin-top:0; font-size:1.3rem;">🎁 Tus beneficios activos:</h4>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+            <div style="background:#FFF3CD; padding:12px; border-radius:10px; border-left:4px solid #FF6B00;">
+              <strong>🔥 Ofertas Exclusivas</strong><br>
+              <small style="color:#666;">Acceso anticipado a las mejores ofertas</small>
+            </div>
+            <div style="background:#D4EDDA; padding:12px; border-radius:10px; border-left:4px solid #28A745;">
+              <strong>🔔 Alertas de Precios</strong><br>
+              <small style="color:#666;">Te avisamos cuando bajan los precios</small>
+            </div>
+            <div style="background:#D1ECF1; padding:12px; border-radius:10px; border-left:4px solid #17A2B8;">
+              <strong>📝 Lista Optimizada</strong><br>
+              <small style="color:#666;">Lista de compras inteligente</small>
+            </div>
+            <div style="background:#E2D5F1; padding:12px; border-radius:10px; border-left:4px solid #6F42C1;">
+              <strong>️ Navegación GPS</strong><br>
+              <small style="color:#666;">Cómo llegar a cada comercio</small>
+            </div>
+            <div style="background:#F8D7DA; padding:12px; border-radius:10px; border-left:4px solid #DC3545;">
+              <strong>🚫 Sin Anuncios</strong><br>
+              <small style="color:#666;">Experiencia 100% limpia</small>
+            </div>
+            <div style="background:#C8E6C9; padding:12px; border-radius:10px; border-left:4px solid #25D366;">
+              <strong>💬 Soporte VIP</strong><br>
+              <small style="color:#666;">Atención prioritaria por WhatsApp</small>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -74,22 +98,45 @@
 
     <!-- Banner Premium (solo si no es premium) -->
     <div class="premium-banner" id="premium-banner" onclick="mostrarPremium()" style="display:none;">
-      <h3>⭐ ¿Querés más beneficios?</h3>
-      <p>Hacete Premium por solo <strong>$2/mes</strong> — Sin contratos, sin deudas.</p>
-      <p style="margin:10px 0;">
-        ✅ Ofertas exclusivas | ✅ Alertas de precios | ✅ Lista de compras optimizada<br>
-        ✅ Navegación GPS | ✅ Sin anuncios
-      </p>
-      <button class="btn btn-primary">👉 Ver opciones de pago</button>
+      <div style="background:linear-gradient(135deg, #FFD700, #FFA500); padding:25px; border-radius:20px; border:3px solid #FF6B00; box-shadow:0 4px 15px rgba(255,165,0,0.3);">
+        <h3 style="color:#0038A8; margin:0 0 15px 0; font-size:1.5rem;">⭐ ¿Querés más beneficios?</h3>
+        <p style="color:#0038A8; font-size:1.1rem; margin:10px 0;">Hacete Premium por solo <strong>$2/mes</strong></p>
+        <p style="color:#666; margin:10px 0;">Sin contratos, sin deudas. Pagás y usás.</p>
+        <div style="background:rgba(255,255,255,0.9); padding:15px; border-radius:10px; margin:15px 0; text-align:left;">
+          <p style="margin:8px 0; color:#333;">✅ <strong>Ofertas exclusivas</strong> - Acceso anticipado</p>
+          <p style="margin:8px 0; color:#333;">✅ <strong>Alertas de precios</strong> - Te avisamos cuando bajan</p>
+          <p style="margin:8px 0; color:#333;">✅ <strong>Lista de compras optimizada</strong></p>
+          <p style="margin:8px 0; color:#333;">✅ <strong>Navegación GPS</strong> a cada comercio</p>
+          <p style="margin:8px 0; color:#333;">✅ <strong>Sin anuncios</strong> - Experiencia limpia</p>
+          <p style="margin:8px 0; color:#333;">✅ <strong>Soporte prioritario</strong> por WhatsApp</p>
+        </div>
+        <button class="btn btn-primary" style="font-size:1.1rem; padding:12px 30px;">👉 Ver opciones de pago</button>
+      </div>
     </div>
 
     <!-- Sección WhatsApp para Premium -->
     <div id="seccion-whatsapp-premium" style="display:none; margin-bottom:20px;">
-      <div class="card" style="background:linear-gradient(135deg, #E8F5E9, #C8E6C9); border-left:5px solid #25D366; box-shadow:0 4px 15px rgba(37,211,102,0.2);">
-        <h3 style="color:#1B5E20; margin-top:0;"> Consultas Premium por WhatsApp</h3>
-        <p style="color:#2E7D32; font-size:1.05rem;">¿Tenés alguna pregunta sobre productos, precios o comercios?</p>
-        <p style="color:#2E7D32;">Nuestro equipo te responde de forma prioritaria:</p>
-        <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20quiero%20hacer%20una%20consulta" target="_blank" class="btn" style="background:#25D366; color:white; text-decoration:none; margin-top:10px; font-size:1.1rem; padding:12px 25px;">📱 Contactar Soporte Premium</a>
+      <div style="background:linear-gradient(135deg, #25D366, #128C7E); padding:30px; border-radius:20px; text-align:center; box-shadow:0 8px 25px rgba(37,211,102,0.4); border:3px solid #075E54;">
+        <div style="font-size:3rem; margin-bottom:15px;"></div>
+        <h3 style="color:#FFF; margin:0 0 15px 0; font-size:1.8rem; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Soporte Premium por WhatsApp</h3>
+        <p style="color:#FFF; font-size:1.1rem; margin:10px 0;">¿Tenés alguna consulta sobre productos, precios o comercios?</p>
+        <p style="color:#FFF; font-size:1rem; margin:10px 0;">Nuestro equipo te responde en minutos:</p>
+        <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20quiero%20hacer%20una%20consulta" target="_blank" style="display:inline-block; background:#FFF; color:#128C7E; text-decoration:none; margin-top:20px; font-size:1.3rem; font-weight:bold; padding:18px 40px; border-radius:50px; box-shadow:0 6px 20px rgba(0,0,0,0.3); transition:all 0.3s;">
+          📱 Contactar Soporte Premium
+        </a>
+        <p style="color:#FFF; font-size:0.9rem; margin-top:15px; opacity:0.9;">Respuesta garantizada en menos de 1 hora</p>
+      </div>
+    </div>
+
+    <!-- Sección Ofertas Exclusivas Premium -->
+    <div id="ofertas-exclusivas-premium" style="display:none; margin-bottom:30px;">
+      <div style="background:linear-gradient(135deg, #FFF9C4, #FFE082); padding:25px; border-radius:20px; border:3px solid #FFB300; box-shadow:0 4px 15px rgba(255,179,0,0.3);">
+        <h3 style="color:#F57F17; margin:0 0 20px 0; font-size:1.6rem; text-align:center;"> OFERTAS EXCLUSIVAS PREMIUM </h3>
+        <p style="color:#F57F17; text-align:center; font-size:1.1rem; margin-bottom:20px;">Estas ofertas son solo para miembros Premium</p>
+        <div id="feed-ofertas-premium">
+          <!-- Las ofertas exclusivas se cargan aquí dinámicamente -->
+          <p style="text-align:center;color:#666;">Cargando ofertas exclusivas...</p>
+        </div>
       </div>
     </div>
 
@@ -160,5 +207,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d3a3344daf14a0',t:'MTc4NzA4NDYxOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d3bfaeef023f3a',t:'MTc4NzA4NTc4NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
