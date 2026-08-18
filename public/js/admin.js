@@ -5,31 +5,23 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { showAlert } from './utils.js';
 
-// Verificar que sea admin
 const role = sessionStorage.getItem('userRole');
-if (role !== 'admin') {
-  window.location.href = '/index.html';
-}
+if (role !== 'admin') window.location.href = '/index.html';
 
 // ========== SECCIONES ==========
 document.getElementById('btn-add-seccion')?.addEventListener('click', addSeccion);
+
 async function addSeccion() {
   const nombre = document.getElementById('seccion-nombre').value.trim();
-  const icono = document.getElementById('seccion-icono').value.trim();
-  if (!nombre) return showAlert('Ingresá el nombre de la sección', 'warning');
-
+  const icono = document.getElementById('seccion-icono').value.trim() || '';
+  if (!nombre) return showAlert('Ingresá el nombre', 'warning');
   try {
-    await addDoc(collection(db, 'secciones'), {
-      nombre, icono: icono || '📦',
-      createdAt: serverTimestamp()
-    });
+    await addDoc(collection(db, 'secciones'), { nombre, icono, createdAt: serverTimestamp() });
     document.getElementById('seccion-nombre').value = '';
     document.getElementById('seccion-icono').value = '';
     showAlert('Sección agregada', 'success');
     loadSecciones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 }
 
 async function loadSecciones() {
@@ -38,59 +30,44 @@ async function loadSecciones() {
   cont.innerHTML = '';
   try {
     const snap = await getDocs(collection(db, 'secciones'));
+    const select = document.getElementById('prod-seccion');
+    if (select) select.innerHTML = '<option value="">Seleccionar sección</option>';
     snap.forEach(d => {
       const data = d.data();
       const div = document.createElement('div');
-      div.style.cssText = 'padding:10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;';
-      div.innerHTML = `<span>${data.icono || '📦'} ${data.nombre}</span>
+      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;';
+      div.innerHTML = `<span>${data.icono} ${data.nombre}</span>
         <button class="btn btn-sm btn-danger" onclick="deleteSeccion('${d.id}')">Eliminar</button>`;
       cont.appendChild(div);
+      if (select) select.innerHTML += `<option value="${d.id}">${data.icono} ${data.nombre}</option>`;
     });
-    // Actualizar select de productos
-    const select = document.getElementById('prod-seccion');
-    if (select) {
-      select.innerHTML = '<option value="">Seleccionar sección</option>';
-      snap.forEach(d => {
-        const data = d.data();
-        select.innerHTML += `<option value="${d.id}">${data.icono || ''} ${data.nombre}</option>`;
-      });
-    }
-  } catch (err) {
-    console.error('Error cargando secciones:', err);
-  }
+  } catch (err) { console.error('Error secciones:', err); }
 }
 
 window.deleteSeccion = async (id) => {
-  if (!confirm('¿Eliminar sección?')) return;
-  try {
-    await deleteDoc(doc(db, 'secciones', id));
-    showAlert('Sección eliminada', 'success');
-    loadSecciones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  if (!confirm('¿Eliminar?')) return;
+  try { await deleteDoc(doc(db, 'secciones', id)); loadSecciones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 // ========== PRODUCTOS ==========
 document.getElementById('btn-add-producto')?.addEventListener('click', addProducto);
+
 async function addProducto() {
   const nombre = document.getElementById('prod-nombre').value.trim();
   const seccion = document.getElementById('prod-seccion').value;
-  const precioUy = parseFloat(document.getElementById('prod-precio-uy').value);
-  const precioBr = parseFloat(document.getElementById('prod-precio-br').value);
-  const comercio = document.getElementById('prod-comercio').value;
-  const imagen = document.getElementById('prod-imagen').value.trim();
+  const precioUy = parseFloat(document.getElementById('prod-precio-uy').value) || 0;
+  const precioBr = parseFloat(document.getElementById('prod-precio-br').value) || 0;
+  const comercio = document.getElementById('prod-comercio').value || null;
+  const imagen = document.getElementById('prod-imagen').value.trim() || null;
 
-  if (!nombre || !seccion) return showAlert('Completá nombre y sección', 'warning');
+  if (!nombre) return showAlert('Ingresá el nombre del producto', 'warning');
 
   try {
     await addDoc(collection(db, 'productos'), {
       nombre, seccionId: seccion,
-      precioUruguay: precioUy || 0,
-      precioBrasil: precioBr || 0,
-      comercioId: comercio || null,
-      imagen: imagen || null,
-      activo: true,
+      precioUruguay: precioUy, precioBrasil: precioBr,
+      comercioId: comercio, imagen, activo: true,
       createdAt: serverTimestamp()
     });
     document.getElementById('prod-nombre').value = '';
@@ -99,9 +76,7 @@ async function addProducto() {
     document.getElementById('prod-imagen').value = '';
     showAlert('Producto agregado', 'success');
     loadProductos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 }
 
 async function loadProductos() {
@@ -113,34 +88,24 @@ async function loadProductos() {
     snap.forEach(d => {
       const data = d.data();
       const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${data.nombre}</td>
-        <td>${data.seccionId || '-'}</td>
-        <td>$${data.precioUruguay || 0}</td>
-        <td>R$${data.precioBrasil || 0}</td>
+      fila.innerHTML = `<td>${data.nombre}</td><td>${data.seccionId || '-'}</td>
+        <td>$${data.precioUruguay || 0}</td><td>R$${data.precioBrasil || 0}</td>
         <td>${data.comercioId || '-'}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="deleteProducto('${d.id}')">Eliminar</button></td>
-      `;
+        <td><button class="btn btn-sm btn-danger" onclick="deleteProducto('${d.id}')">Eliminar</button></td>`;
       tbody.appendChild(fila);
     });
-  } catch (err) {
-    console.error('Error cargando productos:', err);
-  }
+  } catch (err) { console.error('Error productos:', err); }
 }
 
 window.deleteProducto = async (id) => {
-  if (!confirm('¿Eliminar producto?')) return;
-  try {
-    await deleteDoc(doc(db, 'productos', id));
-    showAlert('Producto eliminado', 'success');
-    loadProductos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  if (!confirm('¿Eliminar?')) return;
+  try { await deleteDoc(doc(db, 'productos', id)); loadProductos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 // ========== COMERCIOS ==========
 document.getElementById('btn-add-comercio')?.addEventListener('click', addComercio);
+
 async function addComercio() {
   const nombre = document.getElementById('com-nombre').value.trim();
   const tipo = document.getElementById('com-tipo').value;
@@ -153,8 +118,7 @@ async function addComercio() {
   try {
     await addDoc(collection(db, 'comercios'), {
       nombre, tipo, direccion, telefono, email,
-      activo: true,
-      premium: false,
+      activo: true, premium: false,
       createdAt: serverTimestamp()
     });
     document.getElementById('com-nombre').value = '';
@@ -163,9 +127,7 @@ async function addComercio() {
     document.getElementById('com-email').value = '';
     showAlert('Comercio agregado', 'success');
     loadComercios();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 }
 
 async function loadComercios() {
@@ -174,57 +136,171 @@ async function loadComercios() {
   cont.innerHTML = '';
   try {
     const snap = await getDocs(collection(db, 'comercios'));
-    // Actualizar select de productos
     const select = document.getElementById('prod-comercio');
     if (select) select.innerHTML = '<option value="">Sin comercio</option>';
-
     snap.forEach(d => {
       const data = d.data();
       const div = document.createElement('div');
-      div.style.cssText = 'padding:10px;border-bottom:1px solid #eee;';
+      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
       div.innerHTML = `<strong>${data.nombre}</strong> (${data.tipo})<br>
         <small>${data.direccion || 'Sin dirección'} | ${data.telefono || 'Sin teléfono'}</small><br>
         <button class="btn btn-sm btn-danger" onclick="deleteComercio('${d.id}')">Eliminar</button>`;
       cont.appendChild(div);
       if (select) select.innerHTML += `<option value="${d.id}">${data.nombre}</option>`;
     });
-  } catch (err) {
-    console.error('Error cargando comercios:', err);
-  }
+  } catch (err) { console.error('Error comercios:', err); }
 }
 
 window.deleteComercio = async (id) => {
-  if (!confirm('¿Eliminar comercio?')) return;
-  try {
-    await deleteDoc(doc(db, 'comercios', id));
-    showAlert('Comercio eliminado', 'success');
-    loadComercios();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  if (!confirm('¿Eliminar?')) return;
+  try { await deleteDoc(doc(db, 'comercios', id)); loadComercios(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
+
+// ========== PAGOS ==========
+async function loadPagos() {
+  const contCom = document.getElementById('lista-pagos-comerciantes');
+  const contCli = document.getElementById('lista-pagos-clientes');
+
+  if (contCom) {
+    contCom.innerHTML = '<p>Cargando...</p>';
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      const comerciantes = [];
+      snap.forEach(d => { if (d.data().role === 'comerciante') comerciantes.push({ id: d.id, ...d.data() }); });
+
+      if (comerciantes.length === 0) {
+        contCom.innerHTML = '<p style="color:#666;">Sin comerciantes registrados</p>';
+      } else {
+        contCom.innerHTML = '';
+        comerciantes.forEach(c => {
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+          const dias = c.diasRestantes || 0;
+          const estado = c.plan === 'vencido' ? '⚠️ Vencido' : (c.plan === 'activo' ? '✅ Activo' : '🆓 Prueba');
+          div.innerHTML = `<strong>${c.comercio || c.nombre}</strong><br>
+            <small>${c.email} | ${estado} | Días: ${dias}</small><br>
+            <button class="btn btn-sm btn-success" onclick="extenderCom(${c.id},30)">+30 días</button>
+            <button class="btn btn-sm btn-warning" onclick="habilitarCom(${c.id},30)">Habilitar</button>
+            <button class="btn btn-sm btn-danger" onclick="suspenderCom(${c.id})">Suspender</button>`;
+          contCom.appendChild(div);
+        });
+      }
+    } catch (err) { contCom.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+  }
+
+  if (contCli) {
+    contCli.innerHTML = '<p>Cargando...</p>';
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      const clientes = [];
+      snap.forEach(d => { if (d.data().role === 'cliente') clientes.push({ id: d.id, ...d.data() }); });
+
+      if (clientes.length === 0) {
+        contCli.innerHTML = '<p style="color:#666;">Sin clientes registrados</p>';
+      } else {
+        contCli.innerHTML = '';
+        clientes.forEach(c => {
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+          const plan = c.plan === 'premium' ? '⭐ Premium' : '🆓 Gratis';
+          div.innerHTML = `<strong>${c.nombre}</strong><br>
+            <small>${c.email} | ${plan}</small><br>
+            <button class="btn btn-sm btn-success" onclick="activarPrem(${c.id},30)">+30 días Premium</button>
+            <button class="btn btn-sm btn-warning" onclick="quitarPrem(${c.id})">Volver a gratis</button>`;
+          contCli.appendChild(div);
+        });
+      }
+    } catch (err) { contCli.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+  }
+}
+
+window.extenderCom = async (id, dias) => {
+  try {
+    await updateDoc(doc(db, 'users', id), {
+      plan: 'activo', diasRestantes: dias, activo: true
+    });
+    showAlert(`Extendido ${dias} días`, 'success');
+    loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.habilitarCom = window.extenderCom;
+
+window.suspenderCom = async (id) => {
+  if (!confirm('¿Suspender?')) return;
+  try {
+    await updateDoc(doc(db, 'users', id), { activo: false, plan: 'suspendido' });
+    showAlert('Suspendido', 'warning');
+    loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.activarPrem = async (id, dias) => {
+  const fecha = new Date();
+  fecha.setDate(fecha.getDate() + dias);
+  try {
+    await updateDoc(doc(db, 'users', id), {
+      plan: 'premium', fechaVencimientoPremium: fecha.toISOString()
+    });
+    showAlert('Premium activado', 'success');
+    loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.quitarPrem = async (id) => {
+  if (!confirm('¿Quitar premium?')) return;
+  try {
+    await updateDoc(doc(db, 'users', id), { plan: 'gratis', fechaVencimientoPremium: null });
+    showAlert('Vuelto a gratis', 'info');
+    loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+// ========== USUARIOS ==========
+async function loadUsuarios() {
+  const cont = document.getElementById('lista-todos-usuarios');
+  if (!cont) return;
+  cont.innerHTML = '<p>Cargando...</p>';
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    const users = [];
+    snap.forEach(d => users.push({ id: d.id, ...d.data() }));
+
+    if (users.length === 0) {
+      cont.innerHTML = '<p style="color:#666;">Sin usuarios registrados aún</p>';
+    } else {
+      cont.innerHTML = '';
+      users.forEach(u => {
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+        const rol = u.role === 'admin' ? '👑 Admin' : (u.role === 'comerciante' ? ' Comerciante' : '🛒 Cliente');
+        div.innerHTML = `<strong>${u.nombre}</strong> ${rol}<br>
+          <small>${u.email} | Plan: ${u.plan || 'N/A'}</small>`;
+        cont.appendChild(div);
+      });
+    }
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+}
 
 // ========== EXCURSIONES ==========
 document.getElementById('btn-add-excursion')?.addEventListener('click', addExcursion);
+
 async function addExcursion() {
   const fecha = document.getElementById('exc-fecha').value;
   const horaSalida = document.getElementById('exc-hora-salida').value;
   const punto = document.getElementById('exc-punto').value.trim();
   const horaRetorno = document.getElementById('exc-hora-retorno').value;
-  const precio = parseFloat(document.getElementById('exc-precio').value);
-  const lugares = parseInt(document.getElementById('exc-lugares').value);
+  const precio = parseFloat(document.getElementById('exc-precio').value) || 0;
+  const lugares = parseInt(document.getElementById('exc-lugares').value) || 0;
   const van = document.getElementById('exc-van').value.trim();
 
-  if (!fecha || !horaSalida || !punto) return showAlert('Completá fecha, hora y punto de encuentro', 'warning');
+  if (!fecha || !horaSalida || !punto) return showAlert('Completá fecha, hora y punto', 'warning');
 
   try {
     await addDoc(collection(db, 'excursiones'), {
-      fecha, horaSalida, punto, horaRetorno,
-      precio: precio || 0,
-      lugares: lugares || 0,
-      lugaresOcupados: 0,
-      van,
-      publicada: true,
+      fecha, horaSalida, punto, horaRetorno, precio, lugares,
+      lugaresOcupados: 0, van, publicada: true,
       createdAt: serverTimestamp()
     });
     document.getElementById('exc-fecha').value = '';
@@ -236,9 +312,7 @@ async function addExcursion() {
     document.getElementById('exc-van').value = '';
     showAlert('Excursión publicada', 'success');
     loadExcursiones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 }
 
 async function loadExcursiones() {
@@ -250,181 +324,124 @@ async function loadExcursiones() {
     snap.forEach(d => {
       const data = d.data();
       const div = document.createElement('div');
-      div.style.cssText = 'padding:10px;border-bottom:1px solid #eee;';
+      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
       div.innerHTML = `<strong>${data.fecha}</strong> - ${data.horaSalida} hs<br>
-        Punto: ${data.punto} | Retorno: ${data.horaRetorno} hs<br>
+        ${data.punto} → Retorno: ${data.horaRetorno} hs<br>
         Precio: $${data.precio} | Lugares: ${data.lugaresOcupados || 0}/${data.lugares}<br>
-        Van: ${data.van || 'Sin asignar'}<br>
-        <button class="btn btn-sm btn-danger" onclick="deleteExcursion('${d.id}')">Eliminar</button>`;
+        Van: ${data.van || '-'}<br>
+        <button class="btn btn-sm btn-danger" onclick="deleteExc(${d.id}')">Eliminar</button>`;
       cont.appendChild(div);
     });
-  } catch (err) {
-    console.error('Error cargando excursiones:', err);
-  }
+  } catch (err) { console.error('Error excursiones:', err); }
 }
 
-window.deleteExcursion = async (id) => {
-  if (!confirm('¿Eliminar excursión?')) return;
-  try {
-    await deleteDoc(doc(db, 'excursiones', id));
-    showAlert('Excursión eliminada', 'success');
-    loadExcursiones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+window.deleteExc = async (id) => {
+  if (!confirm('¿Eliminar?')) return;
+  try { await deleteDoc(doc(db, 'excursiones', id)); loadExcursiones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
-// ========== PAGOS ==========
-async function loadPagos() {
-  const contComerciantes = document.getElementById('lista-pagos-comerciantes');
-  const contClientes = document.getElementById('lista-pagos-clientes');
-
-  if (contComerciantes) {
-    contComerciantes.innerHTML = '';
-    try {
-      const snap = await getDocs(collection(db, 'users'));
-      const comerciantes = [];
-      snap.forEach(d => {
-        const data = d.data();
-        if (data.role === 'comerciante') {
-          comerciantes.push({ id: d.id, ...data });
-        }
-      });
-
-      if (comerciantes.length === 0) {
-        contComerciantes.innerHTML = '<p style="color:#666;">Sin comerciantes registrados</p>';
-      } else {
-        comerciantes.forEach(c => {
-          const div = document.createElement('div');
-          div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-          const diasRestantes = c.diasRestantes || 0;
-          const estado = diasRestantes > 0 ? '✅ Activo' : '⚠️ Vencido';
-          div.innerHTML = `
-            <strong>${c.comercio || c.nombre}</strong><br>
-            <small>${c.email} | Plan: ${c.plan} | ${estado}</small><br>
-            <small>Días restantes: ${diasRestantes}</small><br>
-            <button class="btn btn-sm btn-success" onclick="extenderComerciante('${c.id}', 30)">+30 días</button>
-            <button class="btn btn-sm btn-warning" onclick="habilitarComerciante('${c.id}', 30)">Habilitar</button>
-            <button class="btn btn-sm btn-danger" onclick="suspenderComerciante('${c.id}')">Suspender</button>
-          `;
-          contComerciantes.appendChild(div);
-        });
-      }
-    } catch (err) {
-      console.error('Error cargando pagos comerciantes:', err);
-    }
-  }
-
-  if (contClientes) {
-    contClientes.innerHTML = '';
-    try {
-      const snap = await getDocs(collection(db, 'users'));
-      const clientes = [];
-      snap.forEach(d => {
-        const data = d.data();
-        if (data.role === 'cliente' && data.plan === 'premium') {
-          clientes.push({ id: d.id, ...data });
-        }
-      });
-
-      if (clientes.length === 0) {
-        contClientes.innerHTML = '<p style="color:#666;">Sin clientes premium</p>';
-      } else {
-        clientes.forEach(c => {
-          const div = document.createElement('div');
-          div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-          div.innerHTML = `
-            <strong>${c.nombre}</strong><br>
-            <small>${c.email}</small><br>
-            <button class="btn btn-sm btn-success" onclick="extenderPremium('${c.id}', 30)">+30 días</button>
-            <button class="btn btn-sm btn-warning" onclick="quitarPremium('${c.id}')">Volver a gratis</button>
-          `;
-          contClientes.appendChild(div);
-        });
-      }
-    } catch (err) {
-      console.error('Error cargando pagos clientes:', err);
-    }
-  }
+// ========== VIDEOS ==========
+async function loadVideos() {
+  const cont = document.getElementById('lista-videos');
+  if (!cont) return;
+  cont.innerHTML = '';
+  try {
+    const snap = await getDocs(collection(db, 'videos'));
+    if (snap.empty) { cont.innerHTML = '<p style="color:#666;">Sin videos</p>'; return; }
+    snap.forEach(d => {
+      const data = d.data();
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+      div.innerHTML = `<video src="${data.url}" controls style="width:100%; max-height:200px;"></video>
+        <strong>${data.titulo}</strong><br>
+        <button class="btn btn-sm btn-danger" onclick="deleteVid('${d.id}')">Eliminar</button>`;
+      cont.appendChild(div);
+    });
+  } catch (err) { console.error('Error videos:', err); }
 }
 
-window.extenderComerciante = async (id, dias) => {
-  try {
-    const { extenderSuscripcion } = await import('./admin-pagos.js');
-    await extenderSuscripcion(id, dias);
-    loadPagos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+window.deleteVid = async (id) => {
+  if (!confirm('¿Eliminar?')) return;
+  try { await deleteDoc(doc(db, 'videos', id)); loadVideos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
-window.habilitarComerciante = async (id, dias) => {
-  try {
-    const { habilitarManual } = await import('./admin-pagos.js');
-    await habilitarManual(id, dias);
-    loadPagos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
-};
+// ========== GENERAR USUARIOS FICTICIOS ==========
+document.getElementById('btn-generar-usuarios')?.addEventListener('click', generarFicticios);
 
-window.suspenderComerciante = async (id) => {
-  if (!confirm('¿Suspender comerciante?')) return;
-  try {
-    const { suspenderUsuario } = await import('./admin-pagos.js');
-    await suspenderUsuario(id);
-    loadPagos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
-};
-
-window.extenderPremium = async (id, dias) => {
-  try {
-    const { activarPremiumCliente } = await import('./admin-pagos.js');
-    await activarPremiumCliente(id, dias);
-    loadPagos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
-};
-
-window.quitarPremium = async (id) => {
-  if (!confirm('¿Quitar plan premium?')) return;
-  try {
-    const { desactivarPremiumCliente } = await import('./admin-pagos.js');
-    await desactivarPremiumCliente(id);
-    loadPagos();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
-};
-
-// Generar usuarios ficticios
-document.getElementById('btn-generar-usuarios')?.addEventListener('click', async () => {
+async function generarFicticios() {
   const resultadoDiv = document.getElementById('resultado-generacion');
-  if (resultadoDiv) {
-    resultadoDiv.innerHTML = '<p>Generando usuarios...</p>';
-    try {
-      const { generarUsuariosFicticios } = await import('./generar-usuarios.js');
-      const resultado = await generarUsuariosFicticios(200, 50);
-      resultadoDiv.innerHTML = `
-        <div class="alert alert-success">
-          ✅ Generación completada<br>
-          Exitosos: ${resultado.exitosos}<br>
-          Errores: ${resultado.errores}<br>
-          Total: ${resultado.total}
-        </div>
-      `;
-    } catch (err) {
-      resultadoDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
-    }
-  }
-});
+  if (resultadoDiv) resultadoDiv.innerHTML = '<p>Generando...</p>';
 
-// ========== INICIALIZACIÓN ==========
+  const nombresUY = ['Juan','María','Carlos','Ana','Pedro','Laura','Diego','Sofía','Martín','Valentina','Santiago','Camila'];
+  const apellidosUY = ['Pérez','González','Rodríguez','Fernández','López','Martínez','Sánchez','Ramírez','Silva','Alvarez'];
+  const nombresBR = ['João','Maria','José','Ana','Carlos','Paula','Pedro','Mariana','Lucas','Julia'];
+  const apellidosBR = ['Silva','Santos','Oliveira','Souza','Rodrigues','Ferreira','Alves','Pereira','Lima'];
+  const tiposCom = ['supermercado','carniceria','farmacia','bebidas','ropa','electronica','panaderia'];
+  const nombresCom = ['Super Central','Mercado Popular','Farma Vida','Depósito Bebidas','Moda Style','TecnoDigital','Panadería El Horno','Carnes El Gaucho'];
+
+  function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  let exitosos = 0;
+
+  try {
+    // 180 clientes
+    for (let i = 0; i < 180; i++) {
+      const esUY = Math.random() > 0.4;
+      const nombre = esUY ? nombresUY[rand(0,nombresUY.length-1)] : nombresBR[rand(0,nombresBR.length-1)];
+      const apellido = esUY ? apellidosUY[rand(0,apellidosUY.length-1)] : apellidosBR[rand(0,apellidosBR.length-1)];
+      const esPremium = Math.random() > 0.85;
+
+      await addDoc(collection(db, 'users'), {
+        nombre: `${nombre} ${apellido}`,
+        email: `${nombre.toLowerCase().charAt(0)}${apellido.toLowerCase()}${rand(10,999)}@gmail.com`,
+        role: 'cliente',
+        plan: esPremium ? 'premium' : 'gratis',
+        pais: esUY ? 'UY' : 'BR',
+        activo: true,
+        ficticio: true,
+        createdAt: serverTimestamp()
+      });
+      exitosos++;
+    }
+
+    // 70 comercios
+    for (let i = 0; i < 70; i++) {
+      const esUY = Math.random() > 0.7;
+      const nombreCom = `${nombresCom[rand(0,nombresCom.length-1)]} ${rand(1,99)}`;
+
+      await addDoc(collection(db, 'users'), {
+        nombre: `${nombresUY[rand(0,nombresUY.length-1)]} ${apellidosUY[rand(0,apellidosUY.length-1)]}`,
+        email: `comercio${rand(10,999)}@gmail.com`,
+        role: 'comerciante',
+        comercio: nombreCom,
+        tipoComercio: tiposCom[rand(0,tiposCom.length-1)],
+        plan: 'prueba',
+        pais: esUY ? 'UY' : 'BR',
+        diasRestantes: rand(15, 60),
+        activo: true,
+        ficticio: true,
+        createdAt: serverTimestamp()
+      });
+      exitosos++;
+    }
+
+    if (resultadoDiv) {
+      resultadoDiv.innerHTML = `<div class="alert alert-success">✅ Generados ${exitosos} usuarios ficticios<br>180 clientes + 70 comercios</div>`;
+    }
+    loadUsuarios();
+    showAlert(`${exitosos} usuarios generados`, 'success');
+  } catch (err) {
+    if (resultadoDiv) resultadoDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+  }
+}
+
+// ========== INICIALIZAR TODO ==========
 loadSecciones();
 loadProductos();
 loadComercios();
-loadExcursiones();
 loadPagos();
+loadUsuarios();
+loadExcursiones();
+loadVideos();
