@@ -472,6 +472,160 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail, sena, a
   });
 };
 
+// ========== GUÍA DEL CHUY ==========
+async function loadGuia() {
+  const cont = document.getElementById('lista-guia-cliente');
+  if (!cont) return;
+  cont.innerHTML = '<p style="text-align:center;color:#666;">Cargando articulos...</p>';
+  
+  const esPremium = sessionStorage.getItem('userPlan') === 'premium';
+  
+  // Mostrar/ocultar warning
+  const warning = document.getElementById('guia-login-warning');
+  if (warning) warning.style.display = esPremium ? 'none' : 'block';
+  
+  try {
+    const snap = await getDocs(collection(db, 'guia_chuy'));
+    const articulos = [];
+    snap.forEach(d => articulos.push({ id: d.id, ...d.data() }));
+    articulos.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+    
+    // Aplicar filtros
+    const todas = document.getElementById('filtro-todas')?.checked;
+    const rutas = document.getElementById('filtro-rutas')?.checked;
+    const lugares = document.getElementById('filtro-lugares')?.checked;
+    const comercios = document.getElementById('filtro-comercios')?.checked;
+    const tips = document.getElementById('filtro-tips')?.checked;
+    
+    const filtrados = articulos.filter(a => {
+      if (todas) return true;
+      if (a.tipo === 'ruta' && rutas) return true;
+      if (a.tipo === 'lugar' && lugares) return true;
+      if (a.tipo === 'comercio' && comercios) return true;
+      if (a.tipo === 'tip' && tips) return true;
+      return false;
+    });
+    
+    if (filtrados.length === 0) {
+      cont.innerHTML = '<p style="text-align:center;color:#666;">No hay articulos que coincidan con los filtros.</p>';
+      return;
+    }
+    
+    cont.innerHTML = '';
+    filtrados.forEach(a => {
+      // Si es premium y el usuario no es premium, mostrar solo preview
+      if (a.premium && !esPremium) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.opacity = '0.6';
+        div.innerHTML = `
+          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '' : a.tipo === 'comercio' ? '🏪' : ''} ${a.titulo}</h4>
+          <p style="color:#666;">${(a.contenido || '').substring(0, 80)}...</p>
+          <p style="color:#FF6B00; font-weight:bold; margin:10px 0;"> Contenido exclusivo Premium</p>
+          <button class="btn btn-sm btn-primary" onclick="mostrarPremium()">Hacete Premium para ver mas</button>
+        `;
+        cont.appendChild(div);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '' : a.tipo === 'comercio' ? '🏪' : '💡'} ${a.titulo}</h4>
+          <p style="color:#333; margin:10px 0; white-space:pre-wrap;">${a.contenido || ''}</p>
+          <p style="color:#666; font-size:0.9rem;">📅 ${a.fecha || '-'}</p>
+        `;
+        cont.appendChild(div);
+      }
+    });
+  } catch (err) {
+    console.error('Error cargando guia:', err);
+    cont.innerHTML = '<p style="color:red;">Error al cargar la guia.</p>';
+  }
+}
+
+// ========== FUNCIONES DE BENEFICIOS PREMIUM ==========
+window.mostrarAlertas = () => {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:30px;border-radius:16px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+      <h2 style="color:#0038A8;">Alertas de Precios</h2>
+      <p style="color:#666; margin-bottom:20px;">Elegi los productos que queres monitorear y te avisamos cuando bajen de precio:</p>
+      <div class="form-group">
+        <label>Producto 1</label>
+        <input type="text" class="form-control" placeholder="Ej: Whisky Johnnie Walker">
+      </div>
+      <div class="form-group">
+        <label>Producto 2</label>
+        <input type="text" class="form-control" placeholder="Ej: Cerveza Heineken">
+      </div>
+      <div class="form-group">
+        <label>Producto 3</label>
+        <input type="text" class="form-control" placeholder="Ej: Chocolate Milka">
+      </div>
+      <p style="color:#666; font-size:0.9rem; margin:15px 0;">Te enviaremos una notificacion cuando estos productos tengan una baja significativa de precio.</p>
+      <button class="btn btn-success btn-block" onclick="this.closest('div[style*=fixed]').remove(); alert('✅ Alertas configuradas');">Guardar Alertas</button>
+      <button class="btn btn-block" style="margin-top:10px;background:#ddd;" onclick="this.closest('div[style*=fixed]').remove()">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
+
+window.mostrarListaCompras = () => {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:30px;border-radius:16px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;">
+      <h2 style="color:#0038A8;">Lista de Compras Optimizada</h2>
+      <p style="color:#666; margin-bottom:20px;">Agrega los productos que necesitas y te diremos donde comprar cada uno al mejor precio:</p>
+      <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <input type="text" id="item-lista" class="form-control" placeholder="Ej: Arroz 1kg" style="flex:1;">
+        <button class="btn btn-success" onclick="agregarItemLista()">Agregar</button>
+      </div>
+      <div id="items-lista-container"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:15px;" onclick="optimizarLista()"> Optimizar Lista</button>
+      <button class="btn btn-block" style="margin-top:10px;background:#ddd;" onclick="this.closest('div[style*=fixed]').remove()">Cerrar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
+
+window.agregarItemLista = () => {
+  const input = document.getElementById('item-lista');
+  const container = document.getElementById('items-lista-container');
+  if (!input.value.trim()) return;
+  const div = document.createElement('div');
+  div.style.cssText = 'padding:8px; background:#f0f0f0; border-radius:6px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;';
+  div.innerHTML = `<span>${input.value}</span> <button onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">X</button>`;
+  container.appendChild(div);
+  input.value = '';
+};
+
+window.optimizarLista = () => {
+  alert(' Analizando precios en todos los comercios...\n\nFuncion completa en desarrollo. Proximamente te diremos exactamente en que comercio comprar cada producto para maximizar tu ahorro.');
+};
+
+window.mostrarSoporteVIP = () => {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:white;padding:30px;border-radius:16px;max-width:400px;width:90%;text-align:center;">
+      <h2 style="color:#0038A8;">Soporte VIP</h2>
+      <p style="color:#666; margin-bottom:20px;">Como usuario Premium, tenes atencion prioritaria:</p>
+      <div style="background:#E8F5E9; padding:20px; border-radius:10px; margin:20px 0;">
+        <p style="font-size:3rem; margin:0;">💬</p>
+        <p style="margin:10px 0;"><strong>WhatsApp Directo</strong></p>
+        <p style="color:#666;">Respuesta en menos de 1 hora</p>
+      </div>
+      <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20necesito%20ayuda" target="_blank" class="btn btn-success" style="display:inline-block; text-decoration:none; margin-bottom:10px;"> Contactar Ahora</a>
+      <button class="btn btn-block" style="background:#ddd;" onclick="this.closest('div[style*=fixed]').remove()">Cerrar</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+};
+
 // ========== INICIALIZACIÓN ==========
 loadStats();
 loadOfertas();
@@ -479,3 +633,4 @@ loadProductos();
 loadMapa();
 loadComercios();
 loadExcursiones();
+loadGuia();

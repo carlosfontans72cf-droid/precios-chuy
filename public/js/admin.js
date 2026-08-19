@@ -598,12 +598,12 @@ function initBuscador() {
 }
 
 async function buscarUsuarios() {
-  const query = document.getElementById('buscador-input').value.trim().toLowerCase();
+  const searchQuery = document.getElementById('buscador-input').value.trim().toLowerCase();
   const rolFiltro = document.getElementById('buscador-rol').value;
   const contenedor = document.getElementById('buscador-resultados');
   const contador = document.getElementById('resultado-contador');
 
-  if (!query && !rolFiltro) {
+  if (!searchQuery && !rolFiltro) {
     contenedor.innerHTML = '<div class="alert alert-warning">Ingresá un término de búsqueda o seleccioná un rol</div>';
     return;
   }
@@ -617,11 +617,11 @@ async function buscarUsuarios() {
     snap.forEach(d => todos.push({ id: d.id, ...d.data() }));
 
     const filtrados = todos.filter(u => {
-      const matchQuery = !query ||
-        (u.nombre && u.nombre.toLowerCase().includes(query)) ||
-        (u.email && u.email.toLowerCase().includes(query)) ||
-        (u.comercio && u.comercio.toLowerCase().includes(query)) ||
-        (u.ruta && u.ruta.toLowerCase().includes(query));
+      const matchQuery = !searchQuery ||
+        (u.nombre && u.nombre.toLowerCase().includes(searchQuery)) ||
+        (u.email && u.email.toLowerCase().includes(searchQuery)) ||
+        (u.comercio && u.comercio.toLowerCase().includes(searchQuery)) ||
+        (u.ruta && u.ruta.toLowerCase().includes(searchQuery));
       const matchRol = !rolFiltro || u.role === rolFiltro;
       return matchQuery && matchRol;
     });
@@ -639,8 +639,8 @@ async function buscarUsuarios() {
       div.className = 'card';
       div.style.marginBottom = '10px';
       let infoHTML = `<div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;"><div style="flex:1; min-width:250px;">`;
-      infoHTML += `<h4>${u.role === 'admin' ? '' : u.role === 'comerciante' ? '' : u.role === 'admin_excursion' ? '' : ''} ${u.nombre || 'Sin nombre'}</h4>`;
-      infoHTML += `<p style="margin:5px 0;"><small> ${u.email || '-'}</small></p>`;
+      infoHTML += `<h4>${u.role === 'admin' ? '' : u.role === 'comerciante' ? '🏪' : u.role === 'admin_excursion' ? '🚌' : ''} ${u.nombre || 'Sin nombre'}</h4>`;
+      infoHTML += `<p style="margin:5px 0;"><small>📧 ${u.email || '-'}</small></p>`;
 
       if (u.role === 'comerciante') {
         infoHTML += `<p style="margin:5px 0;"><small> ${u.comercio || '-'}</small></p>`;
@@ -648,7 +648,7 @@ async function buscarUsuarios() {
       } else if (u.role === 'cliente') {
         infoHTML += `<p style="margin:5px 0;"><small>⭐ Plan: <strong>${u.plan === 'premium' ? 'Premium' : 'Gratis'}</strong></small></p>`;
       } else if (u.role === 'admin_excursion') {
-        infoHTML += `<p style="margin:5px 0;"><small> Ruta: ${u.ruta || '-'}</small></p>`;
+        infoHTML += `<p style="margin:5px 0;"><small>🚌 Ruta: ${u.ruta || '-'}</small></p>`;
         infoHTML += `<p style="margin:5px 0;"><small>✅ Aprobado: <strong>${u.aprobado ? 'Sí' : 'No'}</strong></small></p>`;
       }
       infoHTML += `</div><div style="display:flex; flex-direction:column; gap:5px;">`;
@@ -656,136 +656,188 @@ async function buscarUsuarios() {
       if (u.role === 'cliente') {
         if (u.plan === 'premium') {
           infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPrem('${u.id}')">Quitar Premium</button>`;
-          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPremByEmail('${u.email}')">Quitar (x email)</button>`;
         } else {
-          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPremBuscador('${u.id}')">+30 días Premium</button>`;
-          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPremByEmail('${u.email}')">Premium (x email)</button>`;
+          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPrem('${u.id}', 30)">+30 días Premium</button>`;
         }
+        infoHTML += `<button class="btn btn-sm btn-primary" onclick="window.activarPremEmail('${u.email}')">Premium (x Email)</button>`;
       } else if (u.role === 'comerciante') {
-        infoHTML += `<button class="btn btn-sm btn-success" onclick="window.extenderComBuscador('${u.id}')">+30 días</button>`;
-        infoHTML += `<button class="btn btn-sm btn-primary" onclick="window.habilitarComBuscador('${u.id}')">Habilitar</button>`;
-        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.suspenderComBuscador('${u.id}')">Suspender</button>`;
+        infoHTML += `<button class="btn btn-sm btn-success" onclick="window.extenderCom('${u.id}', 30)">+30 días</button>`;
+        infoHTML += `<button class="btn btn-sm btn-primary" onclick="window.habilitarCom('${u.id}', 30)">Habilitar</button>`;
+        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.suspenderCom('${u.id}')">Suspender</button>`;
       } else if (u.role === 'admin_excursion') {
         if (!u.aprobado) {
-          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.aprobarAdminBuscador('${u.id}')">✅ Aprobar</button>`;
+          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.aprobarAdmin('${u.id}')">✅ Aprobar</button>`;
         } else {
-          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.desaprobarAdminBuscador('${u.id}')">Desaprobar</button>`;
+          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.desaprobarAdmin('${u.id}')">Desaprobar</button>`;
         }
-        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.rechazarAdminBuscador('${u.id}')">🗑 Rechazar</button>`;
+        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.rechazarAdmin('${u.id}')">🗑 Rechazar</button>`;
       }
       infoHTML += `</div></div>`;
       div.innerHTML = infoHTML;
       contenedor.appendChild(div);
     });
 
-// Función para buscar y actualizar por EMAIL (más confiable)
-window.activarPremByEmail = async (email) => {
-  const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
-  const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
-  try {
-    // Buscar el documento por email
-    const q = query(collection(db, 'users'), where('email', '==', email));
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      showAlert('❌ Usuario no encontrado', 'danger');
-      return;
-    }
-    // Puede haber múltiples, actualizamos todos los que coincidan
-    let actualizados = 0;
-    snap.forEach(async (d) => {
-      await updateDoc(doc(db, 'users', d.id), { 
-        plan: 'premium', 
-        fechaVencimientoPremium: fecha.toISOString(), 
-        premiumActivo: true 
-      });
-      actualizados++;
-    });
-    showAlert(`✅ Premium activado para ${email} (${actualizados} doc(s))`, 'success');
-    console.log(`✅ Premium activado: ${email}, días: ${dias}`);
-    buscarUsuarios(); loadPagos();
-  } catch (err) { 
-    showAlert(`Error: ${err.message}`, 'danger'); 
-    console.error('Error:', err);
-  }
-};
-
-window.quitarPremByEmail = async (email) => {
-  if (!confirm(`¿Quitar Premium a ${email}?`)) return;
-  try {
-    const q = query(collection(db, 'users'), where('email', '==', email));
-    const snap = await getDocs(q);
-    snap.forEach(async (d) => {
-      await updateDoc(doc(db, 'users', d.id), { 
-        plan: 'gratis', 
-        fechaVencimientoPremium: null,
-        premiumActivo: false
-      });
-    });
-    showAlert(`✅ ${email} vuelto a gratis`, 'info');
-    buscarUsuarios(); loadPagos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-};
-
-// Funciones globales
-window.activarPremBuscador = async (id) => {
-      const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
-      const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
-      try {
-        console.log('✅ Activando premium para documento:', id);
-        await updateDoc(doc(db, 'users', id), { 
-          plan: 'premium', 
-          fechaVencimientoPremium: fecha.toISOString(), 
-          premiumActivo: true 
-        });
-        showAlert(`✅ Premium activado por ${dias} días`, 'success');
-        buscarUsuarios(); loadPagos();
-      } catch (err) { 
-        showAlert(`Error: ${err.message}`, 'danger'); 
-        console.error('Error activando premium:', err);
-      }
-    };
-    window.extenderComBuscador = async (id) => {
-      const dias = parseInt(prompt('¿Cuántos días?', '30')) || 30;
-      try {
-        const ud = await getDoc(doc(db, 'users', id));
-        await updateDoc(doc(db, 'users', id), { plan: 'activo', diasRestantes: (ud.data().diasRestantes||0)+dias, activo: true });
-        showAlert(`✅ Extendido ${dias} días`, 'success');
-        buscarUsuarios(); loadPagos();
-      } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
-    window.habilitarComBuscador = async (id) => {
-      const dias = parseInt(prompt('¿Cuántos días?', '30')) || 30;
-      const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
-      try {
-        await updateDoc(doc(db, 'users', id), { plan: 'activo', diasRestantes: dias, fechaVencimiento: fecha.toISOString(), activo: true });
-        showAlert(`✅ Habilitado por ${dias} días`, 'success');
-        buscarUsuarios(); loadPagos();
-      } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
-    window.suspenderComBuscador = async (id) => {
-      if (!confirm('¿Suspender comerciante?')) return;
-      try { await updateDoc(doc(db, 'users', id), { activo: false, plan: 'suspendido' }); showAlert('⚠️ Suspendido', 'warning'); buscarUsuarios(); loadPagos(); }
-      catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
-    window.aprobarAdminBuscador = async (id) => {
-      if (!confirm('¿Aprobar admin de excursión?')) return;
-      try { await updateDoc(doc(db, 'users', id), { aprobado: true }); showAlert('✅ Aprobado', 'success'); buscarUsuarios(); loadAprobaciones(); }
-      catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
-    window.desaprobarAdminBuscador = async (id) => {
-      if (!confirm('¿Desaprobar?')) return;
-      try { await updateDoc(doc(db, 'users', id), { aprobado: false }); showAlert('⚠️ Desaprobado', 'warning'); buscarUsuarios(); loadAprobaciones(); }
-      catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
-    window.rechazarAdminBuscador = async (id) => {
-      if (!confirm('¿Rechazar y eliminar? No se puede deshacer.')) return;
-      try { await deleteDoc(doc(db, 'users', id)); showAlert('🗑 Eliminado', 'danger'); buscarUsuarios(); loadAprobaciones(); }
-      catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-    };
   } catch (err) {
     contenedor.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
   }
 }
+
+// ===== FUNCIONES GLOBALES DE ADMIN (fuera de buscarUsuarios para tener query y where en scope) =====
+
+window.activarPremEmail = async (email) => {
+  const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
+  const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    if (snap.empty) { showAlert('❌ Usuario no encontrado', 'danger'); return; }
+    let count = 0;
+    for (const d of snap.docs) {
+      await updateDoc(doc(db, 'users', d.id), { 
+        plan: 'premium', fechaVencimientoPremium: fecha.toISOString(), premiumActivo: true 
+      });
+      count++;
+    }
+    showAlert(`✅ Premium activado para ${email} (${count} doc(s))`, 'success');
+    buscarUsuarios(); loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.quitarPremEmail = async (email) => {
+  if (!confirm(`¿Quitar Premium a ${email}?`)) return;
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      await updateDoc(doc(db, 'users', d.id), { 
+        plan: 'gratis', fechaVencimientoPremium: null, premiumActivo: false 
+      });
+    }
+    showAlert('✅ Vuelto a gratis', 'info');
+    buscarUsuarios(); loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.aprobarAdmin = async (id) => {
+  if (!confirm('¿Aprobar admin de excursión?')) return;
+  try { 
+    await updateDoc(doc(db, 'users', id), { aprobado: true }); 
+    showAlert('✅ Aprobado', 'success'); 
+    loadAprobaciones(); 
+    if (typeof buscarUsuarios === 'function') buscarUsuarios();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.desaprobarAdmin = async (id) => {
+  if (!confirm('¿Desaprobar?')) return;
+  try { 
+    await updateDoc(doc(db, 'users', id), { aprobado: false }); 
+    showAlert('⚠️ Desaprobado', 'warning'); 
+    loadAprobaciones();
+    if (typeof buscarUsuarios === 'function') buscarUsuarios();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.rechazarAdmin = async (id) => {
+  if (!confirm('¿Rechazar y eliminar?')) return;
+  try { 
+    await deleteDoc(doc(db, 'users', id)); 
+    showAlert('🗑 Eliminado', 'danger'); 
+    loadAprobaciones();
+    if (typeof buscarUsuarios === 'function') buscarUsuarios();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+// ========== GUÍA DEL CHUY (gestión de contenido) ==========
+async function loadGuia() {
+  const cont = document.getElementById('lista-guia');
+  if (!cont) return;
+  cont.innerHTML = '<p>Cargando...</p>';
+  try {
+    const snap = await getDocs(collection(db, 'guia_chuy'));
+    if (snap.empty) { 
+      cont.innerHTML = '<p style="color:#666;">No hay artículos en la guía. Agregá el primero abajo.</p>'; 
+      return; 
+    }
+    cont.innerHTML = '';
+    snap.forEach(d => {
+      const data = d.data();
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '10px';
+      div.innerHTML = `
+        <h4>${data.tipo || ''} ${data.titulo}</h4>
+        <p style="color:#666; margin:5px 0;">${(data.contenido || '').substring(0, 100)}...</p>
+        <p style="margin:5px 0;"><small>📅 ${data.fecha || '-'}</small></p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-warning" onclick="window.editarGuia('${d.id}', '${data.titulo}', '${(data.contenido||'').replace(/'/g, "\\'")}', '${data.tipo || ''}')">✏️ Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="window.borrarGuia('${d.id}')">🗑 Borrar</button>
+        </div>
+      `;
+      cont.appendChild(div);
+    });
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+}
+
+document.getElementById('btn-add-guia')?.addEventListener('click', () => {
+  const titulo = document.getElementById('guia-titulo').value.trim();
+  const tipo = document.getElementById('guia-tipo').value;
+  const contenido = document.getElementById('guia-contenido').value.trim();
+  const esPremium = document.getElementById('guia-premium').checked;
+  
+  if (!titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
+  
+  addDoc(collection(db, 'guia_chuy'), {
+    titulo, tipo, contenido,
+    premium: esPremium,
+    fecha: new Date().toISOString().split('T')[0],
+    createdAt: serverTimestamp()
+  }).then(() => {
+    document.getElementById('guia-titulo').value = '';
+    document.getElementById('guia-contenido').value = '';
+    document.getElementById('guia-premium').checked = false;
+    showAlert('✅ Artículo agregado a la guía', 'success');
+    loadGuia();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+window.editarGuia = (id, titulo, contenido, tipo) => {
+  document.getElementById('guia-titulo').value = titulo;
+  document.getElementById('guia-tipo').value = tipo;
+  document.getElementById('guia-contenido').value = contenido;
+  document.getElementById('guia-edit-id').value = id;
+  showAlert('Editando artículo. Modificá y guardá.', 'info');
+};
+
+document.getElementById('btn-save-guia')?.addEventListener('click', () => {
+  const id = document.getElementById('guia-edit-id').value;
+  const titulo = document.getElementById('guia-titulo').value.trim();
+  const tipo = document.getElementById('guia-tipo').value;
+  const contenido = document.getElementById('guia-contenido').value.trim();
+  const esPremium = document.getElementById('guia-premium').checked;
+  
+  if (!id || !titulo || !contenido) return showAlert('Completá todos los campos', 'warning');
+  
+  updateDoc(doc(db, 'guia_chuy', id), {
+    titulo, tipo, contenido, premium: esPremium
+  }).then(() => {
+    document.getElementById('guia-titulo').value = '';
+    document.getElementById('guia-contenido').value = '';
+    document.getElementById('guia-edit-id').value = '';
+    document.getElementById('guia-premium').checked = false;
+    showAlert('✅ Artículo actualizado', 'success');
+    loadGuia();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+window.borrarGuia = async (id) => {
+  if (!confirm('¿Borrar este artículo de la guía?')) return;
+  try {
+    await deleteDoc(doc(db, 'guia_chuy', id));
+    showAlert(' Artículo borrado', 'danger');
+    loadGuia();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
 
 // ========== INICIALIZAR TODO ==========
 loadSecciones();
@@ -796,4 +848,5 @@ loadUsuarios();
 loadExcursiones();
 loadVideos();
 loadAprobaciones();
+loadGuia();
 initBuscador();

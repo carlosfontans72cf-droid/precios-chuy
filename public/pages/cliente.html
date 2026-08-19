@@ -23,6 +23,7 @@
     .premium-banner { background: linear-gradient(90deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; cursor: pointer; border: 2px solid #0038A8; }
     .premium-banner:hover { transform: scale(1.02); }
     .premium-banner h3 { color: #0038A8; margin: 0 0 10px 0; }
+    .beneficio-card:hover { transform: translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
   </style>
 </head>
 <body>
@@ -39,7 +40,8 @@
     <button class="active" onclick="showTab('ofertas')">🔥 Ofertas</button>
     <button onclick="showTab('productos')">🛍️ Productos</button>
     <button onclick="showTab('mapa')">🗺️ Mapa</button>
-    <button onclick="showTab('excursiones')">🚌 Excursiones</button>
+    <button onclick="showTab('excursiones')">Excursiones</button>
+    <button onclick="showTab('guia')">Guia</button>
   </div>
 
   <div class="container">
@@ -183,6 +185,24 @@
       <h3 class="section-title">🚌 Próximas Excursiones</h3>
       <p style="color:#666;margin-bottom:15px;">Salidas desde Maldonado hacia Chui para compras</p>
       <div id="lista-excursiones-cliente"></div>
+
+    <!-- TAB: Guia del Chuy -->
+    <div id="tab-guia" class="tab-content">
+      <h3 class="section-title">Guia del Chuy</h3>
+      <div id="guia-login-warning" style="display:none; background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px;">
+        <p style="color:#856404; margin:0;">Algunos articulos son solo para usuarios <strong>Premium</strong>. <a href="#" onclick="mostrarPremium(); return false;" style="color:#0038A8; font-weight:bold;">Hacete Premium</a></p>
+      </div>
+      <div style="margin-bottom:15px;">
+        <label style="margin-right:15px;"><input type="checkbox" id="filtro-todas" checked onchange="loadGuia()"> Todas</label>
+        <label style="margin-right:15px;"><input type="checkbox" id="filtro-rutas" onchange="loadGuia()"> Rutas</label>
+        <label style="margin-right:15px;"><input type="checkbox" id="filtro-lugares" onchange="loadGuia()"> Lugares</label>
+        <label style="margin-right:15px;"><input type="checkbox" id="filtro-comercios" onchange="loadGuia()"> Comercios</label>
+        <label style="margin-right:15px;"><input type="checkbox" id="filtro-tips" onchange="loadGuia()"> Consejos</label>
+      </div>
+      <div id="lista-guia-cliente">
+        <p style="text-align:center;color:#666;">Cargando articulos...</p>
+      </div>
+    </div>
     </div>
 
   </div>
@@ -207,5 +227,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d3bfaeef023f3a',t:'MTc4NzA4NTc4NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d980eb2aa7988b',t:'MTc4NzE0NjEyOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
