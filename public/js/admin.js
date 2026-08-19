@@ -787,9 +787,6 @@ window.activarPremBuscador = async (id) => {
   }
 }
 
-// Necesario para getDoc en buscador
-import { getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
 // ========== INICIALIZAR TODO ==========
 loadSecciones();
 loadProductos();
