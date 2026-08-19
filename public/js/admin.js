@@ -1,7 +1,8 @@
 // Panel de Administración - Precios Chuy
 import { db } from './firebase-config.js';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp,
+  query, where, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { showAlert } from './utils.js';
 
@@ -655,8 +656,10 @@ async function buscarUsuarios() {
       if (u.role === 'cliente') {
         if (u.plan === 'premium') {
           infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPrem('${u.id}')">Quitar Premium</button>`;
+          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPremByEmail('${u.email}')">Quitar (x email)</button>`;
         } else {
           infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPremBuscador('${u.id}')">+30 días Premium</button>`;
+          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPremByEmail('${u.email}')">Premium (x email)</button>`;
         }
       } else if (u.role === 'comerciante') {
         infoHTML += `<button class="btn btn-sm btn-success" onclick="window.extenderComBuscador('${u.id}')">+30 días</button>`;
@@ -675,15 +678,71 @@ async function buscarUsuarios() {
       contenedor.appendChild(div);
     });
 
-    // Funciones globales
-    window.activarPremBuscador = async (id) => {
+// Función para buscar y actualizar por EMAIL (más confiable)
+window.activarPremByEmail = async (email) => {
+  const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
+  const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
+  try {
+    // Buscar el documento por email
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      showAlert('❌ Usuario no encontrado', 'danger');
+      return;
+    }
+    // Puede haber múltiples, actualizamos todos los que coincidan
+    let actualizados = 0;
+    snap.forEach(async (d) => {
+      await updateDoc(doc(db, 'users', d.id), { 
+        plan: 'premium', 
+        fechaVencimientoPremium: fecha.toISOString(), 
+        premiumActivo: true 
+      });
+      actualizados++;
+    });
+    showAlert(`✅ Premium activado para ${email} (${actualizados} doc(s))`, 'success');
+    console.log(`✅ Premium activado: ${email}, días: ${dias}`);
+    buscarUsuarios(); loadPagos();
+  } catch (err) { 
+    showAlert(`Error: ${err.message}`, 'danger'); 
+    console.error('Error:', err);
+  }
+};
+
+window.quitarPremByEmail = async (email) => {
+  if (!confirm(`¿Quitar Premium a ${email}?`)) return;
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    snap.forEach(async (d) => {
+      await updateDoc(doc(db, 'users', d.id), { 
+        plan: 'gratis', 
+        fechaVencimientoPremium: null,
+        premiumActivo: false
+      });
+    });
+    showAlert(`✅ ${email} vuelto a gratis`, 'info');
+    buscarUsuarios(); loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+// Funciones globales
+window.activarPremBuscador = async (id) => {
       const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
       const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
       try {
-        await updateDoc(doc(db, 'users', id), { plan: 'premium', fechaVencimientoPremium: fecha.toISOString(), premiumActivo: true });
+        console.log('✅ Activando premium para documento:', id);
+        await updateDoc(doc(db, 'users', id), { 
+          plan: 'premium', 
+          fechaVencimientoPremium: fecha.toISOString(), 
+          premiumActivo: true 
+        });
         showAlert(`✅ Premium activado por ${dias} días`, 'success');
         buscarUsuarios(); loadPagos();
-      } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+      } catch (err) { 
+        showAlert(`Error: ${err.message}`, 'danger'); 
+        console.error('Error activando premium:', err);
+      }
     };
     window.extenderComBuscador = async (id) => {
       const dias = parseInt(prompt('¿Cuántos días?', '30')) || 30;
