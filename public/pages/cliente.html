@@ -1,27 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"><style>
-  #lista-guia-cliente {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    min-height: 100px !important;
-  }
-  
-  #lista-guia-cliente .card {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    margin-bottom: 15px !important;
-    padding: 15px !important;
-    background: white !important;
-    border-radius: 8px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-  }
-  
-  #tab-guia {
-    display: block !important;
-  }
-</style>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,6 +24,16 @@
     .premium-banner:hover { transform: scale(1.02); }
     .premium-banner h3 { color: #0038A8; margin: 0 0 10px 0; }
     .beneficio-card:hover { transform: translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+    
+    #lista-guia-cliente {
+      display: block !important;
+      min-height: 50px !important;
+    }
+    
+    #lista-guia-cliente .card {
+      display: block !important;
+      margin-bottom: 15px !important;
+    }
   </style>
 </head>
 <body>
@@ -208,6 +196,7 @@
       <h3 class="section-title">🚌 Próximas Excursiones</h3>
       <p style="color:#666;margin-bottom:15px;">Salidas desde Maldonado hacia Chui para compras</p>
       <div id="lista-excursiones-cliente"></div>
+    </div>
 
     <!-- TAB: Guia del Chuy -->
     <div id="tab-guia" class="tab-content">
@@ -250,5 +239,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d9aca71ac42ddb',t:'MTc4NzE0NzkyMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2da42c91e32a7a7',t:'MTc4NzE1NDA2OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
