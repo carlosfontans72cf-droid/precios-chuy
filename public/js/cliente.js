@@ -113,6 +113,7 @@ async function loadOfertas() {
 async function loadProductos() {
   const cont = document.getElementById('lista-productos-cliente');
   const selectSeccion = document.getElementById('filtrar-seccion');
+  const inputBusqueda = document.getElementById('buscar-producto');
   if (!cont) return;
 
   try {
@@ -124,31 +125,59 @@ async function loadProductos() {
         selectSeccion.innerHTML += `<option value="${d.id}">${data.icono || ''} ${data.nombre}</option>`;
       });
     }
-  } catch (err) { console.error('Error secciones:', err); }
-
-  try {
+    
     const snap = await getDocs(collection(db, 'productos'));
+    
+    // Aplicar filtros
+    const busqueda = inputBusqueda?.value.trim().toLowerCase() || '';
+    const seccionFiltro = selectSeccion?.value || '';
+    
     if (snap.empty) {
-      cont.innerHTML = '<p style="text-align:center;color:#666;grid-column:span 2;">Sin productos cargados</p>';
+      cont.innerHTML = '<p style="text-align:center;color:#666;grid-column:span 2;">📦 Sin productos cargados. El administrador aún no agregó productos.</p>';
       return;
     }
+    
+    const productos = [];
+    snap.forEach(d => productos.push({ id: d.id, ...d.data() }));
+    
+    const filtrados = productos.filter(p => {
+      const matchBusqueda = !busqueda || (p.nombre && p.nombre.toLowerCase().includes(busqueda));
+      const matchSeccion = !seccionFiltro || p.seccionId === seccionFiltro;
+      return matchBusqueda && matchSeccion;
+    });
+    
+    if (filtrados.length === 0) {
+      if (busqueda || seccionFiltro) {
+        cont.innerHTML = `<p style="text-align:center;color:#FF6B00;font-size:1.1rem;grid-column:span 2;padding:20px;">⚠️ No se encontraron productos que coincidan con "${busqueda || seccionFiltro}"<br><small style="color:#666;">Probá con otro término o sección</small></p>`;
+      } else {
+        cont.innerHTML = '<p style="text-align:center;color:#666;grid-column:span 2;">Sin productos cargados</p>';
+      }
+      return;
+    }
+    
     cont.innerHTML = '';
-    snap.forEach(d => {
-      const data = d.data();
+    filtrados.forEach(d => {
       const div = document.createElement('div');
       div.className = 'product-card';
       div.innerHTML = `
-        ${data.imagen ? `<img src="${data.imagen}" alt="${data.nombre}" onerror="this.style.display='none'">` : '<div style="height:150px;background:#f0f0f0;border-radius:8px;"></div>'}
-        <h3>${data.nombre}</h3>
+        ${d.imagen ? `<img src="${d.imagen}" alt="${d.nombre}" onerror="this.style.display='none'">` : '<div style="height:150px;background:#f0f0f0;border-radius:8px;"></div>'}
+        <h3>${d.nombre}</h3>
         <div style="display:flex;justify-content:space-between;margin-top:10px;">
-          <span class="precio-uruguay">🇺 $${data.precioUruguay || 0}</span>
-          <span class="precio-brasil">🇧🇷 R$${data.precioBrasil || 0}</span>
+          <span class="precio-uruguay">🇺🇾 $${d.precioUruguay || 0}</span>
+          <span class="precio-brasil">🇧🇷 R$${d.precioBrasil || 0}</span>
         </div>
       `;
       cont.appendChild(div);
     });
-  } catch (err) { console.error('Error productos:', err); }
+  } catch (err) { 
+    console.error('Error productos:', err);
+    cont.innerHTML = '<p style="color:red;grid-column:span 2;">❌ Error al cargar productos</p>';
+  }
 }
+
+document.getElementById('btn-buscar-productos')?.addEventListener('click', loadProductos);
+document.getElementById('buscar-producto')?.addEventListener('input', loadProductos);
+document.getElementById('filtrar-seccion')?.addEventListener('change', loadProductos);
 
 // ========== MAPA ==========
 let mapa;
@@ -475,10 +504,14 @@ window.reservarExcursion = (excId, adminNombre, fecha, ruta, adminEmail, sena, a
 // ========== GUÍA DEL CHUY ==========
 async function loadGuia() {
   const cont = document.getElementById('lista-guia-cliente');
-  if (!cont) return;
-  cont.innerHTML = '<p style="text-align:center;color:#666;">Cargando articulos...</p>';
+  if (!cont) {
+    console.error('❌ Contenedor de guía no encontrado');
+    return;
+  }
+  cont.innerHTML = '<p style="text-align:center;color:#666;">Cargando artículos...</p>';
   
   const esPremium = sessionStorage.getItem('userPlan') === 'premium';
+  console.log(' Cargando guía... Es premium:', esPremium);
   
   // Mostrar/ocultar warning
   const warning = document.getElementById('guia-login-warning');
@@ -486,16 +519,20 @@ async function loadGuia() {
   
   try {
     const snap = await getDocs(collection(db, 'guia_chuy'));
+    console.log('📄 Artículos encontrados:', snap.size);
+    
     const articulos = [];
     snap.forEach(d => articulos.push({ id: d.id, ...d.data() }));
     articulos.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
     
     // Aplicar filtros
-    const todas = document.getElementById('filtro-todas')?.checked;
+    const todas = document.getElementById('filtro-todas')?.checked !== false;
     const rutas = document.getElementById('filtro-rutas')?.checked;
     const lugares = document.getElementById('filtro-lugares')?.checked;
     const comercios = document.getElementById('filtro-comercios')?.checked;
     const tips = document.getElementById('filtro-tips')?.checked;
+    
+    console.log('Filtros:', { todas, rutas, lugares, comercios, tips });
     
     const filtrados = articulos.filter(a => {
       if (todas) return true;
@@ -503,33 +540,43 @@ async function loadGuia() {
       if (a.tipo === 'lugar' && lugares) return true;
       if (a.tipo === 'comercio' && comercios) return true;
       if (a.tipo === 'tip' && tips) return true;
+      if (a.tipo === 'alerta') return true;
       return false;
     });
     
+    console.log('Artículos filtrados:', filtrados.length);
+    
     if (filtrados.length === 0) {
-      cont.innerHTML = '<p style="text-align:center;color:#666;">No hay articulos que coincidan con los filtros.</p>';
+      if (snap.empty) {
+        cont.innerHTML = '<p style="text-align:center;color:#666;">📭 No hay artículos en la guía aún. El administrador no ha agregado contenido.</p>';
+      } else {
+        cont.innerHTML = '<p style="text-align:center;color:#666;">No hay artículos que coincidan con los filtros seleccionados.</p>';
+      }
       return;
     }
     
     cont.innerHTML = '';
     filtrados.forEach(a => {
+      console.log('Artículo:', a.titulo, 'Premium:', a.premium);
+      
       // Si es premium y el usuario no es premium, mostrar solo preview
       if (a.premium && !esPremium) {
         const div = document.createElement('div');
         div.className = 'card';
         div.style.opacity = '0.6';
         div.innerHTML = `
-          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '' : a.tipo === 'comercio' ? '🏪' : ''} ${a.titulo}</h4>
+          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '📍' : a.tipo === 'comercio' ? '🏪' : a.tipo === 'alerta' ? '⚠️' : '💡'} ${a.titulo}</h4>
           <p style="color:#666;">${(a.contenido || '').substring(0, 80)}...</p>
-          <p style="color:#FF6B00; font-weight:bold; margin:10px 0;"> Contenido exclusivo Premium</p>
-          <button class="btn btn-sm btn-primary" onclick="mostrarPremium()">Hacete Premium para ver mas</button>
+          <p style="color:#FF6B00; font-weight:bold; margin:10px 0;">🔒 Contenido exclusivo Premium</p>
+          <button class="btn btn-sm btn-primary" onclick="mostrarPremium()">⭐ Hacete Premium para ver más</button>
         `;
         cont.appendChild(div);
       } else {
         const div = document.createElement('div');
         div.className = 'card';
+        div.style.cursor = 'pointer';
         div.innerHTML = `
-          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '' : a.tipo === 'comercio' ? '🏪' : '💡'} ${a.titulo}</h4>
+          <h4>${a.tipo === 'ruta' ? '🗺️' : a.tipo === 'lugar' ? '📍' : a.tipo === 'comercio' ? '🏪' : a.tipo === 'alerta' ? '️' : '💡'} ${a.titulo}</h4>
           <p style="color:#333; margin:10px 0; white-space:pre-wrap;">${a.contenido || ''}</p>
           <p style="color:#666; font-size:0.9rem;">📅 ${a.fecha || '-'}</p>
         `;
@@ -537,10 +584,17 @@ async function loadGuia() {
       }
     });
   } catch (err) {
-    console.error('Error cargando guia:', err);
-    cont.innerHTML = '<p style="color:red;">Error al cargar la guia.</p>';
+    console.error('❌ Error cargando guia:', err);
+    cont.innerHTML = `<p style="color:red;">❌ Error al cargar la guía: ${err.message}</p>`;
   }
 }
+
+// Recargar guía cuando cambian los filtros
+document.getElementById('filtro-todas')?.addEventListener('change', loadGuia);
+document.getElementById('filtro-rutas')?.addEventListener('change', loadGuia);
+document.getElementById('filtro-lugares')?.addEventListener('change', loadGuia);
+document.getElementById('filtro-comercios')?.addEventListener('change', loadGuia);
+document.getElementById('filtro-tips')?.addEventListener('change', loadGuia);
 
 // ========== FUNCIONES DE BENEFICIOS PREMIUM ==========
 window.mostrarAlertas = () => {
