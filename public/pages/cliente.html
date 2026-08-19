@@ -55,19 +55,19 @@
         <div style="background:rgba(255,255,255,0.95); padding:20px; border-radius:15px; margin-top:20px; text-align:left;">
           <h4 style="color:#FF6B00; margin-top:0; font-size:1.3rem;">🎁 Tus beneficios activos:</h4>
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
-            <div style="background:#FFF3CD; padding:12px; border-radius:10px; border-left:4px solid #FF6B00;">
+            <div class="beneficio-card" onclick="showTab('ofertas')" style="background:#FFF3CD; padding:12px; border-radius:10px; border-left:4px solid #FF6B00; cursor:pointer;">
               <strong>🔥 Ofertas Exclusivas</strong><br>
               <small style="color:#666;">Acceso anticipado a las mejores ofertas</small>
             </div>
-            <div style="background:#D4EDDA; padding:12px; border-radius:10px; border-left:4px solid #28A745;">
+            <div class="beneficio-card" onclick="mostrarAlertas()" style="background:#D4EDDA; padding:12px; border-radius:10px; border-left:4px solid #28A745; cursor:pointer;">
               <strong>🔔 Alertas de Precios</strong><br>
               <small style="color:#666;">Te avisamos cuando bajan los precios</small>
             </div>
-            <div style="background:#D1ECF1; padding:12px; border-radius:10px; border-left:4px solid #17A2B8;">
+            <div class="beneficio-card" onclick="mostrarListaCompras()" style="background:#D1ECF1; padding:12px; border-radius:10px; border-left:4px solid #17A2B8; cursor:pointer;">
               <strong>📝 Lista Optimizada</strong><br>
               <small style="color:#666;">Lista de compras inteligente</small>
             </div>
-            <div style="background:#E2D5F1; padding:12px; border-radius:10px; border-left:4px solid #6F42C1;">
+            <div class="beneficio-card" onclick="showTab('mapa')" style="background:#E2D5F1; padding:12px; border-radius:10px; border-left:4px solid #6F42C1; cursor:pointer;">
               <strong>️ Navegación GPS</strong><br>
               <small style="color:#666;">Cómo llegar a cada comercio</small>
             </div>
@@ -75,7 +75,7 @@
               <strong>🚫 Sin Anuncios</strong><br>
               <small style="color:#666;">Experiencia 100% limpia</small>
             </div>
-            <div style="background:#C8E6C9; padding:12px; border-radius:10px; border-left:4px solid #25D366;">
+            <div class="beneficio-card" onclick="mostrarSoporteVIP()" style="background:#C8E6C9; padding:12px; border-radius:10px; border-left:4px solid #25D366; cursor:pointer;">
               <strong>💬 Soporte VIP</strong><br>
               <small style="color:#666;">Atención prioritaria por WhatsApp</small>
             </div>
@@ -152,7 +152,7 @@
 
     <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">🛍️ Comparar Precios</h3>
+      <h3 class="section-title">️ Comparar Precios</h3>
       <div class="card">
         <div class="form-group">
           <label>Buscar producto</label>
@@ -164,6 +164,7 @@
             <option value="">Todas las secciones</option>
           </select>
         </div>
+        <button id="btn-buscar-productos" class="btn btn-primary btn-block">🔍 Buscar Productos</button>
       </div>
       <div id="lista-productos-cliente" class="grid grid-2"></div>
     </div>
@@ -227,5 +228,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d980eb2aa7988b',t:'MTc4NzE0NjEyOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d9aca71ac42ddb',t:'MTc4NzE0NzkyMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
