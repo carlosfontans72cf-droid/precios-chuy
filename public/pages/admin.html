@@ -16,6 +16,16 @@
     .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
     .contador-fill { background: #009C3B; height: 100%; transition: width 0.3s; }
   </style>
+  <script>
+    // PROTECCION DE RUTA: Solo admin puede entrar
+    (function() {
+      const role = sessionStorage.getItem('userRole');
+      if (role !== 'admin') {
+        alert('Acceso denegado. Solo administradores pueden entrar a esta página.');
+        window.location.href = '/index.html';
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -28,35 +38,35 @@
   </nav>
 
   <div class="admin-nav">
-    <button class="active" onclick="showTab('secciones')">Secciones</button>
-    <button onclick="showTab('productos')">Productos</button>
-    <button onclick="showTab('comercios')">Comercios</button>
-    <button onclick="showTab('pagos')">Pagos</button>
-    <button onclick="showTab('usuarios')">Usuarios</button>
-    <button onclick="showTab('excursiones')">Excursiones</button>
+    <button class="active" onclick="showTab('secciones')">📂 Secciones</button>
+    <button onclick="showTab('productos')"> Productos</button>
+    <button onclick="showTab('comercios')">🏪 Comercios</button>
+    <button onclick="showTab('pagos')">💳 Pagos</button>
+    <button onclick="showTab('usuarios')">👥 Usuarios</button>
+    <button onclick="showTab('excursiones')"> Excursiones</button>
     <button onclick="showTab('aprobaciones')">✅ Aprobaciones</button>
-    <button onclick="showTab('videos')">Videos</button>
-    <button onclick="showTab('guia')">Guia Chuy</button>
+    <button onclick="showTab('videos')">📹 Videos</button>
+    <button onclick="showTab('guia')">️ Guía Chuy</button>
   </div>
 
   <div class="container">
 
     <!-- TAB: Secciones -->
     <div id="tab-secciones" class="tab-content active">
-      <h3 class="section-title">Gestion de Secciones</h3>
+      <h3 class="section-title">Gestión de Secciones</h3>
       <div class="card">
-        <div class="card-header">Agregar Nueva Seccion</div>
+        <div class="card-header">Agregar Nueva Sección</div>
         <div class="grid grid-2">
           <div class="form-group">
-            <label>Nombre de la seccion</label>
+            <label>Nombre de la sección</label>
             <input type="text" id="seccion-nombre" class="form-control" placeholder="Ej: Comestibles, Farmacia...">
           </div>
           <div class="form-group">
-            <label>Icono (emoji)</label>
-            <input type="text" id="seccion-icono" class="form-control" placeholder="Ej: carrito">
+            <label>Ícono (emoji)</label>
+            <input type="text" id="seccion-icono" class="form-control" placeholder="Ej: 🛒, 🍖">
           </div>
         </div>
-        <button id="btn-add-seccion" class="btn btn-success">Agregar Seccion</button>
+        <button id="btn-add-seccion" class="btn btn-success">Agregar Sección</button>
       </div>
       <div class="card">
         <div class="card-header">Secciones Existentes</div>
@@ -66,7 +76,7 @@
 
     <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">Gestion de Productos</h3>
+      <h3 class="section-title">📦 Gestión de Productos</h3>
       <div class="card">
         <div class="card-header">Agregar Producto</div>
         <div class="grid grid-2">
@@ -75,7 +85,7 @@
             <input type="text" id="prod-nombre" class="form-control" placeholder="Ej: Arroz 1kg">
           </div>
           <div class="form-group">
-            <label>Seccion</label>
+            <label>Sección</label>
             <select id="prod-seccion" class="form-control"></select>
           </div>
           <div class="form-group">
@@ -102,7 +112,7 @@
         <div class="card-header">Subir productos desde Excel</div>
         <p style="margin-bottom:10px;color:#666;">Formato: nombre, seccion, precio_uy, precio_br, comercio</p>
         <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" class="form-control">
-        <button id="btn-upload-excel" class="btn btn-warning" style="margin-top:10px;">Subir Excel</button>
+        <button id="btn-upload-excel" class="btn btn-warning" style="margin-top:10px;">📊 Subir Excel</button>
       </div>
 
       <div class="card">
@@ -110,7 +120,7 @@
         <div style="overflow-x:auto;">
           <table>
             <thead>
-              <tr><th>Producto</th><th>Seccion</th><th>UYU</th><th>R$</th><th>Comercio</th><th>Acciones</th></tr>
+              <tr><th>Producto</th><th>Sección</th><th>UYU</th><th>R$</th><th>Comercio</th><th>Acciones</th></tr>
             </thead>
             <tbody id="lista-productos"></tbody>
           </table>
@@ -120,7 +130,7 @@
 
     <!-- TAB: Comercios -->
     <div id="tab-comercios" class="tab-content">
-      <h3 class="section-title">Gestion de Comercios</h3>
+      <h3 class="section-title">🏪 Gestión de Comercios</h3>
       <div class="card">
         <div class="card-header">Agregar Comercio</div>
         <div class="grid grid-2">
@@ -132,20 +142,20 @@
             <label>Tipo</label>
             <select id="com-tipo" class="form-control">
               <option value="supermercado">Supermercado</option>
-              <option value="carniceria">Carniceria</option>
+              <option value="carniceria">Carnicería</option>
               <option value="farmacia">Farmacia</option>
               <option value="bebidas">Bebidas</option>
               <option value="ropa">Ropa</option>
-              <option value="electronica">Electronica</option>
+              <option value="electronica">Electrónica</option>
               <option value="otro">Otro</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Direccion</label>
+            <label>Dirección</label>
             <input type="text" id="com-direccion" class="form-control" placeholder="Rua...">
           </div>
           <div class="form-group">
-            <label>Telefono / WhatsApp</label>
+            <label>Teléfono / WhatsApp</label>
             <input type="text" id="com-telefono" class="form-control" placeholder="+55...">
           </div>
           <div class="form-group">
@@ -153,7 +163,7 @@
             <input type="email" id="com-email" class="form-control" placeholder="comercio@email.com">
           </div>
           <div class="form-group">
-            <label>Metodos de pago</label>
+            <label>Métodos de pago</label>
             <select id="com-pago" class="form-control" multiple>
               <option value="pix">PIX</option>
               <option value="efectivo_r">Efectivo R$</option>
@@ -173,15 +183,15 @@
 
     <!-- TAB: Pagos -->
     <div id="tab-pagos" class="tab-content">
-      <h3 class="section-title">Gestion de Pagos</h3>
+      <h3 class="section-title">💳 Gestión de Pagos</h3>
       
       <!-- Buscador de usuarios -->
       <div id="buscador-usuarios-container"></div>
 
       <div class="card">
-        <div class="card-header">Comerciantes con suscripcion</div>
+        <div class="card-header">Comerciantes con suscripción</div>
         <p style="margin-bottom:15px;color:#666;">
-          Gestion de pagos de comerciantes. Podes extender, habilitar o suspender.
+          Gestión de pagos de comerciantes. Podés extender, habilitar o suspender.
         </p>
         <div id="lista-pagos-comerciantes"></div>
       </div>
@@ -195,17 +205,13 @@
     <div id="tab-usuarios" class="tab-content">
       <h3 class="section-title">👥 Gestión de Usuarios</h3>
       
-      <!-- Buscador de usuarios -->
-      <div id="buscador-usuarios-container"></div>
-
       <div class="card">
         <div class="card-header">Generar usuarios ficticios</div>
         <p style="margin-bottom:15px;color:#666;">
           Crea 250 usuarios de prueba (200 clientes + 50 comercios).
-          Utiles para mostrar la app con datos realistas.
         </p>
         <button id="btn-generar-usuarios" class="btn btn-warning">
-          Generar 250 usuarios ficticios
+          🤖 Generar 250 usuarios ficticios
         </button>
         <div id="resultado-generacion" style="margin-top:15px;"></div>
       </div>
@@ -217,9 +223,9 @@
 
     <!-- TAB: Excursiones -->
     <div id="tab-excursiones" class="tab-content">
-      <h3 class="section-title">Gestion de Excursiones</h3>
+      <h3 class="section-title">🚌 Gestión de Excursiones</h3>
       <div class="card">
-        <div class="card-header">Nueva Excursion</div>
+        <div class="card-header">Nueva Excursión</div>
         <div class="grid grid-2">
           <div class="form-group">
             <label>Fecha</label>
@@ -247,10 +253,10 @@
           </div>
           <div class="form-group" style="grid-column: span 2;">
             <label>Nombre de la van / conductor</label>
-            <input type="text" id="exc-van" class="form-control" placeholder="Van El Rapido">
+            <input type="text" id="exc-van" class="form-control" placeholder="Van El Rápido">
           </div>
         </div>
-        <button id="btn-add-excursion" class="btn btn-success">Publicar Excursion</button>
+        <button id="btn-add-excursion" class="btn btn-success">Publicar Excursión</button>
       </div>
       <div class="card">
         <div class="card-header">Excursiones Programadas</div>
@@ -260,7 +266,7 @@
 
     <!-- TAB: Videos -->
     <div id="tab-videos" class="tab-content">
-      <h3 class="section-title">Gestion de Videos</h3>
+      <h3 class="section-title">📹 Gestión de Videos</h3>
       <div class="card">
         <div class="card-header">Videos de Comerciantes</div>
         <div id="lista-videos"></div>
@@ -280,46 +286,57 @@
       </div>
     </div>
 
-    <!-- TAB: Guia del Chuy -->
+    <!-- TAB: Guía del Chuy -->
     <div id="tab-guia" class="tab-content">
-      <h3 class="section-title">Guia del Chuy (Contenido Premium)</h3>
+      <h3 class="section-title">🗺️ Guía del Chuy</h3>
       <div class="card">
-        <div class="card-header">Nuevo Articulo</div>
+        <div class="card-header">Nuevo Artículo</div>
         <input type="hidden" id="guia-edit-id" value="">
         <div class="grid grid-2">
           <div class="form-group">
-            <label>Titulo</label>
-            <input type="text" id="guia-titulo" class="form-control" placeholder="Ej: Como llegar a la Barra Brasileña">
+            <label>Título</label>
+            <input type="text" id="guia-titulo" class="form-control" placeholder="Ej: Cómo llegar a la Barra Brasileña">
           </div>
           <div class="form-group">
             <label>Tipo</label>
             <select id="guia-tipo" class="form-control">
-              <option value="ruta">Ruta</option>
-              <option value="lugar">Lugar de interes</option>
-              <option value="comercio">Comercio destacado</option>
-              <option value="tip">Consejo</option>
-              <option value="alerta">Alerta</option>
+              <option value="ruta">🗺️ Ruta</option>
+              <option value="lugar">📍 Lugar de interés</option>
+              <option value="comercio"> Comercio destacado</option>
+              <option value="tip">💡 Consejo</option>
+              <option value="alerta">️ Alerta</option>
             </select>
           </div>
           <div class="form-group" style="grid-column: span 2;">
             <label>Contenido</label>
-            <textarea id="guia-contenido" class="form-control" rows="5" placeholder="Descripcion detallada, indicaciones, etc."></textarea>
+            <textarea id="guia-contenido" class="form-control" rows="5" placeholder="Descripción detallada, indicaciones, etc."></textarea>
           </div>
           <div class="form-group">
             <label><input type="checkbox" id="guia-premium" style="margin-right:8px;"> Solo visible para Premium</label>
           </div>
         </div>
         <div style="display:flex; gap:10px; margin-top:10px;">
-          <button id="btn-add-guia" class="btn btn-success">Agregar Articulo</button>
-          <button id="btn-save-guia" class="btn btn-warning" style="display:none;">Guardar Cambios</button>
+          <button id="btn-add-guia" class="btn btn-success">➕ Agregar Artículo</button>
+          <button id="btn-save-guia" class="btn btn-warning" style="display:none;">💾 Guardar Cambios</button>
         </div>
       </div>
       <div class="card">
-        <div class="card-header">Articulos de la Guia</div>
+        <div class="card-header">Artículos de la Guía</div>
         <div id="lista-guia"></div>
       </div>
     </div>
 
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#0038A8; color:white; padding:20px; text-align:center; margin-top:30px;">
+    <div>
+      <a href="/pages/politica-privacidad.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📋 Política de Privacidad</a>
+      <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📄 Términos y Condiciones</a>
+    </div>
+    <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
+      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇾🇷
+    </div>
   </div>
 
   <script>
@@ -337,9 +354,9 @@
 
     const nombre = sessionStorage.getItem('userName');
     const role = sessionStorage.getItem('userRole');
-    document.getElementById('user-info').textContent = nombre + ' (' + role + ')';
+    document.getElementById('user-info').textContent = nombre + ' (admin)';
   </script>
 
   <script type="module" src="/js/admin.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d97ca63f695777',t:'MTc4NzE0NTk1NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2dba0bb0ef5203f',t:'MTc4NzE2ODQwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

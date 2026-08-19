@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comerciante - Precios Chuy</title>
+  <title>Mi Comercio - Precios Chuy</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <meta name="theme-color" content="#009C3B">
   <style>
     .com-nav { background: #009C3B; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -17,15 +16,24 @@
     .stats-banner { background: linear-gradient(90deg, #009C3B, #0038A8); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
     .stats-banner .num { font-size: 1.8rem; font-weight: bold; color: #FFDF00; }
     .suscripcion-box { background: linear-gradient(135deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #0038A8; }
-    .suscripcion-box h3 { color: #0038A8; margin: 0 0 10px 0; }
     .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
     .contador-fill { background: #0038A8; height: 100%; transition: width 0.3s; }
   </style>
+  <script>
+    // PROTECCION DE RUTA: Solo comerciantes pueden entrar
+    (function() {
+      const role = sessionStorage.getItem('userRole');
+      if (role !== 'comerciante') {
+        alert('Acceso denegado. Solo comerciantes pueden entrar a esta página.');
+        window.location.href = '/index.html';
+      }
+    })();
+  </script>
 </head>
 <body>
 
   <nav class="navbar">
-    <h1>Mi Comercio</h1>
+    <h1>🏪 Mi Comercio</h1>
     <div>
       <span class="user-info" id="user-info">Cargando...</span>
       <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
@@ -33,47 +41,32 @@
   </nav>
 
   <div class="com-nav">
-    <button class="active" onclick="showTab('perfil')"> Mi Perfil</button>
-    <button onclick="showTab('productos')">🛍️ Mis Productos</button>
+    <button class="active" onclick="showTab('perfil')">🏪 Mi Perfil</button>
+    <button onclick="showTab('productos')">️ Mis Productos</button>
     <button onclick="showTab('videos')">📹 Videos/Ofertas</button>
-    <button onclick="showTab('excursiones')">🚌 Excursiones</button>
     <button onclick="showTab('stats')">📊 Estadísticas</button>
   </div>
 
   <div class="container">
 
-    <!-- Banner contador de usuarios -->
-    <div class="stats-banner" id="stats-banner">
-      <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:30px;">
-        <div>
-          <div class="num" id="stat-total-users">0</div>
-          <div>Usuarios activos</div>
-        </div>
-        <div>
-          <div class="num" id="stat-productos">0</div>
-          <div>Productos</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Caja de suscripción -->
+    <!-- Banner de suscripción -->
     <div class="suscripcion-box" id="suscripcion-box">
-      <h3 id="sub-titulo"> Período de prueba activo</h3>
+      <h3 id="sub-titulo">🎉 Período de prueba activo</h3>
       <p id="sub-texto">Te quedan <strong id="sub-dias">--</strong> días gratis</p>
       <div class="contador-bar">
         <div class="contador-fill" id="sub-barra" style="width:100%"></div>
       </div>
       <p style="font-size:0.9rem;">Después: $5/mes — Sin contratos, sin deudas</p>
-      <button class="btn btn-primary" onclick="mostrarPago()" style="margin-top:10px;"> Ver opciones de pago</button>
+      <button class="btn btn-primary" onclick="mostrarPago()" style="margin-top:10px;">💳 Ver opciones de pago</button>
     </div>
 
     <!-- TAB: Perfil -->
     <div id="tab-perfil" class="tab-content active">
-      <h3 class="section-title"> Datos del Comercio</h3>
+      <h3 class="section-title">🏪 Datos del Comercio</h3>
       <div class="card">
         <div class="grid grid-2">
           <div class="form-group">
-            <label>Nombre</label>
+            <label>Nombre del comercio</label>
             <input type="text" id="perfil-nombre" class="form-control">
           </div>
           <div class="form-group">
@@ -85,6 +78,7 @@
               <option value="bebidas">Bebidas</option>
               <option value="ropa">Ropa</option>
               <option value="electronica">Electrónica</option>
+              <option value="panaderia">Panadería</option>
               <option value="otro">Otro</option>
             </select>
           </div>
@@ -97,36 +91,37 @@
             <input type="text" id="perfil-telefono" class="form-control" placeholder="+55...">
           </div>
           <div class="form-group">
-            <label>Logo (URL)</label>
-            <input type="text" id="perfil-logo" class="form-control">
+            <label>Logo (URL de imagen)</label>
+            <input type="text" id="perfil-logo" class="form-control" placeholder="https://...">
           </div>
           <div class="form-group">
             <label>Horarios</label>
             <input type="text" id="perfil-horarios" class="form-control" placeholder="Lun-Sáb 8-20hs">
           </div>
         </div>
-        
-        <div class="form-group" style="margin-top:20px;">
-          <label>📍 Ubicación en el mapa</label>
-          <p style="color:#666; font-size:0.9rem; margin-bottom:10px;">
-            Hacé click en el mapa para marcar la ubicación de tu comercio
-          </p>
-          <div id="mapa-perfil" style="height:300px; width:100%; border-radius:8px; border:2px solid #ddd;"></div>
-          <div style="display:flex; gap:10px; margin-top:10px;">
-            <input type="text" id="perfil-lat" class="form-control" placeholder="Latitud" readonly style="flex:1;">
-            <input type="text" id="perfil-lng" class="form-control" placeholder="Longitud" readonly style="flex:1;">
-          </div>
-        </div>
-        
         <button id="btn-save-perfil" class="btn btn-success">💾 Guardar Perfil</button>
+      </div>
+
+      <!-- Mapa para marcar ubicación -->
+      <div class="card">
+        <div class="card-header">📍 Ubicación en el mapa</div>
+        <p style="color:#666; font-size:0.9rem; margin-bottom:10px;">
+          Hacé click en el mapa para marcar la ubicación de tu comercio. Los clientes te encontrarán más fácil.
+        </p>
+        <div id="mapa-perfil" style="height:300px; width:100%; border-radius:8px; border:2px solid #ddd;"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <input type="text" id="perfil-lat" class="form-control" placeholder="Latitud" readonly style="flex:1;">
+          <input type="text" id="perfil-lng" class="form-control" placeholder="Longitud" readonly style="flex:1;">
+        </div>
+        <button id="btn-save-ubicacion" class="btn btn-primary" style="margin-top:10px;">📍 Guardar ubicación</button>
       </div>
     </div>
 
     <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">️ Mis Productos</h3>
+      <h3 class="section-title">🛍️ Mis Productos</h3>
       <div class="card">
-        <div class="card-header">Agregar Producto</div>
+        <div class="card-header"> Agregar Producto</div>
         <div class="grid grid-2">
           <div class="form-group">
             <label>Nombre</label>
@@ -137,21 +132,31 @@
             <input type="number" id="prod-precio" class="form-control" step="0.01">
           </div>
           <div class="form-group">
-            <label>Imagen (URL)</label>
-            <input type="text" id="prod-imagen" class="form-control">
+            <label>Precio Uruguay (referencia $)</label>
+            <input type="number" id="prod-precio-uy" class="form-control" step="0.01" placeholder="Opcional">
           </div>
           <div class="form-group">
-            <label>Es oferta</label>
+            <label>Imagen (URL)</label>
+            <input type="text" id="prod-imagen" class="form-control" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Es oferta especial</label>
             <select id="prod-es-oferta" class="form-control">
               <option value="false">No</option>
-              <option value="true">Sí</option>
+              <option value="true">Sí 🔥</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sección</label>
+            <select id="prod-seccion" class="form-control">
+              <option value="">-- Seleccionar --</option>
             </select>
           </div>
         </div>
-        <button id="btn-add-producto" class="btn btn-success">Agregar Producto</button>
+        <button id="btn-add-producto" class="btn btn-success">➕ Agregar Producto</button>
       </div>
       <div class="card">
-        <div class="card-header">Productos Cargados</div>
+        <div class="card-header">📦 Productos Cargados</div>
         <div id="lista-mis-productos"></div>
       </div>
     </div>
@@ -162,7 +167,7 @@
       <div class="card">
         <div class="card-header">Subir nueva oferta (1 por día, máx 90 seg)</div>
         <div class="form-group">
-          <label>Grabar video</label>
+          <label>Grabar video desde el celular</label>
           <input type="file" id="video-file" accept="video/*" capture="environment" class="form-control">
         </div>
         <div class="form-group">
@@ -180,37 +185,53 @@
         <button id="btn-upload-video" class="btn btn-success">📤 Publicar Oferta</button>
       </div>
       <div class="card">
-        <div class="card-header">Mis Ofertas Activas</div>
+        <div class="card-header"> Mis Ofertas Activas</div>
         <div id="lista-mis-videos"></div>
       </div>
     </div>
 
-    <!-- TAB: Excursiones -->
-    <div id="tab-excursiones" class="tab-content">
-      <h3 class="section-title">🚌 Próximas Excursiones</h3>
-      <p style="color:#666;margin-bottom:15px;">
-        Prepará ofertas especiales para los días de excursiones.
-      </p>
-      <div id="lista-excursiones-com"></div>
-    </div>
-
-    <!-- TAB: Stats -->
+    <!-- TAB: Estadísticas -->
     <div id="tab-stats" class="tab-content">
-      <h3 class="section-title">📊 Estadísticas</h3>
+      <h3 class="section-title"> Estadísticas</h3>
       <div class="card">
         <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">
           <div class="stat-card">
             <div class="number" id="stat-productos-com" style="font-size:2.5rem;font-weight:bold;color:#0038A8;">0</div>
-            <div class="label">Productos</div>
+            <div class="label">Productos cargados</div>
           </div>
           <div class="stat-card">
             <div class="number" id="stat-ofertas-com" style="font-size:2.5rem;font-weight:bold;color:#009C3B;">0</div>
             <div class="label">Ofertas activas</div>
           </div>
+          <div class="stat-card">
+            <div class="number" id="stat-vistas-com" style="font-size:2.5rem;font-weight:bold;color:#FF6B00;">0</div>
+            <div class="label">Vistas del perfil</div>
+          </div>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-header"> Consejos para vender más</div>
+        <ul style="padding-left:20px; color:#555; line-height:1.8;">
+          <li>Actualizá tus precios al menos una vez por semana</li>
+          <li>Publicá una oferta con video al menos cada 3 días</li>
+          <li>Respondé rápido a los mensajes de WhatsApp</li>
+          <li>Agregá fotos de buena calidad de tus productos</li>
+          <li>Ofrecé descuentos exclusivos para usuarios Premium</li>
+        </ul>
       </div>
     </div>
 
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#009C3B; color:white; padding:20px; text-align:center; margin-top:30px;">
+    <div>
+      <a href="/pages/politica-privacidad.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📋 Política de Privacidad</a>
+      <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📄 Términos y Condiciones</a>
+    </div>
+    <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
+      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇧🇷
+    </div>
   </div>
 
   <script>
@@ -226,11 +247,21 @@
       window.location.href = '/index.html';
     }
 
+    function mostrarPago() {
+      alert('Para renovar tu suscripción de comerciante:\n\n' +
+            ' WhatsApp: +598 95205598\n' +
+            '💳 PREX: 19793785\n' +
+            '🏦 Santander Pesos: 001206586016\n' +
+            '🏦 Santander USD: 005206747953\n\n' +
+            'Titular: Carlos Fontans');
+    }
+
     const nombre = sessionStorage.getItem('userName');
     document.getElementById('user-info').textContent = nombre || 'Comerciante';
   </script>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d252c7aa6890c1',t:'MTc4NzA3MDgzOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2dba4386bda1e98',t:'MTc4NzE2ODU0Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

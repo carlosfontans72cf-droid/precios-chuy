@@ -13,13 +13,24 @@
     .admin-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .reserva-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #009C3B; }
+    .reserva-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #009C3B; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
   </style>
+  <script>
+    // PROTECCION DE RUTA: Solo admin_excursion puede entrar
+    (function() {
+      const role = sessionStorage.getItem('userRole');
+      const aprobado = sessionStorage.getItem('userAprobado') === 'true';
+      if (role !== 'admin_excursion' || !aprobado) {
+        alert('Acceso denegado. Solo administradores de excursión aprobados pueden entrar.');
+        window.location.href = '/index.html';
+      }
+    })();
+  </script>
 </head>
 <body>
 
   <nav class="navbar">
-    <h1>Admin Excursión</h1>
+    <h1>🚌 Admin Excursión</h1>
     <div>
       <span class="user-info" id="user-info">Cargando...</span>
       <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
@@ -31,13 +42,14 @@
     <h2>Cuenta en revisión</h2>
     <p>Tu solicitud está siendo revisada por el administrador general.</p>
     <p>Te contactaremos pronto para activar tu cuenta.</p>
+    <button class="btn btn-primary" onclick="logout()">Volver al inicio</button>
   </div>
 
-  <div id="panel-activo" style="display:none;">
+  <div id="panel-activo">
     <div class="admin-nav">
       <button class="active" onclick="showTab('excursiones')">🚌 Mis Excursiones</button>
-      <button onclick="showTab('reservas')"> Reservas</button>
-      <button onclick="showTab('stats')">📊 Estadísticas</button>
+      <button onclick="showTab('reservas')">📋 Reservas</button>
+      <button onclick="showTab('stats')"> Estadísticas</button>
     </div>
 
     <div class="container">
@@ -47,7 +59,7 @@
         <h3 class="section-title">🚌 Gestionar Excursiones</h3>
         
         <div class="card">
-          <div class="card-header">Crear Nueva Excursión</div>
+          <div class="card-header"> Nueva Excursión</div>
           <div class="grid grid-2">
             <div class="form-group">
               <label>Fecha</label>
@@ -66,31 +78,31 @@
               <input type="time" id="exc-hora-retorno" class="form-control">
             </div>
             <div class="form-group">
-              <label>Precio del pasaje ($)</label>
+              <label>Precio por persona ($)</label>
               <input type="number" id="exc-precio" class="form-control" step="0.01">
             </div>
             <div class="form-group">
               <label>Seña por persona ($)</label>
-              <input type="number" id="exc-sena" class="form-control" step="0.01" placeholder="Ej: 200">
+              <input type="number" id="exc-sena" class="form-control" step="0.01" placeholder="Opcional">
             </div>
             <div class="form-group">
               <label>Lugares disponibles</label>
               <input type="number" id="exc-lugares" class="form-control" min="1">
             </div>
             <div class="form-group">
-              <label>Tu WhatsApp (para recibir seña)</label>
-              <input type="text" id="exc-whatsapp" class="form-control" placeholder="+598 99... o +55 53...">
+              <label>Tu WhatsApp (para recibir reservas)</label>
+              <input type="text" id="exc-whatsapp" class="form-control" placeholder="+598...">
             </div>
             <div class="form-group" style="grid-column: span 2;">
               <label>Descripción / Detalles</label>
-              <textarea id="exc-descripcion" class="form-control" rows="3" placeholder="Información adicional sobre la excursión"></textarea>
+              <textarea id="exc-descripcion" class="form-control" rows="3" placeholder="Info adicional sobre la excursión..."></textarea>
             </div>
           </div>
-          <button id="btn-add-excursion" class="btn btn-success">Publicar Excursión</button>
+          <button id="btn-add-excursion" class="btn btn-success">📤 Publicar Excursión</button>
         </div>
 
         <div class="card">
-          <div class="card-header">Mis Excursiones Publicadas</div>
+          <div class="card-header">📋 Mis Excursiones Publicadas</div>
           <div id="lista-excursiones"></div>
         </div>
       </div>
@@ -104,22 +116,45 @@
       <!-- TAB: Stats -->
       <div id="tab-stats" class="tab-content">
         <h3 class="section-title">📊 Estadísticas</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="number" id="stat-excursiones">0</div>
-            <div class="label">Excursiones activas</div>
+        <div class="card">
+          <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">
+            <div class="stat-card">
+              <div class="number" id="stat-excursiones" style="font-size:2.5rem;font-weight:bold;color:#0038A8;">0</div>
+              <div class="label">Excursiones activas</div>
+            </div>
+            <div class="stat-card">
+              <div class="number" id="stat-reservas" style="font-size:2.5rem;font-weight:bold;color:#009C3B;">0</div>
+              <div class="label">Reservas totales</div>
+            </div>
+            <div class="stat-card">
+              <div class="number" id="stat-personas" style="font-size:2.5rem;font-weight:bold;color:#FF6B00;">0</div>
+              <div class="label">Personas transportadas</div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="number" id="stat-reservas">0</div>
-            <div class="label">Reservas totales</div>
-          </div>
-          <div class="stat-card">
-            <div class="number" id="stat-personas">0</div>
-            <div class="label">Personas transportadas</div>
-          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">💰 Calculadora de ganancias</div>
+          <p style="color:#666; margin-bottom:10px;">Costo por persona reservada: <strong>$1 USD</strong></p>
+          <p style="font-size:1.2rem; color:#0038A8;">
+            Total a pagar al admin de Precios Chuy: <strong id="total-pagar">$0 USD</strong>
+          </p>
+          <p style="color:#666; font-size:0.9rem;">
+            Se cobra solo por reservas confirmadas. Sin reservas = sin costo.
+          </p>
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#009C3B; color:white; padding:20px; text-align:center; margin-top:30px;">
+    <div>
+      <a href="/pages/politica-privacidad.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📋 Política de Privacidad</a>
+      <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📄 Términos y Condiciones</a>
+    </div>
+    <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
+      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇧🇷
     </div>
   </div>
 
@@ -138,9 +173,9 @@
 
     const nombre = sessionStorage.getItem('userName');
     const role = sessionStorage.getItem('userRole');
-    document.getElementById('user-info').textContent = `${nombre} (${role})`;
+    document.getElementById('user-info').textContent = nombre + ' (' + role + ')';
   </script>
 
   <script type="module" src="/js/admin-excursion.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d2b03e6c8e8bc1',t:'MTc4NzA3NDY2Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2dbb40cef8417d3',t:'MTc4NzE2OTE5NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
