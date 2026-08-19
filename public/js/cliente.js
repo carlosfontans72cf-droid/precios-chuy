@@ -23,32 +23,33 @@ async function loadStats() {
     if (el2) el2.textContent = comsSnap.size;
     if (el3) el3.textContent = prodsSnap.size;
 
-    // VERIFICAR SI EL USUARIO ES PREMIUM - LEER DIRECTAMENTE DE FIRESTORE
+    // VERIFICAR SI EL USUARIO ES PREMIUM - LEER DIRECTAMENTE POR UID
     let esPremium = false;
     if (userId) {
       try {
-        // Importar doc y getDoc dinámicamente
-        const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-        const userDocRef = doc(db, 'users', userId);
-        const userDocSnap = await getDoc(userDocRef);
+        const { doc: docFn, getDoc: getDocFn } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const userDocRef = docFn(db, 'users', userId);
+        const userDocSnap = await getDocFn(userDocRef);
         
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          console.log('Datos del usuario:', userData);
-          console.log('Plan del usuario:', userData.plan);
+          console.log('Mi UID:', userId);
+          console.log('Datos de MI documento:', userData);
+          console.log('Plan de MI documento:', userData.plan);
           
           if (userData.plan === 'premium') {
             esPremium = true;
             sessionStorage.setItem('userPlan', 'premium');
-            console.log('✅ Usuario es PREMIUM');
+            console.log('✅ Mi cuenta es PREMIUM');
           } else {
             sessionStorage.setItem('userPlan', 'gratis');
-            console.log('Usuario es GRATIS');
+            console.log('Mi cuenta es GRATIS');
           }
+        } else {
+          console.error('⚠️ No existe documento en users para mi UID:', userId);
         }
       } catch (e) {
         console.error('Error leyendo plan:', e);
-        // Fallback a sessionStorage
         esPremium = sessionStorage.getItem('userPlan') === 'premium';
       }
     }
@@ -59,13 +60,11 @@ async function loadStats() {
     const ofertasExclusivas = document.getElementById('ofertas-exclusivas-premium');
 
     if (esPremium) {
-      // Es premium: mostrar banner activo, sección WhatsApp y ofertas exclusivas
       if (bannerPremium) bannerPremium.style.display = 'none';
       if (bannerActivo) bannerActivo.style.display = 'block';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'block';
       if (ofertasExclusivas) ofertasExclusivas.style.display = 'block';
     } else {
-      // No es premium: mostrar banner de upgrade
       if (bannerPremium) bannerPremium.style.display = 'block';
       if (bannerActivo) bannerActivo.style.display = 'none';
       if (seccionWhatsapp) seccionWhatsapp.style.display = 'none';
