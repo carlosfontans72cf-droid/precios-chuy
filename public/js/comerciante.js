@@ -71,8 +71,29 @@ async function loadSuscripcion() {
     const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
     if (!userDoc.empty) {
       const data = userDoc.docs[0].data();
-      diasRestantesGlobal = data.diasRestantes || 60;
       const totalDias = 60;
+      
+      // Calcular días restantes basados en la fecha de registro/suscripción
+      let diasRestantes = 60;
+      
+      if (data.fechaSuscripcion) {
+        // Si tiene fecha de suscripción, calcular días transcurridos
+        const fechaInicio = new Date(data.fechaSuscripcion);
+        const hoy = new Date();
+        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+        diasRestantes = Math.max(0, totalDias - diasTranscurridos);
+      } else if (data.createdAt) {
+        // Si no tiene fechaSuscripcion, usar createdAt como referencia
+        const fechaInicio = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+        const hoy = new Date();
+        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+        diasRestantes = Math.max(0, totalDias - diasTranscurridos);
+      } else {
+        // Si no hay ninguna fecha, guardar fecha actual como inicio
+        diasRestantes = 60;
+      }
+      
+      diasRestantesGlobal = diasRestantes;
       const porcentaje = Math.max(0, Math.min(100, (diasRestantesGlobal / totalDias) * 100));
 
       const titulo = document.getElementById('sub-titulo');
@@ -135,7 +156,20 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
   const file = fileInput.files[0];
   
   if (!file) return showAlert('Seleccioná una imagen primero', 'warning');
-  if (!comercioDocId) return showAlert('Primero guardá el perfil del comercio', 'warning');
+  
+  // Si no tenemos el ID aún, cargarlo primero
+  if (!comercioDocId) {
+    try {
+      const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
+      if (!userDoc.empty) {
+        comercioDocId = userDoc.docs[0].id;
+      } else {
+        return showAlert('No se encontró tu perfil. Guardá el perfil primero.', 'danger');
+      }
+    } catch (err) {
+      return showAlert('Error al buscar perfil. Guardá el perfil primero.', 'danger');
+    }
+  }
   
   const btn = document.getElementById('btn-subir-foto');
   btn.disabled = true;
@@ -143,6 +177,7 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
   
   try {
     const blobComprimido = await comprimirImagen(file, 800, 0.7);
+    btn.textContent = ' Subiendo...';
     showAlert('✅ Imagen comprimida, subiendo...', 'info');
     
     const ext = 'jpg';
@@ -157,9 +192,10 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
     container.innerHTML = `<img src="${fotoUrl}" class="foto-preview" alt="Foto del comercio">`;
     document.getElementById('perfil-logo').value = fotoUrl;
     
-    showAlert('✅ Foto actualizada', 'success');
+    showAlert('✅ Foto actualizada correctamente', 'success');
   } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
+    console.error('Error subiendo foto:', err);
+    showAlert(`Error al subir: ${err.message}`, 'danger');
   } finally {
     btn.disabled = false;
     btn.textContent = '📤 Subir foto';
