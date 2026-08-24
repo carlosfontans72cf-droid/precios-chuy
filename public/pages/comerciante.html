@@ -18,6 +18,9 @@
     .suscripcion-box { background: linear-gradient(135deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #0038A8; }
     .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
     .contador-fill { background: #0038A8; height: 100%; transition: width 0.3s; }
+    .foto-upload { display:flex; align-items:center; gap:20px; margin-bottom:20px; }
+    .foto-preview { width:120px; height:120px; border-radius:12px; object-fit:cover; border:3px solid #FFDF00; background:#f0f0f0; }
+    .foto-placeholder { width:120px; height:120px; border-radius:12px; background:linear-gradient(135deg, #009C3B, #0038A8); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem; border:3px solid #FFDF00; }
   </style>
   <script>
     // PROTECCION DE RUTA: Solo comerciantes pueden entrar
@@ -91,14 +94,48 @@
             <input type="text" id="perfil-telefono" class="form-control" placeholder="+55...">
           </div>
           <div class="form-group">
-            <label>Logo (URL de imagen)</label>
-            <input type="text" id="perfil-logo" class="form-control" placeholder="https://...">
+            <label>Foto/Logo del comercio</label>
+            <div class="foto-upload">
+              <div id="foto-container">
+                <div class="foto-placeholder">🏪</div>
+              </div>
+              <div>
+                <input type="file" id="foto-input" accept="image/*" style="margin-bottom:8px;">
+                <br>
+                <button class="btn btn-primary" id="btn-subir-foto" style="font-size:0.85rem;padding:8px 16px;">📤 Subir foto</button>
+              </div>
+            </div>
+            <input type="text" id="perfil-logo" class="form-control" placeholder="O pegá una URL de imagen..." style="margin-top:8px;">
           </div>
           <div class="form-group">
             <label>Horarios</label>
             <input type="text" id="perfil-horarios" class="form-control" placeholder="Lun-Sáb 8-20hs">
           </div>
         </div>
+
+        <!-- Cambio de moneda del comerciante -->
+        <h4 style="color:#009C3B;margin:20px 0 10px 0;">💱 Mi cambio de moneda (actualizado hoy)</h4>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:15px;">Publicá tu cambio actual para que los clientes lo vean. No todos cambian al mismo precio.</p>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>🇾 Compra USD (pesos uruguayos)</label>
+            <input type="number" id="cambio-usd-compra" class="form-control" step="0.01" placeholder="Ej: 42.50">
+          </div>
+          <div class="form-group">
+            <label>🇺🇾 Venta USD (pesos uruguayos)</label>
+            <input type="number" id="cambio-usd-venta" class="form-control" step="0.01" placeholder="Ej: 44.00">
+          </div>
+          <div class="form-group">
+            <label>🇧🇷 Compra Real (pesos uruguayos)</label>
+            <input type="number" id="cambio-brl-compra" class="form-control" step="0.01" placeholder="Ej: 7.80">
+          </div>
+          <div class="form-group">
+            <label>🇧🇷 Venta Real (pesos uruguayos)</label>
+            <input type="number" id="cambio-brl-venta" class="form-control" step="0.01" placeholder="Ej: 8.20">
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:#888;">Última actualización: <span id="cambio-fecha">--</span></p>
+
         <button id="btn-save-perfil" class="btn btn-success">💾 Guardar Perfil</button>
       </div>
 
@@ -263,5 +300,5 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2dba4386bda1e98',t:'MTc4NzE2ODU0Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a30178c1fd2dccba',t:'MTc4NzU2NTIyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

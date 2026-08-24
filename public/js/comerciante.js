@@ -13,6 +13,41 @@ if (!userId) window.location.href = '/index.html';
 // Hacer disponible globalmente
 window.mostrarPago = () => mostrarPagoComerciante(diasRestantesGlobal, userId);
 let diasRestantesGlobal = 60;
+let comercioDocId = '';
+
+// ========== COMPRIMIR IMAGEN ==========
+function comprimirImagen(file, maxWidth = 800, calidad = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Error al comprimir'));
+        }, 'image/jpeg', calidad);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 // ========== ESTADÍSTICAS GENERALES (contador público) ==========
 async function loadStatsGenerales() {
@@ -94,6 +129,43 @@ function initMapaPerfil() {
   });
 }
 
+// ========== SUBIR FOTO DE PERFIL ==========
+document.getElementById('btn-subir-foto')?.addEventListener('click', async () => {
+  const fileInput = document.getElementById('foto-input');
+  const file = fileInput.files[0];
+  
+  if (!file) return showAlert('Seleccioná una imagen primero', 'warning');
+  if (!comercioDocId) return showAlert('Primero guardá el perfil del comercio', 'warning');
+  
+  const btn = document.getElementById('btn-subir-foto');
+  btn.disabled = true;
+  btn.textContent = '⏳ Comprimiendo...';
+  
+  try {
+    const blobComprimido = await comprimirImagen(file, 800, 0.7);
+    showAlert('✅ Imagen comprimida, subiendo...', 'info');
+    
+    const ext = 'jpg';
+    const fileName = `comercios/${comercioDocId}/foto.${ext}`;
+    const storageRef = ref(storage, fileName);
+    const snapshot = await uploadBytes(storageRef, blobComprimido);
+    const fotoUrl = await getDownloadURL(snapshot.ref);
+    
+    await updateDoc(doc(db, 'users', comercioDocId), { logo: fotoUrl });
+    
+    const container = document.getElementById('foto-container');
+    container.innerHTML = `<img src="${fotoUrl}" class="foto-preview" alt="Foto del comercio">`;
+    document.getElementById('perfil-logo').value = fotoUrl;
+    
+    showAlert('✅ Foto actualizada', 'success');
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📤 Subir foto';
+  }
+});
+
 // ========== PERFIL ==========
 document.getElementById('btn-save-perfil')?.addEventListener('click', savePerfil);
 async function savePerfil() {
@@ -107,7 +179,7 @@ async function savePerfil() {
     // Buscar el documento del usuario por email
     const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
     if (!userDoc.empty) {
-      const docId = userDoc.docs[0].id;
+      comercioDocId = userDoc.docs[0].id;
       const dataToUpdate = {
         nombreComercio: nombre,
         tipo: document.getElementById('perfil-tipo').value,
@@ -115,6 +187,12 @@ async function savePerfil() {
         telefono: document.getElementById('perfil-telefono').value.trim(),
         logo: document.getElementById('perfil-logo').value.trim(),
         horarios: document.getElementById('perfil-horarios').value.trim(),
+        // Cambio de moneda
+        cambioUsdCompra: parseFloat(document.getElementById('cambio-usd-compra').value) || null,
+        cambioUsdVenta: parseFloat(document.getElementById('cambio-usd-venta').value) || null,
+        cambioBrlCompra: parseFloat(document.getElementById('cambio-brl-compra').value) || null,
+        cambioBrlVenta: parseFloat(document.getElementById('cambio-brl-venta').value) || null,
+        cambioFecha: new Date().toISOString(),
         updatedAt: serverTimestamp()
       };
       
@@ -124,7 +202,11 @@ async function savePerfil() {
         dataToUpdate.lng = lng;
       }
       
-      await updateDoc(doc(db, 'users', docId), dataToUpdate);
+      await updateDoc(doc(db, 'users', comercioDocId), dataToUpdate);
+      
+      // Actualizar fecha de cambio
+      document.getElementById('cambio-fecha').textContent = new Date().toLocaleString('es-UY');
+      
       showAlert('Perfil actualizado', 'success');
     }
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
@@ -295,7 +377,51 @@ async function loadExcursionesComerciante() {
   } catch (err) { console.error('Error excursiones:', err); }
 }
 
+// ========== CARGAR PERFIL EXISTENTE ==========
+async function loadPerfilExistente() {
+  try {
+    const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
+    if (!userDoc.empty) {
+      const docId = userDoc.docs[0].id;
+      comercioDocId = docId;
+      const data = userDoc.docs[0].data();
+      
+      // Cargar campos del perfil
+      if (data.nombreComercio) document.getElementById('perfil-nombre').value = data.nombreComercio;
+      if (data.tipo) document.getElementById('perfil-tipo').value = data.tipo;
+      if (data.direccion) document.getElementById('perfil-direccion').value = data.direccion;
+      if (data.telefono) document.getElementById('perfil-telefono').value = data.telefono;
+      if (data.logo) document.getElementById('perfil-logo').value = data.logo;
+      if (data.horarios) document.getElementById('perfil-horarios').value = data.horarios;
+      
+      // Cargar foto si existe
+      if (data.logo) {
+        const container = document.getElementById('foto-container');
+        container.innerHTML = `<img src="${data.logo}" class="foto-preview" alt="Foto del comercio">`;
+      }
+      
+      // Cargar coordenadas
+      if (data.lat && data.lng) {
+        document.getElementById('perfil-lat').value = data.lat;
+        document.getElementById('perfil-lng').value = data.lng;
+        if (mapaPerfil) {
+          const nuevoMarker = L.marker([data.lat, data.lng]).addTo(mapaPerfil);
+          nuevoMarker.bindPopup('📍 Tu comercio').openPopup();
+        }
+      }
+      
+      // Cargar cambio de moneda
+      if (data.cambioUsdCompra) document.getElementById('cambio-usd-compra').value = data.cambioUsdCompra;
+      if (data.cambioUsdVenta) document.getElementById('cambio-usd-venta').value = data.cambioUsdVenta;
+      if (data.cambioBrlCompra) document.getElementById('cambio-brl-compra').value = data.cambioBrlCompra;
+      if (data.cambioBrlVenta) document.getElementById('cambio-brl-venta').value = data.cambioBrlVenta;
+      if (data.cambioFecha) document.getElementById('cambio-fecha').textContent = new Date(data.cambioFecha).toLocaleString('es-UY');
+    }
+  } catch (err) { console.error('Error cargando perfil:', err); }
+}
+
 // ========== INICIALIZACIÓN ==========
+loadPerfilExistente();
 loadStatsGenerales();
 loadSuscripcion();
 loadProductos();
