@@ -73,12 +73,13 @@ btnLogin.addEventListener('click', async () => {
 
     // Verificar si está aprobado (para admin_excursion)
     if (userData.role === 'admin_excursion' && !userData.aprobado) {
-      errorDiv.textContent = 'Tu cuenta está pendiente de aprobación';
+      errorDiv.textContent = 'Tu cuenta está pendiente de aprobación por el administrador';
       await auth.signOut();
       throw new Error('Cuenta pendiente');
     }
 
-    // Guardar sesión
+    // Guardar sesión (limpiar primero por si había datos viejos)
+    sessionStorage.clear();
     sessionStorage.setItem('userId', userId);
     sessionStorage.setItem('userEmail', userData.email);
     sessionStorage.setItem('userName', userData.nombre);
@@ -113,9 +114,9 @@ btnLogin.addEventListener('click', async () => {
   }
 });
 
-// Verificar sesión activa al cargar
+// Verificar sesión activa al cargar - SOLO en página de login
 auth.onAuthStateChanged((user) => {
-  if (user) {
+  if (user && window.location.pathname.includes('login')) {
     const role = sessionStorage.getItem('userRole');
     if (role === 'admin') window.location.href = '/pages/admin.html';
     else if (role === 'comerciante') window.location.href = '/pages/comerciante.html';
