@@ -236,14 +236,14 @@ async function loadMapa() {
 function crearPopupComercio(comercio) {
   const icono = obtenerIcono(comercio.tipo);
   return `
-    <div style="min-width:200px;cursor:pointer;" onclick="irAPerfilComercio('${comercio.id}')">
-      ${comercio.logo ? `<img src="${comercio.logo}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;border:2px solid #FFDF00;" onerror="this.style.display='none'">` : ''}
-      <h3 style="margin:0 0 10px 0;color:#0038A8;">${icono} ${comercio.nombre}</h3>
+    <div style="min-width:200px;" data-comercio-id="${comercio.id}" class="popup-comercio">
+      ${comercio.logo ? `<img src="${comercio.logo}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:10px;border:2px solid #FFDF00;cursor:pointer;" onerror="this.style.display='none'">` : ''}
+      <h3 style="margin:0 0 10px 0;color:#0038A8;cursor:pointer;" class="popup-comercio-nombre">${icono} ${comercio.nombre}</h3>
       <p style="margin:5px 0;"><strong>Tipo:</strong> ${comercio.tipo}</p>
       <p style="margin:5px 0;"><strong>📍</strong> ${comercio.direccion || 'No disponible'}</p>
-      <p style="margin:5px 0;"><strong></strong> ${comercio.telefono || 'No disponible'}</p>
-      <p style="margin:5px 0;"><strong></strong> ${comercio.horarios || 'No disponible'}</p>
-      <p style="margin:10px 0 0 0;color:#009C3B;font-weight:bold;font-size:0.9rem;">👆 Click para ver perfil completo</p>
+      <p style="margin:5px 0;"><strong>📱</strong> ${comercio.telefono || 'No disponible'}</p>
+      <p style="margin:5px 0;"><strong>⏰</strong> ${comercio.horarios || 'No disponible'}</p>
+      <p style="margin:10px 0 0 0;color:#009C3B;font-weight:bold;font-size:0.9rem;cursor:pointer;" class="popup-comercio-ver">👆 Click para ver perfil completo</p>
     </div>
   `;
 }
@@ -545,6 +545,17 @@ window.mostrarSoporteVIP = () => {
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 };
+// Delegación de eventos para popups del mapa (click en nombre del comercio)
+document.addEventListener('click', function(e) {
+  const popupCard = e.target.closest('.popup-comercio');
+  if (popupCard) {
+    const comercioId = popupCard.getAttribute('data-comercio-id');
+    if (comercioId) {
+      sessionStorage.setItem('perfilComercioId', comercioId);
+      window.location.href = '/pages/perfil-comercio.html';
+    }
+  }
+});
 
 // ========== INICIALIZACIÓN ==========
 loadStats();
