@@ -17,7 +17,6 @@
     .contador-fill { background: #009C3B; height: 100%; transition: width 0.3s; }
   </style>
   <script>
-    // PROTECCION DE RUTA: Solo admin puede entrar
     (function() {
       const role = sessionStorage.getItem('userRole');
       if (role !== 'admin') {
@@ -39,14 +38,15 @@
 
   <div class="admin-nav">
     <button class="active" onclick="showTab('secciones')">📂 Secciones</button>
-    <button onclick="showTab('productos')"> Productos</button>
+    <button onclick="showTab('productos')">📦 Productos</button>
     <button onclick="showTab('comercios')">🏪 Comercios</button>
     <button onclick="showTab('pagos')">💳 Pagos</button>
-    <button onclick="showTab('usuarios')">👥 Usuarios</button>
-    <button onclick="showTab('excursiones')"> Excursiones</button>
+    <button onclick="showTab('usuarios')"> Usuarios</button>
+    <button onclick="showTab('excursiones')">🚌 Excursiones</button>
     <button onclick="showTab('aprobaciones')">✅ Aprobaciones</button>
-    <button onclick="showTab('videos')">📹 Videos</button>
-    <button onclick="showTab('guia')">️ Guía Chuy</button>
+    <button onclick="showTab('videos')"> Videos</button>
+    <button onclick="showTab('guia')">🗺️ Guía Chuy</button>
+    <button onclick="showTab('avisos')">📰 Avisos</button>
     <button id="btn-logout" class="btn btn-danger">Cerrar Sesión</button>
   </div>
 
@@ -108,14 +108,12 @@
         </div>
         <button id="btn-add-producto" class="btn btn-success">Agregar Producto</button>
       </div>
-
       <div class="card">
         <div class="card-header">Subir productos desde Excel</div>
         <p style="margin-bottom:10px;color:#666;">Formato: nombre, seccion, precio_uy, precio_br, comercio</p>
         <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" class="form-control">
         <button id="btn-upload-excel" class="btn btn-warning" style="margin-top:10px;">📊 Subir Excel</button>
       </div>
-
       <div class="card">
         <div class="card-header">Productos Cargados</div>
         <div style="overflow-x:auto;">
@@ -185,15 +183,10 @@
     <!-- TAB: Pagos -->
     <div id="tab-pagos" class="tab-content">
       <h3 class="section-title">💳 Gestión de Pagos</h3>
-      
-      <!-- Buscador de usuarios -->
       <div id="buscador-usuarios-container"></div>
-
       <div class="card">
         <div class="card-header">Comerciantes con suscripción</div>
-        <p style="margin-bottom:15px;color:#666;">
-          Gestión de pagos de comerciantes. Podés extender, habilitar o suspender.
-        </p>
+        <p style="margin-bottom:15px;color:#666;">Gestión de pagos de comerciantes. Podés extender, habilitar o suspender.</p>
         <div id="lista-pagos-comerciantes"></div>
       </div>
       <div class="card">
@@ -205,15 +198,10 @@
     <!-- TAB: Usuarios -->
     <div id="tab-usuarios" class="tab-content">
       <h3 class="section-title">👥 Gestión de Usuarios</h3>
-      
       <div class="card">
         <div class="card-header">Generar usuarios ficticios</div>
-        <p style="margin-bottom:15px;color:#666;">
-          Crea 250 usuarios de prueba (200 clientes + 50 comercios).
-        </p>
-        <button id="btn-generar-usuarios" class="btn btn-warning">
-          🤖 Generar 250 usuarios ficticios
-        </button>
+        <p style="margin-bottom:15px;color:#666;">Crea 250 usuarios de prueba (200 clientes + 50 comercios).</p>
+        <button id="btn-generar-usuarios" class="btn btn-warning">🤖 Generar 250 usuarios ficticios</button>
         <div id="resultado-generacion" style="margin-top:15px;"></div>
       </div>
       <div class="card">
@@ -279,10 +267,7 @@
       <h3 class="section-title">✅ Aprobaciones Pendientes</h3>
       <div class="card">
         <div class="card-header">Admins de Excursión</div>
-        <p style="margin-bottom:15px; color:#666;">
-          Usuarios que solicitan ser administradores de excursiones.
-          Revisá y aprobá para que puedan crear excursiones.
-        </p>
+        <p style="margin-bottom:15px; color:#666;">Usuarios que solicitan ser administradores de excursiones.</p>
         <div id="lista-aprobaciones"></div>
       </div>
     </div>
@@ -301,16 +286,16 @@
           <div class="form-group">
             <label>Tipo</label>
             <select id="guia-tipo" class="form-control">
-              <option value="ruta">🗺️ Ruta</option>
+              <option value="ruta">️ Ruta</option>
               <option value="lugar">📍 Lugar de interés</option>
               <option value="comercio"> Comercio destacado</option>
               <option value="tip">💡 Consejo</option>
-              <option value="alerta">️ Alerta</option>
+              <option value="alerta">⚠️ Alerta</option>
             </select>
           </div>
           <div class="form-group" style="grid-column: span 2;">
             <label>Contenido</label>
-            <textarea id="guia-contenido" class="form-control" rows="5" placeholder="Descripción detallada, indicaciones, etc."></textarea>
+            <textarea id="guia-contenido" class="form-control" rows="5" placeholder="Descripción detallada..."></textarea>
           </div>
           <div class="form-group">
             <label><input type="checkbox" id="guia-premium" style="margin-right:8px;"> Solo visible para Premium</label>
@@ -327,6 +312,54 @@
       </div>
     </div>
 
+    <!-- TAB: Avisos/Noticias -->
+    <div id="tab-avisos" class="tab-content">
+      <h3 class="section-title"> Avisos y Noticias</h3>
+      <div class="card">
+        <div class="card-header">Nuevo Aviso</div>
+        <input type="hidden" id="aviso-edit-id" value="">
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" id="aviso-titulo" class="form-control" placeholder="Ej: 🎉 Nueva app disponible">
+        </div>
+        <div class="form-group">
+          <label>Contenido</label>
+          <textarea id="aviso-contenido" class="form-control" rows="4" placeholder="Escribí el contenido del aviso..."></textarea>
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label>Imagen (URL) - opcional</label>
+            <input type="text" id="aviso-imagen" class="form-control" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Link - opcional</label>
+            <input type="text" id="aviso-link" class="form-control" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Texto del botón</label>
+            <input type="text" id="aviso-link-texto" class="form-control" placeholder="Ej: Ver más, Contactar...">
+          </div>
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select id="aviso-prioridad" class="form-control">
+              <option value="alta">🔴 Alta (aparece primero)</option>
+              <option value="media">🟡 Media</option>
+              <option value="baja">🟢 Baja</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button id="btn-add-aviso" class="btn btn-success"> Publicar Aviso</button>
+          <button id="btn-save-aviso" class="btn btn-warning" style="display:none;">💾 Guardar Cambios</button>
+          <button id="btn-cancelar-aviso" class="btn" style="background:#ddd;display:none;">Cancelar edición</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Avisos Publicados</div>
+        <div id="lista-avisos"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Footer -->
@@ -336,7 +369,7 @@
       <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📄 Términos y Condiciones</a>
     </div>
     <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
-      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇾🇷
+      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇧🇷
     </div>
   </div>
 
@@ -347,17 +380,12 @@
       document.getElementById('tab-' + tabName).classList.add('active');
       event.target.classList.add('active');
     }
-
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = '/index.html';
-    }
-
+    function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
     const nombre = sessionStorage.getItem('userName');
     const role = sessionStorage.getItem('userRole');
     document.getElementById('user-info').textContent = nombre + ' (admin)';
   </script>
 
   <script type="module" src="/js/admin.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2dba0bb0ef5203f',t:'MTc4NzE2ODQwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

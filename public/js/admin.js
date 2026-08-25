@@ -838,6 +838,301 @@ window.borrarGuia = async (id) => {
     loadGuia();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
+// ========== AVISOS / NOTICIAS ==========
+document.getElementById('btn-add-aviso')?.addEventListener('click', () => {
+  const titulo = document.getElementById('aviso-titulo').value.trim();
+  const contenido = document.getElementById('aviso-contenido').value.trim();
+  const imagen = document.getElementById('aviso-imagen').value.trim() || null;
+  const link = document.getElementById('aviso-link').value.trim() || null;
+  const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
+  const prioridad = document.getElementById('aviso-prioridad').value;
+
+  if (!titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
+
+  addDoc(collection(db, 'avisos'), {
+    titulo, contenido, imagen, link, linkTexto, prioridad,
+    activo: true,
+    creadoPor: 'admin',
+    createdAt: serverTimestamp()
+  }).then(() => {
+    document.getElementById('aviso-titulo').value = '';
+    document.getElementById('aviso-contenido').value = '';
+    document.getElementById('aviso-imagen').value = '';
+    document.getElementById('aviso-link').value = '';
+    document.getElementById('aviso-link-texto').value = '';
+    document.getElementById('aviso-prioridad').value = 'media';
+    showAlert('✅ Aviso publicado', 'success');
+    loadAvisos();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+async function loadAvisos() {
+  const cont = document.getElementById('lista-avisos');
+  if (!cont) return;
+  cont.innerHTML = '<p>Cargando...</p>';
+
+  try {
+    const snap = await getDocs(collection(db, 'avisos'));
+    const avisos = [];
+    snap.forEach(d => avisos.push({ id: d.id, ...d.data() }));
+    avisos.sort((a, b) => {
+      const orden = { alta: 0, media: 1, baja: 2 };
+      return (orden[a.prioridad] || 1) - (orden[b.prioridad] || 1);
+    });
+
+    if (avisos.length === 0) {
+      cont.innerHTML = '<p style="color:#666;">No hay avisos publicados</p>';
+      return;
+    }
+
+    cont.innerHTML = '';
+    avisos.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '10px';
+      const colorPrioridad = a.prioridad === 'alta' ? '#EF3340' : a.prioridad === 'media' ? '#FFC107' : '#009C3B';
+      const iconoPrioridad = a.prioridad === 'alta' ? '' : a.prioridad === 'media' ? '🟡' : '🟢';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:250px;">
+            <h4 style="margin:0 0 5px 0;">${iconoPrioridad} ${a.titulo}</h4>
+            <p style="margin:5px 0; color:#666; white-space:pre-wrap;">${(a.contenido || '').substring(0, 120)}${(a.contenido || '').length > 120 ? '...' : ''}</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <span style="background:${colorPrioridad}; color:white; padding:2px 8px; border-radius:4px; font-size:0.75rem;">${a.prioridad}</span>
+              ${a.activo ? '<span style="color:#009C3B; font-size:0.8rem;">✅ Activo</span>' : '<span style="color:#EF3340; font-size:0.8rem;">️ Inactivo</span>'}
+              ${a.link ? `<a href="${a.link}" target="_blank" style="font-size:0.8rem; color:#0038A8;">🔗 ${a.linkTexto || 'Ver link'}</a>` : ''}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <button class="btn btn-sm btn-warning" onclick="window.editarAviso('${a.id}')">✏️ Editar</button>
+            <button class="btn btn-sm ${a.activo ? 'btn-danger' : 'btn-success'}" onclick="window.toggleAviso('${a.id}', ${a.activo})">
+              ${a.activo ? '⏸️ Desactivar' : '▶️ Activar'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="window.borrarAviso('${a.id}')">🗑 Borrar</button>
+          </div>
+        </div>
+        ${a.imagen ? `<img src="${a.imagen}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px;" onerror="this.style.display='none'">` : ''}
+      `;
+      cont.appendChild(div);
+    });
+  } catch (err) {
+    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+  }
+}
+
+window.editarAviso = async (id) => {
+  try {
+    const avisoDoc = await getDoc(doc(db, 'avisos', id));
+    if (!avisoDoc.exists()) return showAlert('Aviso no encontrado', 'danger');
+    const data = avisoDoc.data();
+    document.getElementById('aviso-titulo').value = data.titulo || '';
+    document.getElementById('aviso-contenido').value = data.contenido || '';
+    document.getElementById('aviso-imagen').value = data.imagen || '';
+    document.getElementById('aviso-link').value = data.link || '';
+    document.getElementById('aviso-link-texto').value = data.linkTexto || '';
+    document.getElementById('aviso-prioridad').value = data.prioridad || 'media';
+    document.getElementById('aviso-edit-id').value = id;
+    document.getElementById('btn-add-aviso').style.display = 'none';
+    document.getElementById('btn-save-aviso').style.display = 'inline-block';
+    document.getElementById('btn-cancelar-aviso').style.display = 'inline-block';
+    document.getElementById('tab-avisos').scrollIntoView({ behavior: 'smooth' });
+    showAlert('Editando aviso. Modificá y guardá.', 'info');
+  } catch (err) {
+    showAlert(`Error: ${err.message}`, 'danger');
+  }
+};
+
+document.getElementById('btn-save-aviso')?.addEventListener('click', () => {
+  const id = document.getElementById('aviso-edit-id').value;
+  const titulo = document.getElementById('aviso-titulo').value.trim();
+  const contenido = document.getElementById('aviso-contenido').value.trim();
+  const imagen = document.getElementById('aviso-imagen').value.trim() || null;
+  const link = document.getElementById('aviso-link').value.trim() || null;
+  const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
+  const prioridad = document.getElementById('aviso-prioridad').value;
+
+  if (!id || !titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
+
+  updateDoc(doc(db, 'avisos', id), {
+    titulo, contenido, imagen, link, linkTexto, prioridad
+  }).then(() => {
+    document.getElementById('aviso-titulo').value = '';
+    document.getElementById('aviso-contenido').value = '';
+    document.getElementById('aviso-imagen').value = '';
+    document.getElementById('aviso-link').value = '';
+    document.getElementById('aviso-link-texto').value = '';
+    document.getElementById('aviso-prioridad').value = 'media';
+    document.getElementById('aviso-edit-id').value = '';
+    document.getElementById('btn-add-aviso').style.display = 'inline-block';
+    document.getElementById('btn-save-aviso').style.display = 'none';
+    document.getElementById('btn-cancelar-aviso').style.display = 'none';
+    showAlert('✅ Aviso actualizado', 'success');
+    loadAvisos();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+document.getElementById('btn-cancelar-aviso')?.addEventListener('click', () => {
+  document.getElementById('aviso-titulo').value = '';
+  document.getElementById('aviso-contenido').value = '';
+  document.getElementById('aviso-imagen').value = '';
+  document.getElementById('aviso-link').value = '';
+  document.getElementById('aviso-link-texto').value = '';
+  document.getElementById('aviso-prioridad').value = 'media';
+  document.getElementById('aviso-edit-id').value = '';
+  document.getElementById('btn-add-aviso').style.display = 'inline-block';
+  document.getElementById('btn-save-aviso').style.display = 'none';
+  document.getElementById('btn-cancelar-aviso').style.display = 'none';
+});
+
+window.toggleAviso = async (id, activo) => {
+  try {
+    await updateDoc(doc(db, 'avisos', id), { activo: !activo });
+    showAlert(activo ? 'Aviso desactivado' : 'Aviso activado', 'success');
+    loadAvisos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.borrarAviso = async (id) => {
+  if (!confirm('¿Borrar este aviso?')) return;
+  try {
+    await deleteDoc(doc(db, 'avisos', id));
+    showAlert('Aviso borrado', 'danger');
+    loadAvisos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+// ========== AVISOS / NOTICIAS ==========
+document.getElementById('btn-add-aviso')?.addEventListener('click', () => {
+  const titulo = document.getElementById('aviso-titulo').value.trim();
+  const contenido = document.getElementById('aviso-contenido').value.trim();
+  const imagen = document.getElementById('aviso-imagen').value.trim() || null;
+  const link = document.getElementById('aviso-link').value.trim() || null;
+  const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
+  const prioridad = document.getElementById('aviso-prioridad').value;
+  if (!titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
+  addDoc(collection(db, 'avisos'), {
+    titulo, contenido, imagen, link, linkTexto, prioridad,
+    activo: true, creadoPor: 'admin', createdAt: serverTimestamp()
+  }).then(() => {
+    document.getElementById('aviso-titulo').value = '';
+    document.getElementById('aviso-contenido').value = '';
+    document.getElementById('aviso-imagen').value = '';
+    document.getElementById('aviso-link').value = '';
+    document.getElementById('aviso-link-texto').value = '';
+    document.getElementById('aviso-prioridad').value = 'media';
+    showAlert('✅ Aviso publicado', 'success');
+    loadAvisos();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+async function loadAvisos() {
+  const cont = document.getElementById('lista-avisos');
+  if (!cont) return;
+  cont.innerHTML = '<p>Cargando...</p>';
+  try {
+    const snap = await getDocs(collection(db, 'avisos'));
+    const avisos = [];
+    snap.forEach(d => avisos.push({ id: d.id, ...d.data() }));
+    avisos.sort((a, b) => ({ alta: 0, media: 1, baja: 2 }[a.prioridad] || 1) - ({ alta: 0, media: 1, baja: 2 }[b.prioridad] || 1));
+    if (avisos.length === 0) { cont.innerHTML = '<p style="color:#666;">No hay avisos publicados</p>'; return; }
+    cont.innerHTML = '';
+    avisos.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '10px';
+      const colorP = a.prioridad === 'alta' ? '#EF3340' : a.prioridad === 'media' ? '#FFC107' : '#009C3B';
+      const iconoP = a.prioridad === 'alta' ? '🔴' : a.prioridad === 'media' ? '🟡' : '🟢';
+      div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:250px;">
+          <h4 style="margin:0 0 5px 0;">${iconoP} ${a.titulo}</h4>
+          <p style="margin:5px 0; color:#666; white-space:pre-wrap;">${(a.contenido || '').substring(0, 120)}${(a.contenido || '').length > 120 ? '...' : ''}</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <span style="background:${colorP}; color:white; padding:2px 8px; border-radius:4px; font-size:0.75rem;">${a.prioridad}</span>
+            ${a.activo ? '<span style="color:#009C3B; font-size:0.8rem;">✅ Activo</span>' : '<span style="color:#EF3340; font-size:0.8rem;">⏸️ Inactivo</span>'}
+            ${a.link ? `<a href="${a.link}" target="_blank" style="font-size:0.8rem; color:#0038A8;">🔗 ${a.linkTexto || 'Ver link'}</a>` : ''}
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <button class="btn btn-sm btn-warning" onclick="window.editarAviso('${a.id}')">✏️ Editar</button>
+          <button class="btn btn-sm ${a.activo ? 'btn-danger' : 'btn-success'}" onclick="window.toggleAviso('${a.id}', ${a.activo})">${a.activo ? '⏸️ Desactivar' : '▶️ Activar'}</button>
+          <button class="btn btn-sm btn-danger" onclick="window.borrarAviso('${a.id}')"> Borrar</button>
+        </div>
+      </div>
+      ${a.imagen ? `<img src="${a.imagen}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px;" onerror="this.style.display='none'">` : ''}`;
+      cont.appendChild(div);
+    });
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+}
+
+window.editarAviso = async (id) => {
+  try {
+    const avisoDoc = await getDoc(doc(db, 'avisos', id));
+    if (!avisoDoc.exists()) return showAlert('Aviso no encontrado', 'danger');
+    const data = avisoDoc.data();
+    document.getElementById('aviso-titulo').value = data.titulo || '';
+    document.getElementById('aviso-contenido').value = data.contenido || '';
+    document.getElementById('aviso-imagen').value = data.imagen || '';
+    document.getElementById('aviso-link').value = data.link || '';
+    document.getElementById('aviso-link-texto').value = data.linkTexto || '';
+    document.getElementById('aviso-prioridad').value = data.prioridad || 'media';
+    document.getElementById('aviso-edit-id').value = id;
+    document.getElementById('btn-add-aviso').style.display = 'none';
+    document.getElementById('btn-save-aviso').style.display = 'inline-block';
+    document.getElementById('btn-cancelar-aviso').style.display = 'inline-block';
+    showAlert('Editando aviso. Modificá y guardá.', 'info');
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+document.getElementById('btn-save-aviso')?.addEventListener('click', () => {
+  const id = document.getElementById('aviso-edit-id').value;
+  const titulo = document.getElementById('aviso-titulo').value.trim();
+  const contenido = document.getElementById('aviso-contenido').value.trim();
+  const imagen = document.getElementById('aviso-imagen').value.trim() || null;
+  const link = document.getElementById('aviso-link').value.trim() || null;
+  const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
+  const prioridad = document.getElementById('aviso-prioridad').value;
+  if (!id || !titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
+  updateDoc(doc(db, 'avisos', id), { titulo, contenido, imagen, link, linkTexto, prioridad }).then(() => {
+    document.getElementById('aviso-titulo').value = '';
+    document.getElementById('aviso-contenido').value = '';
+    document.getElementById('aviso-imagen').value = '';
+    document.getElementById('aviso-link').value = '';
+    document.getElementById('aviso-link-texto').value = '';
+    document.getElementById('aviso-prioridad').value = 'media';
+    document.getElementById('aviso-edit-id').value = '';
+    document.getElementById('btn-add-aviso').style.display = 'inline-block';
+    document.getElementById('btn-save-aviso').style.display = 'none';
+    document.getElementById('btn-cancelar-aviso').style.display = 'none';
+    showAlert('✅ Aviso actualizado', 'success');
+    loadAvisos();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+});
+
+document.getElementById('btn-cancelar-aviso')?.addEventListener('click', () => {
+  document.getElementById('aviso-titulo').value = '';
+  document.getElementById('aviso-contenido').value = '';
+  document.getElementById('aviso-imagen').value = '';
+  document.getElementById('aviso-link').value = '';
+  document.getElementById('aviso-link-texto').value = '';
+  document.getElementById('aviso-prioridad').value = 'media';
+  document.getElementById('aviso-edit-id').value = '';
+  document.getElementById('btn-add-aviso').style.display = 'inline-block';
+  document.getElementById('btn-save-aviso').style.display = 'none';
+  document.getElementById('btn-cancelar-aviso').style.display = 'none';
+});
+
+window.toggleAviso = async (id, activo) => {
+  try {
+    await updateDoc(doc(db, 'avisos', id), { activo: !activo });
+    showAlert(activo ? 'Aviso desactivado' : 'Aviso activado', 'success');
+    loadAvisos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+window.borrarAviso = async (id) => {
+  if (!confirm('¿Borrar este aviso?')) return;
+  try { await deleteDoc(doc(db, 'avisos', id)); showAlert('Aviso borrado', 'danger'); loadAvisos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
 
 // ========== INICIALIZAR TODO ==========
 loadSecciones();
@@ -849,4 +1144,5 @@ loadExcursiones();
 loadVideos();
 loadAprobaciones();
 loadGuia();
+loadAvisos();
 initBuscador();

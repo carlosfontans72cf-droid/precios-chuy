@@ -24,38 +24,12 @@
     .premium-banner:hover { transform: scale(1.02); }
     .premium-banner h3 { color: #0038A8; margin: 0 0 10px 0; }
     .beneficio-card:hover { transform: translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
-    
-    #lista-guia-cliente {
-      display: block !important;
-      min-height: 50px !important;
-    }
-    
-    #lista-guia-cliente .card {
-      display: block !important;
-      margin-bottom: 15px !important;
-    }
-
-    .footer-legal {
-      background:#0038A8; 
-      color:white; 
-      padding:20px; 
-      text-align:center; 
-      margin-top:30px;
-    }
-    .footer-legal a {
-      color:#FFD700; 
-      text-decoration:none; 
-      margin: 0 10px;
-      font-size:0.9rem;
-    }
-    .footer-legal a:hover {
-      text-decoration: underline;
-    }
-    .footer-copy {
-      margin-top:10px; 
-      font-size:0.8rem; 
-      opacity:0.8;
-    }
+    #lista-guia-cliente { display: block !important; min-height: 50px !important; }
+    #lista-guia-cliente .card { display: block !important; margin-bottom: 15px !important; }
+    .footer-legal { background:#0038A8; color:white; padding:20px; text-align:center; margin-top:30px; }
+    .footer-legal a { color:#FFD700; text-decoration:none; margin: 0 10px; font-size:0.9rem; }
+    .footer-legal a:hover { text-decoration: underline; }
+    .footer-copy { margin-top:10px; font-size:0.8rem; opacity:0.8; }
   </style>
 </head>
 <body>
@@ -69,17 +43,17 @@
   </nav>
 
   <div class="main-nav">
-    <button class="active" onclick="showTab('ofertas')">🔥 Ofertas</button>
+    <button class="active" onclick="showTab('ofertas')"> Ofertas</button>
     <button onclick="showTab('productos')">️ Productos</button>
     <button onclick="showTab('mapa')">🗺️ Mapa</button>
-    <button onclick="showTab('excursiones')">Excursiones</button>
-    <button onclick="showTab('guia')">Guia</button>
+    <button onclick="showTab('excursiones')">🚌 Excursiones</button>
+    <button onclick="showTab('guia')">📖 Guia</button>
+    <button onclick="showTab('avisos')">📰 Avisos</button>
     <button id="btn-logout" class="btn btn-danger">Cerrar Sesión</button>
   </div>
 
   <div class="container">
 
-    <!-- Banner Premium (visible solo si es premium) -->
     <div id="banner-premium-activo" style="display:none;">
       <div style="background:linear-gradient(135deg, #FFD700, #FFA500); padding:25px; border-radius:20px; margin-bottom:20px; text-align:center; border:4px solid #FF6B00; box-shadow:0 8px 25px rgba(255,165,0,0.5);">
         <div style="font-size:3rem; margin-bottom:10px;">⭐⭐</div>
@@ -88,50 +62,24 @@
         <div style="background:rgba(255,255,255,0.95); padding:20px; border-radius:15px; margin-top:20px; text-align:left;">
           <h4 style="color:#FF6B00; margin-top:0; font-size:1.3rem;">🎁 Tus beneficios activos:</h4>
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
-            <div class="beneficio-card" onclick="showTab('ofertas')" style="background:#FFF3CD; padding:12px; border-radius:10px; border-left:4px solid #FF6B00; cursor:pointer;">
-              <strong> Ofertas Exclusivas</strong><br>
-              <small style="color:#666;">Acceso anticipado a las mejores ofertas</small>
-            </div>
-            <div class="beneficio-card" onclick="mostrarAlertas()" style="background:#D4EDDA; padding:12px; border-radius:10px; border-left:4px solid #28A745; cursor:pointer;">
-              <strong>🔔 Alertas de Precios</strong><br>
-              <small style="color:#666;">Te avisamos cuando bajan los precios</small>
-            </div>
-            <div class="beneficio-card" onclick="mostrarListaCompras()" style="background:#D1ECF1; padding:12px; border-radius:10px; border-left:4px solid #17A2B8; cursor:pointer;">
-              <strong> Lista Optimizada</strong><br>
-              <small style="color:#666;">Lista de compras inteligente</small>
-            </div>
-            <div class="beneficio-card" onclick="showTab('mapa')" style="background:#E2D5F1; padding:12px; border-radius:10px; border-left:4px solid #6F42C1; cursor:pointer;">
-              <strong>📍 Navegación GPS</strong><br>
-              <small style="color:#666;">Cómo llegar a cada comercio</small>
-            </div>
-            <div style="background:#F8D7DA; padding:12px; border-radius:10px; border-left:4px solid #DC3545;">
-              <strong>🚫 Sin Anuncios</strong><br>
-              <small style="color:#666;">Experiencia 100% limpia</small>
-            </div>
-            <div class="beneficio-card" onclick="mostrarSoporteVIP()" style="background:#C8E6C9; padding:12px; border-radius:10px; border-left:4px solid #25D366; cursor:pointer;">
-              <strong> Soporte VIP</strong><br>
-              <small style="color:#666;">Atención prioritaria por WhatsApp</small>
-            </div>
+            <div class="beneficio-card" onclick="showTab('ofertas')" style="background:#FFF3CD; padding:12px; border-radius:10px; border-left:4px solid #FF6B00; cursor:pointer;"><strong> Ofertas Exclusivas</strong><br><small style="color:#666;">Acceso anticipado a las mejores ofertas</small></div>
+            <div class="beneficio-card" onclick="mostrarAlertas()" style="background:#D4EDDA; padding:12px; border-radius:10px; border-left:4px solid #28A745; cursor:pointer;"><strong>🔔 Alertas de Precios</strong><br><small style="color:#666;">Te avisamos cuando bajan los precios</small></div>
+            <div class="beneficio-card" onclick="mostrarListaCompras()" style="background:#D1ECF1; padding:12px; border-radius:10px; border-left:4px solid #17A2B8; cursor:pointer;"><strong>📝 Lista Optimizada</strong><br><small style="color:#666;">Lista de compras inteligente</small></div>
+            <div class="beneficio-card" onclick="showTab('mapa')" style="background:#E2D5F1; padding:12px; border-radius:10px; border-left:4px solid #6F42C1; cursor:pointer;"><strong> Navegación GPS</strong><br><small style="color:#666;">Cómo llegar a cada comercio</small></div>
+            <div style="background:#F8D7DA; padding:12px; border-radius:10px; border-left:4px solid #DC3545;"><strong>🚫 Sin Anuncios</strong><br><small style="color:#666;">Experiencia 100% limpia</small></div>
+            <div class="beneficio-card" onclick="mostrarSoporteVIP()" style="background:#C8E6C9; padding:12px; border-radius:10px; border-left:4px solid #25D366; cursor:pointer;"><strong>📞 Soporte VIP</strong><br><small style="color:#666;">Atención prioritaria por WhatsApp</small></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Banner contador de usuarios -->
     <div class="stats-banner" id="stats-banner">
       <div style="display:flex;justify-content:space-around;flex-wrap:wrap;gap:30px;">
-        <div>
-          <div class="num" id="stat-total-users">0</div>
-          <div>Usuarios activos</div>
-        </div>
-        <div>
-          <div class="num" id="stat-productos">0</div>
-          <div>Productos</div>
-        </div>
+        <div><div class="num" id="stat-total-users">0</div><div>Usuarios activos</div></div>
+        <div><div class="num" id="stat-productos">0</div><div>Productos</div></div>
       </div>
     </div>
 
-    <!-- Banner Premium (solo si no es premium) -->
     <div class="premium-banner" id="premium-banner" onclick="mostrarPremium()" style="display:none;">
       <div style="background:linear-gradient(135deg, #FFD700, #FFA500); padding:25px; border-radius:20px; border:3px solid #FF6B00; box-shadow:0 4px 15px rgba(255,165,0,0.3);">
         <h3 style="color:#0038A8; margin:0 0 15px 0; font-size:1.5rem;">⭐ ¿Querés más beneficios?</h3>
@@ -149,41 +97,30 @@
       </div>
     </div>
 
-    <!-- Sección WhatsApp para Premium -->
     <div id="seccion-whatsapp-premium" style="display:none; margin-bottom:20px;">
       <div style="background:linear-gradient(135deg, #25D366, #128C7E); padding:30px; border-radius:20px; text-align:center; box-shadow:0 8px 25px rgba(37,211,102,0.4); border:3px solid #075E54;">
-        <div style="font-size:3rem; margin-bottom:15px;"></div>
+        <div style="font-size:3rem; margin-bottom:15px;">📱</div>
         <h3 style="color:#FFF; margin:0 0 15px 0; font-size:1.8rem; text-shadow:2px 2px 4px rgba(0,0,0,0.3);">Soporte Premium por WhatsApp</h3>
         <p style="color:#FFF; font-size:1.1rem; margin:10px 0;">¿Tenés alguna consulta sobre productos, precios o comercios?</p>
         <p style="color:#FFF; font-size:1rem; margin:10px 0;">Nuestro equipo te responde en minutos:</p>
-        <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20quiero%20hacer%20una%20consulta" target="_blank" style="display:inline-block; background:#FFF; color:#128C7E; text-decoration:none; margin-top:20px; font-size:1.3rem; font-weight:bold; padding:18px 40px; border-radius:50px; box-shadow:0 6px 20px rgba(0,0,0,0.3); transition:all 0.3s;">
-          📱 Contactar Soporte Premium
-        </a>
+        <a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium%20y%20quiero%20hacer%20una%20consulta" target="_blank" style="display:inline-block; background:#FFF; color:#128C7E; text-decoration:none; margin-top:20px; font-size:1.3rem; font-weight:bold; padding:18px 40px; border-radius:50px; box-shadow:0 6px 20px rgba(0,0,0,0.3); transition:all 0.3s;">📱 Contactar Soporte Premium</a>
         <p style="color:#FFF; font-size:0.9rem; margin-top:15px; opacity:0.9;">Respuesta garantizada en menos de 1 hora</p>
       </div>
     </div>
 
-    <!-- Sección Ofertas Exclusivas Premium -->
     <div id="ofertas-exclusivas-premium" style="display:none; margin-bottom:30px;">
       <div style="background:linear-gradient(135deg, #FFF9C4, #FFE082); padding:25px; border-radius:20px; border:3px solid #FFB300; box-shadow:0 4px 15px rgba(255,179,0,0.3);">
-        <h3 style="color:#F57F17; margin:0 0 20px 0; font-size:1.6rem; text-align:center;"> OFERTAS EXCLUSIVAS PREMIUM </h3>
+        <h3 style="color:#F57F17; margin:0 0 20px 0; font-size:1.6rem; text-align:center;">⭐ OFERTAS EXCLUSIVAS PREMIUM ⭐</h3>
         <p style="color:#F57F17; text-align:center; font-size:1.1rem; margin-bottom:20px;">Estas ofertas son solo para miembros Premium</p>
-        <div id="feed-ofertas-premium">
-          <!-- Las ofertas exclusivas se cargan aquí dinámicamente -->
-          <p style="text-align:center;color:#666;">Cargando ofertas exclusivas...</p>
-        </div>
+        <div id="feed-ofertas-premium"><p style="text-align:center;color:#666;">Cargando ofertas exclusivas...</p></div>
       </div>
     </div>
 
-    <!-- TAB: Ofertas -->
     <div id="tab-ofertas" class="tab-content active">
       <h3 class="section-title">🔥 Ofertas Destacadas</h3>
-      <div id="feed-ofertas">
-        <p style="text-align:center;color:#666;">Cargando ofertas...</p>
-      </div>
+      <div id="feed-ofertas"><p style="text-align:center;color:#666;">Cargando ofertas...</p></div>
     </div>
 
-    <!-- TAB: Productos -->
     <div id="tab-productos" class="tab-content">
       <h3 class="section-title">️ Comparar Precios</h3>
       <div class="card">
@@ -193,39 +130,32 @@
         </div>
         <div class="form-group">
           <label>Filtrar por sección</label>
-          <select id="filtrar-seccion" class="form-control">
-            <option value="">Todas las secciones</option>
-          </select>
+          <select id="filtrar-seccion" class="form-control"><option value="">Todas las secciones</option></select>
         </div>
         <button id="btn-buscar-productos" class="btn btn-primary btn-block">🔍 Buscar Productos</button>
       </div>
       <div id="lista-productos-cliente" class="grid grid-2"></div>
     </div>
 
-    <!-- TAB: Mapa -->
     <div id="tab-mapa" class="tab-content">
       <h3 class="section-title">🗺️ Comercios en Chui</h3>
       <div class="card">
         <div id="mapa-comercios" style="height:450px; width:100%; border-radius:12px; z-index:1;"></div>
       </div>
-      <p style="text-align:center; color:#666; margin-top:10px;">
-        Click en cada pin para ver la información del comercio
-      </p>
+      <p style="text-align:center; color:#666; margin-top:10px;">Click en cada pin para ver la información del comercio</p>
       <div id="lista-comercios-cliente" style="margin-top:20px;"></div>
     </div>
 
-    <!-- TAB: Excursiones -->
     <div id="tab-excursiones" class="tab-content">
       <h3 class="section-title">🚌 Próximas Excursiones</h3>
       <p style="color:#666;margin-bottom:15px;">Salidas desde Maldonado hacia Chui para compras</p>
       <div id="lista-excursiones-cliente"></div>
     </div>
 
-    <!-- TAB: Guia del Chuy -->
     <div id="tab-guia" class="tab-content">
-      <h3 class="section-title">️ Guia del Chuy</h3>
+      <h3 class="section-title">📖 Guia del Chuy</h3>
       <div id="guia-login-warning" style="display:none; background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:15px;">
-        <p style="color:#856404; margin:0;"> Algunos artículos son solo para usuarios <strong>Premium</strong>. <a href="#" onclick="mostrarPremium(); return false;" style="color:#0038A8; font-weight:bold;">Hacete Premium</a></p>
+        <p style="color:#856404; margin:0;">️ Algunos artículos son solo para usuarios <strong>Premium</strong>. <a href="#" onclick="mostrarPremium(); return false;" style="color:#0038A8; font-weight:bold;">Hacete Premium</a></p>
       </div>
       <div style="margin-bottom:15px;">
         <label style="margin-right:15px;"><input type="checkbox" id="filtro-todas" checked onchange="loadGuia()"> Todas</label>
@@ -234,22 +164,22 @@
         <label style="margin-right:15px;"><input type="checkbox" id="filtro-comercios" onchange="loadGuia()"> Comercios</label>
         <label style="margin-right:15px;"><input type="checkbox" id="filtro-tips" onchange="loadGuia()"> Consejos</label>
       </div>
-      <div id="lista-guia-cliente">
-        <p style="text-align:center;color:#666;">Cargando artículos...</p>
-      </div>
+      <div id="lista-guia-cliente"><p style="text-align:center;color:#666;">Cargando artículos...</p></div>
+    </div>
+
+    <div id="tab-avisos" class="tab-content">
+      <h3 class="section-title">📰 Avisos y Noticias</h3>
+      <div id="lista-avisos-cliente"><p style="text-align:center;color:#666;">Cargando avisos...</p></div>
     </div>
 
   </div>
 
-  <!-- Footer con enlaces legales -->
   <div class="footer-legal">
     <div>
       <a href="/pages/politica-privacidad.html" target="_blank">📋 Política de Privacidad</a>
       <a href="/pages/terminos-condiciones.html" target="_blank">📄 Términos y Condiciones</a>
     </div>
-    <div class="footer-copy">
-      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇾🇧🇷
-    </div>
+    <div class="footer-copy">© 2026 Precios Chuy. Todos los derechos reservados. 🇾🇷</div>
   </div>
 
   <script>
@@ -259,12 +189,7 @@
       document.getElementById('tab-' + tabName).classList.add('active');
       event.target.classList.add('active');
     }
-
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = '/index.html';
-    }
-
+    function logout() { sessionStorage.clear(); window.location.href = '/index.html'; }
     const nombre = sessionStorage.getItem('userName');
     const userId = sessionStorage.getItem('userId');
     document.getElementById('user-info').textContent = nombre || 'Cliente';
@@ -272,5 +197,5 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="/js/cliente.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2db79ef4a04d841',t:'MTc4NzE2NjgxNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
