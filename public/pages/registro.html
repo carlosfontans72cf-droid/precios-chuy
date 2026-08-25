@@ -22,15 +22,15 @@
 
   <div class="login-container">
     <div class="login-card" style="max-width: 900px;">
-      <div class="logo">Taxi</div>
-      <h2>Registro - Precios Chuy</h2>
+      <div class="logo" style="font-size:2rem;font-weight:bold;color:#0038A8;margin-bottom:10px;">Precios Chuy</div>
+      <h2>Registro</h2>
       <p style="text-align:center; color:#666; margin-bottom:20px;">
         Elegi como queres usar la app
       </p>
 
       <div class="role-selector">
         <div class="role-card" onclick="selectRole('cliente')" id="role-cliente">
-          <div class="icon">Carrito</div>
+          <div class="icon">&#128722;</div>
           <h3>Soy Cliente</h3>
           <p>Comparar precios y ahorrar</p>
           <div class="price-tag">GRATIS</div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="role-card" onclick="selectRole('comerciante')" id="role-comerciante">
-          <div class="icon">Tienda</div>
+          <div class="icon">&#127978;</div>
           <h3>Soy Comerciante</h3>
           <p>Vender mis productos</p>
           <div class="price-tag">60 DIAS GRATIS</div>
@@ -65,7 +65,7 @@
         </div>
 
         <div class="role-card" onclick="selectRole('admin_excursion')" id="role-admin-excursion">
-          <div class="icon">Bus</div>
+          <div class="icon">&#128652;</div>
           <h3>Admin de Excursion</h3>
           <p>Organizar viajes</p>
           <div class="price-tag">$1/persona</div>
@@ -111,6 +111,7 @@
               <option value="bebidas">Bebidas</option>
               <option value="ropa">Ropa</option>
               <option value="electronica">Electronica</option>
+              <option value="panaderia">Panaderia</option>
               <option value="otro">Otro</option>
             </select>
           </div>
@@ -144,7 +145,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/registro.js"></script>
   <script>
     function togglePassword() {
       const p = document.getElementById('reg-password');
@@ -153,29 +153,18 @@
 
     function selectRole(role) {
       console.log('Rol seleccionado:', role);
-      
-      // Quitar seleccion de todos
       const cards = document.querySelectorAll('.role-card');
       for (let i = 0; i < cards.length; i++) {
         cards[i].classList.remove('selected');
       }
-      
-      // Seleccionar el correcto
       const selectedCard = document.getElementById('role-' + role);
-      if (selectedCard) {
-        selectedCard.classList.add('selected');
-      }
-      
-      // Mostrar formulario
+      if (selectedCard) selectedCard.classList.add('selected');
       document.getElementById('registro-form').style.display = 'block';
-      
-      // Mostrar campos segun rol
       document.getElementById('comercio-fields').style.display = (role === 'comerciante') ? 'block' : 'none';
       document.getElementById('excursion-fields').style.display = (role === 'admin_excursion') ? 'block' : 'none';
-      
-      // Guardar rol
       sessionStorage.setItem('selectedRole', role);
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2d271c19babc1a3',t:'MTc4NzA3MjEwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  <script type="module" src="/js/registro.js"></script>
+</body>
 </html>
