@@ -3,61 +3,294 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Precios Chuy - Iniciar Sesión</title>
-  <link rel="manifest" href="/manifest.json">
+  <title>Precios Chuy - Compará precios Uruguay y Brasil</title>
   <link rel="stylesheet" href="/css/styles.css">
   <meta name="theme-color" content="#0038A8">
+  <style>
+    /* ===== BANNER CF APPS DEVELOPER ===== */
+    .cf-banner {
+      margin-top: 30px;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 40%, #0f2b4c 100%);
+      border-radius: 16px;
+      padding: 28px 24px 24px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .cf-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.03), transparent);
+      animation: cf-shine 6s ease-in-out infinite;
+    }
+    @keyframes cf-shine {
+      0%, 100% { transform: translateX(-50%); }
+      50% { transform: translateX(50%); }
+    }
+    .cf-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .cf-icon {
+      font-family: 'Courier New', monospace;
+      font-size: 1.4rem;
+      color: #00ff88;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+    .cf-name {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, #d4af37 0%, #f5e6a3 30%, #d4af37 50%, #aa8a2e 70%, #d4af37 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: cf-gold 4s ease-in-out infinite;
+      filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
+    }
+    @keyframes cf-gold {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .cf-subtitle {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.95rem;
+      color: #8892b0;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin: 0 0 16px 0;
+      font-weight: 300;
+    }
+    .cf-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      margin: 0 auto 16px auto;
+    }
+    .cf-text {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.95rem;
+      color: #ccd6f6;
+      line-height: 1.6;
+      margin: 0 0 18px 0;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cf-text strong {
+      color: #f5e6a3;
+      font-weight: 600;
+    }
+    .cf-contact {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 20px;
+      margin-bottom: 18px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.85rem;
+      color: #8892b0;
+    }
+    .cf-contact span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cf-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .cf-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+    }
+    .cf-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      animation: cf-pulse 2s ease-in-out infinite;
+    }
+    @keyframes cf-pulse {
+      0% { width: 0; height: 0; opacity: 1; }
+      100% { width: 120px; height: 120px; opacity: 0; }
+    }
+    .cf-powered {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.7rem;
+      color: #4a5568;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 14px;
+    }
+  </style>
 </head>
 <body>
 
   <div class="login-container">
     <div class="login-card">
-      <div class="logo"></div>
-      <h2>Precios Chuy</h2>
-      <p style="text-align:center; color:#666; margin-bottom:20px;">
-        Compará precios Uruguay 🇺🇾 vs Brasil 🇧🇷
-      </p>
+      <div class="logo-container">
+        <img src="/img/logo.png" alt="Precios Chuy" class="logo" style="max-width:200px;">
+      </div>
+      <h2 class="app-title">Precios Chuy</h2>
+      <p class="app-subtitle">Compará precios Uruguay 🇺🇾 y Brasil 🇧🇷</p>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" class="form-control" placeholder="tu@email.com" autocomplete="off">
+      <!-- Formulario de Login -->
+      <div id="login-form">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" class="form-control" placeholder="tu@email.com" autocomplete="off">
+        </div>
+
+        <div class="form-group" style="position: relative;">
+          <label>Contraseña</label>
+          <input type="password" id="password" class="form-control" placeholder="Contraseña" style="padding-right:42px;">
+          <button type="button" class="btn-toggle-password" onclick="togglePassword()"></button>
+        </div>
+
+        <div id="login-error" class="error-message"></div>
+
+        <button id="btn-login" class="btn btn-primary btn-block">Iniciar Sesión</button>
+
+        <p class="switch-form">
+          <span>¿No tenés cuenta?</span>
+          <a href="#" onclick="showRegister()">Registrate gratis</a>
+        </p>
+        <p class="switch-form">
+          <span>¿Sos comerciante?</span>
+          <a href="#" onclick="showRegister()">Registrá tu comercio</a>
+        </p>
+
+        <p class="legal-text">
+          Al registrarte, aceptás nuestra
+          <a href="/pages/politica-privacidad.html" target="_blank">Política de Privacidad</a>
+          y nuestros
+          <a href="/pages/terminos-condiciones.html" target="_blank">Términos y Condiciones</a>
+        </p>
       </div>
 
-      <div class="form-group" style="position: relative;">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" class="form-control" placeholder="Contraseña" style="padding-right:42px;">
-        <button type="button" class="btn btn-sm" style="position:absolute;right:12px;bottom:10px;background:transparent;" onclick="togglePassword()">👁</button>
+      <!-- Formulario de Registro -->
+      <div id="register-form" style="display:none;">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="tu@email.com">
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 6 caracteres">
+        </div>
+
+        <div class="form-group">
+          <label>Quiero registrarme como:</label>
+          <select id="reg-role" class="form-control">
+            <option value="cliente"> Cliente</option>
+            <option value="comerciante">🏪 Comerciante</option>
+          </select>
+        </div>
+
+        <div id="register-error" class="error-message"></div>
+
+        <button id="btn-register" class="btn btn-primary btn-block">Crear cuenta</button>
+
+        <p class="switch-form">
+          <span>¿Ya tenés cuenta?</span>
+          <a href="#" onclick="showLogin()">Iniciá sesión</a>
+        </p>
+
+        <p class="legal-text">
+          Al registrarte, aceptás nuestra
+          <a href="/pages/politica-privacidad.html" target="_blank">Política de Privacidad</a>
+          y nuestros
+          <a href="/pages/terminos-condiciones.html" target="_blank">Términos y Condiciones</a>
+        </p>
       </div>
 
-      <div id="login-error" style="color: #EF3340; text-align:center; margin-bottom:10px; min-height:20px;"></div>
+      <!-- ===== BANNER CF APPS DEVELOPER ===== -->
+      <div class="cf-banner">
+        <div class="cf-logo">
+          <span class="cf-icon">&lt;/&gt;</span>
+          <span class="cf-name">CF</span>
+        </div>
+        <p class="cf-subtitle">Desarrollador de Apps</p>
+        <div class="cf-divider"></div>
+        <p class="cf-text">
+          ¿Tenés una <strong>idea</strong>? Te la convertimos en <strong>app</strong>.<br>
+          Desarrollo a medida para comercios, restaurantes y servicios.
+        </p>
+        <div class="cf-contact">
+          <span>🇺🇾 +598 95 205598</span>
+          <span>🇧🇷 +55 3991 757952</span>
+        </div>
+        <a href="https://wa.me/59895205598?text=Hola!%20Quiero%20info%20sobre%20desarrollo%20de%20apps" target="_blank" class="cf-btn">
+          💬 Contactanos por WhatsApp
+        </a>
+        <p class="cf-powered">Powered by CF Apps Developer</p>
+      </div>
+      <!-- ===== FIN BANNER CF APPS DEVELOPER ===== -->
 
-      <button id="btn-login" class="btn btn-primary btn-block">
-        Iniciar Sesión
-      </button>
-
-      <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">
-        ¿No tenés cuenta? <a href="/pages/registro.html" style="color:#0038A8;">Registrate gratis</a>
-      </p>
-
-      <p style="text-align:center; margin-top:10px; color:#888; font-size:0.85rem;">
-        ¿Sos comerciante? <a href="/pages/registro.html" style="color:#009C3B;">Registrá tu comercio</a>
-      </p>
-
-      <p style="text-align:center; margin-top:15px; color:#888; font-size:0.75rem;">
-        Al registrarte, aceptás nuestra 
-        <a href="/pages/politica-privacidad.html" target="_blank" style="color:#0038A8;">Política de Privacidad</a>
-        y nuestros 
-        <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#0038A8;">Términos y Condiciones</a>
-      </p>
     </div>
   </div>
 
-  <script type="module" src="/js/auth.js"></script>
   <script>
     function togglePassword() {
+      const loginForm = document.getElementById('login-form');
       const p = document.getElementById('password');
-      p.type = p.type === 'password' ? 'text' : 'password';
+      const r = document.getElementById('reg-password');
+      if (loginForm.style.display !== 'none') {
+        p.type = p.type === 'password' ? 'text' : 'password';
+      } else {
+        r.type = r.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    function showRegister() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('register-form').style.display = 'block';
+    }
+
+    function showLogin() {
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2db747adfb81a73',t:'MTc4NzE2NjU5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+  <script type="module" src="/js/auth.js"></script>
+</body>
 </html>
