@@ -15,13 +15,19 @@
     .tab-content.active { display: block; }
     .reserva-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #009C3B; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
   </style>
-  <script>
-    // PROTECCION DE RUTA: Solo admin_excursion puede entrar
-    (function() {
-      const role = sessionStorage.getItem('userRole');
+ t role = sessionStorage.getItem('userRole');
       const aprobado = sessionStorage.getItem('userAprobado') === 'true';
       if (role !== 'admin_excursion' || !aprobado) {
         alert('Acceso denegado. Solo administradores de excursión aprobados pueden entrar.');
+        window.location.href = '/index.html';
+      }
+    })();
+  </script>   <script>
+    // PROTECCION DE RUTA: Solo admin_excursion puede entrar
+    (function() {
+      const role = sessionStorage.getItem('userRole');
+      if (role !== 'admin_excursion') {
+        alert('Acceso denegado. Solo administradores de excursión pueden entrar.');
         window.location.href = '/index.html';
       }
     })();

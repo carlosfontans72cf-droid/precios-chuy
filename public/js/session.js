@@ -1,8 +1,8 @@
 // Manejo central de sesiones - Precios Chuy
 import { auth } from './firebase-config.js';
 
-// Limpiar sesión y cerrar
-export function logout() {
+// Limpiar sesión y cerrar (exportable y global)
+function doLogout() {
   sessionStorage.clear();
   auth.signOut().then(() => {
     window.location.href = '/index.html';
@@ -11,6 +11,9 @@ export function logout() {
   });
 }
 
+// Hacer logout() disponible globalmente para los botones "Salir" del navbar
+window.logout = doLogout;
+
 // Guardar datos de sesión después de login exitoso
 export function guardarSesion(userId, userData) {
   sessionStorage.clear();
@@ -18,6 +21,7 @@ export function guardarSesion(userId, userData) {
   sessionStorage.setItem('userEmail', userData.email || '');
   sessionStorage.setItem('userName', userData.nombre || '');
   sessionStorage.setItem('userRole', userData.role || 'cliente');
+  sessionStorage.setItem('userAprobado', userData.aprobado ? 'true' : 'false');
   if (userData.ruta) sessionStorage.setItem('userRuta', userData.ruta);
   sessionStorage.setItem('userPlan', userData.plan === 'premium' ? 'premium' : 'gratis');
 }
@@ -30,7 +34,8 @@ export function getSession() {
     userName: sessionStorage.getItem('userName'),
     userRole: sessionStorage.getItem('userRole'),
     userPlan: sessionStorage.getItem('userPlan'),
-    userRuta: sessionStorage.getItem('userRuta')
+    userRuta: sessionStorage.getItem('userRuta'),
+    userAprobado: sessionStorage.getItem('userAprobado') === 'true'
   };
 }
 
@@ -54,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnLogout) {
     btnLogout.addEventListener('click', (e) => {
       e.preventDefault();
-      logout();
+      doLogout();
     });
   }
 });
