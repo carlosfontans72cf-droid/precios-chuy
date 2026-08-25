@@ -3,303 +3,445 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Comercio - Precios Chuy</title>
+  <title>Perfil del Comercio - Precios Chuy</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <meta name="theme-color" content="#009C3B">
+  <meta name="theme-color" content="#0038A8">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    .com-nav { background: #009C3B; padding: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .com-nav button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-    .com-nav button:hover { background: rgba(255,255,255,0.3); }
-    .com-nav button.active { background: #FFDF00; color: #1a1a2e; font-weight: bold; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .stats-banner { background: linear-gradient(90deg, #009C3B, #0038A8); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
-    .stats-banner .num { font-size: 1.8rem; font-weight: bold; color: #FFDF00; }
-    .suscripcion-box { background: linear-gradient(135deg, #FFDF00, #FFC107); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #0038A8; }
-    .contador-bar { background: #ddd; border-radius: 10px; overflow: hidden; margin: 10px 0; height: 20px; }
-    .contador-fill { background: #0038A8; height: 100%; transition: width 0.3s; }
-    .foto-upload { display:flex; align-items:center; gap:20px; margin-bottom:20px; }
-    .foto-preview { width:120px; height:120px; border-radius:12px; object-fit:cover; border:3px solid #FFDF00; background:#f0f0f0; }
-    .foto-placeholder { width:120px; height:120px; border-radius:12px; background:linear-gradient(135deg, #009C3B, #0038A8); display:flex; align-items:center; justify-content:center; color:white; font-size:3rem; border:3px solid #FFDF00; }
+    .perfil-header {
+      background: linear-gradient(135deg, #0038A8, #009C3B);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      border-radius: 0 0 20px 20px;
+      margin-bottom: 20px;
+    }
+    .perfil-foto {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #FFDF00;
+      margin-bottom: 15px;
+      background: #f0f0f0;
+    }
+    .perfil-foto-placeholder {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFDF00, #FFC107);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 15px auto;
+      border: 4px solid white;
+    }
+    .perfil-nombre {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 0 0 5px 0;
+    }
+    .perfil-tipo {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+    .info-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .info-card h3 {
+      color: #0038A8;
+      margin: 0 0 15px 0;
+      border-bottom: 2px solid #FFDF00;
+      padding-bottom: 8px;
+    }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+    .info-row .icono {
+      font-size: 1.3rem;
+      min-width: 24px;
+    }
+    .info-row .texto {
+      flex: 1;
+    }
+    .info-row .label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 2px;
+    }
+    .info-row .valor {
+      font-size: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+    .cambio-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .cambio-item {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .cambio-item .moneda {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .cambio-item .valor {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #0038A8;
+    }
+    .producto-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .producto-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .producto-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+    .producto-info {
+      padding: 15px;
+    }
+    .producto-info h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    .precios {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .precio-br {
+      color: #009C3B;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .precio-uy {
+      color: #0038A8;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+    .badge-oferta {
+      background: #FF6B00;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    #mapa-perfil-comercio {
+      height: 300px;
+      border-radius: 12px;
+      border: 2px solid #ddd;
+    }
+    .btn-volver {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: white;
+      color: #0038A8;
+      border: 2px solid #0038A8;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-volver:hover {
+      background: #0038A8;
+      color: white;
+    }
+    .btn-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #25D366;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    .btn-whatsapp:hover {
+      background: #128C7E;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .error-msg {
+      text-align: center;
+      padding: 40px;
+      color: #dc3545;
+    }
   </style>
-  <script>
-    // PROTECCION DE RUTA: Solo comerciantes pueden entrar
-    (function() {
-      const role = sessionStorage.getItem('userRole');
-      if (role !== 'comerciante') {
-        alert('Acceso denegado. Solo comerciantes pueden entrar a esta página.');
-        window.location.href = '/index.html';
-      }
-    })();
-  </script>
 </head>
 <body>
 
-  <nav class="navbar">
-    <h1>🏪 Mi Comercio</h1>
-    <div>
-      <span class="user-info" id="user-info">Cargando...</span>
-      <button class="btn btn-sm btn-danger" onclick="logout()" style="margin-left:10px;">Salir</button>
-    </div>
-  </nav>
+  <a href="/pages/cliente.html" class="btn-volver">← Volver</a>
 
-  <div class="com-nav">
-    <button class="active" onclick="showTab('perfil')">🏪 Mi Perfil</button>
-    <button onclick="showTab('productos')">️ Mis Productos</button>
-    <button onclick="showTab('videos')">📹 Videos/Ofertas</button>
-    <button onclick="showTab('stats')">📊 Estadísticas</button>
-    <button id="btn-logout" class="btn btn-danger">Cerrar Sesión</button>
-  </div>
-
-  <div class="container">
-
-    <!-- Banner de suscripción -->
-    <div class="suscripcion-box" id="suscripcion-box">
-      <h3 id="sub-titulo">🎉 Período de prueba activo</h3>
-      <p id="sub-texto">Te quedan <strong id="sub-dias">--</strong> días gratis</p>
-      <div class="contador-bar">
-        <div class="contador-fill" id="sub-barra" style="width:100%"></div>
-      </div>
-      <p style="font-size:0.9rem;">Después: $5/mes — Sin contratos, sin deudas</p>
-      <button class="btn btn-primary" onclick="mostrarPago()" style="margin-top:10px;">💳 Ver opciones de pago</button>
-    </div>
-
-    <!-- TAB: Perfil -->
-    <div id="tab-perfil" class="tab-content active">
-      <h3 class="section-title">🏪 Datos del Comercio</h3>
-      <div class="card">
-        <div class="grid grid-2">
-          <div class="form-group">
-            <label>Nombre del comercio</label>
-            <input type="text" id="perfil-nombre" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Tipo</label>
-            <select id="perfil-tipo" class="form-control">
-              <option value="supermercado">Supermercado</option>
-              <option value="carniceria">Carnicería</option>
-              <option value="farmacia">Farmacia</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="ropa">Ropa</option>
-              <option value="electronica">Electrónica</option>
-              <option value="panaderia">Panadería</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Dirección</label>
-            <input type="text" id="perfil-direccion" class="form-control" placeholder="Rua...">
-          </div>
-          <div class="form-group">
-            <label>Teléfono / WhatsApp</label>
-            <input type="text" id="perfil-telefono" class="form-control" placeholder="+55...">
-          </div>
-          <div class="form-group">
-            <label>Foto/Logo del comercio</label>
-            <div class="foto-upload">
-              <div id="foto-container">
-                <div class="foto-placeholder">🏪</div>
-              </div>
-              <div>
-                <input type="file" id="foto-input" accept="image/*" style="margin-bottom:8px;">
-                <br>
-                <button class="btn btn-primary" id="btn-subir-foto" style="font-size:0.85rem;padding:8px 16px;">📤 Subir foto</button>
-              </div>
-            </div>
-            <input type="text" id="perfil-logo" class="form-control" placeholder="O pegá una URL de imagen..." style="margin-top:8px;">
-          </div>
-          <div class="form-group">
-            <label>Horarios</label>
-            <input type="text" id="perfil-horarios" class="form-control" placeholder="Lun-Sáb 8-20hs">
-          </div>
-        </div>
-
-        <!-- Cambio de moneda del comerciante -->
-        <h4 style="color:#009C3B;margin:20px 0 10px 0;">💱 Mi cambio de moneda (actualizado hoy)</h4>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:15px;">Publicá tu cambio actual para que los clientes lo vean. No todos cambian al mismo precio.</p>
-        <div class="grid grid-2">
-          <div class="form-group">
-            <label>🇾 Compra USD (pesos uruguayos)</label>
-            <input type="number" id="cambio-usd-compra" class="form-control" step="0.01" placeholder="Ej: 42.50">
-          </div>
-          <div class="form-group">
-            <label>🇺🇾 Venta USD (pesos uruguayos)</label>
-            <input type="number" id="cambio-usd-venta" class="form-control" step="0.01" placeholder="Ej: 44.00">
-          </div>
-          <div class="form-group">
-            <label>🇧🇷 Compra Real (pesos uruguayos)</label>
-            <input type="number" id="cambio-brl-compra" class="form-control" step="0.01" placeholder="Ej: 7.80">
-          </div>
-          <div class="form-group">
-            <label>🇧🇷 Venta Real (pesos uruguayos)</label>
-            <input type="number" id="cambio-brl-venta" class="form-control" step="0.01" placeholder="Ej: 8.20">
-          </div>
-        </div>
-        <p style="font-size:0.8rem;color:#888;">Última actualización: <span id="cambio-fecha">--</span></p>
-
-        <button id="btn-save-perfil" class="btn btn-success">💾 Guardar Perfil</button>
-      </div>
-
-      <!-- Mapa para marcar ubicación -->
-      <div class="card">
-        <div class="card-header">📍 Ubicación en el mapa</div>
-        <p style="color:#666; font-size:0.9rem; margin-bottom:10px;">
-          Hacé click en el mapa para marcar la ubicación de tu comercio. Los clientes te encontrarán más fácil.
-        </p>
-        <div id="mapa-perfil" style="height:300px; width:100%; border-radius:8px; border:2px solid #ddd;"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <input type="text" id="perfil-lat" class="form-control" placeholder="Latitud" readonly style="flex:1;">
-          <input type="text" id="perfil-lng" class="form-control" placeholder="Longitud" readonly style="flex:1;">
-        </div>
-        <button id="btn-save-ubicacion" class="btn btn-primary" style="margin-top:10px;">📍 Guardar ubicación</button>
-      </div>
-    </div>
-
-    <!-- TAB: Productos -->
-    <div id="tab-productos" class="tab-content">
-      <h3 class="section-title">🛍️ Mis Productos</h3>
-      <div class="card">
-        <div class="card-header"> Agregar Producto</div>
-        <div class="grid grid-2">
-          <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" id="prod-nombre" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Precio Brasil (R$)</label>
-            <input type="number" id="prod-precio" class="form-control" step="0.01">
-          </div>
-          <div class="form-group">
-            <label>Precio Uruguay (referencia $)</label>
-            <input type="number" id="prod-precio-uy" class="form-control" step="0.01" placeholder="Opcional">
-          </div>
-          <div class="form-group">
-            <label>Imagen (URL)</label>
-            <input type="text" id="prod-imagen" class="form-control" placeholder="https://...">
-          </div>
-          <div class="form-group">
-            <label>Es oferta especial</label>
-            <select id="prod-es-oferta" class="form-control">
-              <option value="false">No</option>
-              <option value="true">Sí 🔥</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Sección</label>
-            <select id="prod-seccion" class="form-control">
-              <option value="">-- Seleccionar --</option>
-            </select>
-          </div>
-        </div>
-        <button id="btn-add-producto" class="btn btn-success">➕ Agregar Producto</button>
-      </div>
-      <div class="card">
-        <div class="card-header">📦 Productos Cargados</div>
-        <div id="lista-mis-productos"></div>
-      </div>
-    </div>
-
-    <!-- TAB: Videos -->
-    <div id="tab-videos" class="tab-content">
-      <h3 class="section-title">📹 Videos y Ofertas</h3>
-      <div class="card">
-        <div class="card-header">Subir nueva oferta (1 por día, máx 90 seg)</div>
-        <div class="form-group">
-          <label>Grabar video desde el celular</label>
-          <input type="file" id="video-file" accept="video/*" capture="environment" class="form-control">
-        </div>
-        <div class="form-group">
-          <label>Título de la oferta</label>
-          <input type="text" id="video-titulo" class="form-control" placeholder="Ej: Whisky con 30% OFF">
-        </div>
-        <div class="form-group">
-          <label>Descripción</label>
-          <textarea id="video-desc" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Válido hasta</label>
-          <input type="date" id="video-vence" class="form-control">
-        </div>
-        <button id="btn-upload-video" class="btn btn-success">📤 Publicar Oferta</button>
-      </div>
-      <div class="card">
-        <div class="card-header"> Mis Ofertas Activas</div>
-        <div id="lista-mis-videos"></div>
-      </div>
-    </div>
-
-    <!-- TAB: Estadísticas -->
-    <div id="tab-stats" class="tab-content">
-      <h3 class="section-title"> Estadísticas</h3>
-      <div class="card">
-        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;">
-          <div class="stat-card">
-            <div class="number" id="stat-productos-com" style="font-size:2.5rem;font-weight:bold;color:#0038A8;">0</div>
-            <div class="label">Productos cargados</div>
-          </div>
-          <div class="stat-card">
-            <div class="number" id="stat-ofertas-com" style="font-size:2.5rem;font-weight:bold;color:#009C3B;">0</div>
-            <div class="label">Ofertas activas</div>
-          </div>
-          <div class="stat-card">
-            <div class="number" id="stat-vistas-com" style="font-size:2.5rem;font-weight:bold;color:#FF6B00;">0</div>
-            <div class="label">Vistas del perfil</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header"> Consejos para vender más</div>
-        <ul style="padding-left:20px; color:#555; line-height:1.8;">
-          <li>Actualizá tus precios al menos una vez por semana</li>
-          <li>Publicá una oferta con video al menos cada 3 días</li>
-          <li>Respondé rápido a los mensajes de WhatsApp</li>
-          <li>Agregá fotos de buena calidad de tus productos</li>
-          <li>Ofrecé descuentos exclusivos para usuarios Premium</li>
-        </ul>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Footer -->
-  <div style="background:#009C3B; color:white; padding:20px; text-align:center; margin-top:30px;">
-    <div>
-      <a href="/pages/politica-privacidad.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📋 Política de Privacidad</a>
-      <a href="/pages/terminos-condiciones.html" target="_blank" style="color:#FFD700; text-decoration:none; margin: 0 10px;">📄 Términos y Condiciones</a>
-    </div>
-    <div style="margin-top:10px; font-size:0.8rem; opacity:0.8;">
-      © 2026 Precios Chuy. Todos los derechos reservados. 🇺🇧🇷
+  <div id="contenido-perfil">
+    <div class="loading">
+      <div style="font-size: 3rem; margin-bottom: 15px;"></div>
+      <p style="font-size: 1.2rem;">Cargando perfil del comercio...</p>
     </div>
   </div>
-
-  <script>
-    function showTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.com-nav button').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + tabName).classList.add('active');
-      event.target.classList.add('active');
-    }
-
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = '/index.html';
-    }
-
-    function mostrarPago() {
-      alert('Para renovar tu suscripción de comerciante:\n\n' +
-            ' WhatsApp: +598 95205598\n' +
-            '💳 PREX: 19793785\n' +
-            '🏦 Santander Pesos: 001206586016\n' +
-            '🏦 Santander USD: 005206747953\n\n' +
-            'Titular: Carlos Fontans');
-    }
-
-    const nombre = sessionStorage.getItem('userName');
-    document.getElementById('user-info').textContent = nombre || 'Comerciante';
-  </script>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script type="module" src="/js/comerciante.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a30178c1fd2dccba',t:'MTc4NzU2NTIyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  <script type="module">
+    import { db } from '../js/firebase-config.js';
+    import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const comercioId = sessionStorage.getItem('perfilComercioId');
+    const contenedor = document.getElementById('contenido-perfil');
+
+    if (!comercioId) {
+      contenedor.innerHTML = `
+        <div class="error-msg">
+          <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
+          <h2>Comercio no encontrado</h2>
+          <p>No se pudo cargar el perfil de este comercio.</p>
+          <a href="/pages/cliente.html" style="color: #0038A8; font-weight: bold;">← Volver al inicio</a>
+        </div>
+      `;
+    } else {
+      try {
+        // Cargar datos del comerciante
+        const userDoc = await getDoc(doc(db, 'users', comercioId));
+
+        if (!userDoc.exists()) {
+          contenedor.innerHTML = `
+            <div class="error-msg">
+              <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
+              <h2>Comercio no encontrado</h2>
+              <p>Este comercio ya no está disponible.</p>
+              <a href="/pages/cliente.html" style="color: #0038A8; font-weight: bold;">← Volver al inicio</a>
+            </div>
+          `;
+        } else {
+          const data = userDoc.data();
+          const nombre = data.nombreComercio || data.comercio || 'Comercio';
+          const tipo = data.tipo || 'comercio';
+          const direccion = data.direccion || 'Dirección no disponible';
+          const telefono = data.telefono || '';
+          const horarios = data.horarios || 'Horarios no disponibles';
+          const logo = data.logo || '';
+          const lat = data.lat;
+          const lng = data.lng;
+          const cambioUsdCompra = data.cambioUsdCompra;
+          const cambioUsdVenta = data.cambioUsdVenta;
+          const cambioBrlCompra = data.cambioBrlCompra;
+          const cambioBrlVenta = data.cambioBrlVenta;
+          const cambioFecha = data.cambioFecha;
+
+          // Iconos por tipo
+          const iconos = {
+            supermercado: '🛒', carniceria: '🥩', farmacia: '💊',
+            bebidas: '🍺', ropa: '👕', electronica: '📱',
+            panaderia: '🍞', ferreteria: '🔧', otro: '🏪'
+          };
+          const icono = iconos[tipo] || '🏪';
+
+          // HTML del perfil
+          let html = `
+            <div class="perfil-header">
+              ${logo ? `<img src="${logo}" alt="${nombre}" class="perfil-foto" onerror="this.style.display='none'; document.getElementById('foto-placeholder').style.display='flex';">` : ''}
+              <div id="foto-placeholder" class="perfil-foto-placeholder" style="${logo ? 'display:none;' : 'display:flex;'}">${icono}</div>
+              <h1 class="perfil-nombre">${icono} ${nombre}</h1>
+              <p class="perfil-tipo">${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</p>
+              ${telefono ? `<a href="https://wa.me/${telefono.replace(/[^0-9]/g, '')}" target="_blank" class="btn-whatsapp">💬 Contactar por WhatsApp</a>` : ''}
+            </div>
+
+            <div class="container">
+          `;
+
+          // Información del comercio
+          html += `
+            <div class="info-card">
+              <h3>📋 Información del Comercio</h3>
+              <div class="info-row">
+                <span class="icono">📍</span>
+                <div class="texto">
+                  <div class="label">Dirección</div>
+                  <div class="valor">${direccion}</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <span class="icono"></span>
+                <div class="texto">
+                  <div class="label">Teléfono / WhatsApp</div>
+                  <div class="valor">${telefono || 'No disponible'}</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <span class="icono"></span>
+                <div class="texto">
+                  <div class="label">Horarios</div>
+                  <div class="valor">${horarios}</div>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Cambio de moneda
+          if (cambioUsdCompra || cambioUsdVenta || cambioBrlCompra || cambioBrlVenta) {
+            html += `
+              <div class="info-card">
+                <h3>💱 Cambio de Moneda</h3>
+                <div class="cambio-grid">
+                  ${cambioUsdCompra ? `
+                    <div class="cambio-item">
+                      <div class="moneda"> Compra USD</div>
+                      <div class="valor">$ ${cambioUsdCompra.toFixed(2)}</div>
+                    </div>
+                  ` : ''}
+                  ${cambioUsdVenta ? `
+                    <div class="cambio-item">
+                      <div class="moneda">🇾 Venta USD</div>
+                      <div class="valor">$ ${cambioUsdVenta.toFixed(2)}</div>
+                    </div>
+                  ` : ''}
+                  ${cambioBrlCompra ? `
+                    <div class="cambio-item">
+                      <div class="moneda">🇧🇷 Compra Real</div>
+                      <div class="valor">R$ ${cambioBrlCompra.toFixed(2)}</div>
+                    </div>
+                  ` : ''}
+                  ${cambioBrlVenta ? `
+                    <div class="cambio-item">
+                      <div class="moneda">🇧🇷 Venta Real</div>
+                      <div class="valor">R$ ${cambioBrlVenta.toFixed(2)}</div>
+                    </div>
+                  ` : ''}
+                </div>
+                ${cambioFecha ? `<p style="font-size:0.8rem;color:#888;margin-top:10px;">Actualizado: ${new Date(cambioFecha).toLocaleString('es-UY')}</p>` : ''}
+              </div>
+            `;
+          }
+
+          // Mapa
+          if (lat && lng) {
+            html += `
+              <div class="info-card">
+                <h3>📍 Ubicación</h3>
+                <div id="mapa-perfil-comercio"></div>
+              </div>
+            `;
+          }
+
+          // Productos del comerciante
+          html += `
+            <div class="info-card">
+              <h3>🛍️ Productos</h3>
+              <div id="lista-productos-comercio">
+                <div class="loading">Cargando productos...</div>
+              </div>
+            </div>
+            </div>
+          `;
+
+          contenedor.innerHTML = html;
+
+          // Inicializar mapa si hay coordenadas
+          if (lat && lng) {
+            setTimeout(() => {
+              const mapa = L.map('mapa-perfil-comercio').setView([lat, lng], 16);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+              }).addTo(mapa);
+              L.marker([lat, lng]).addTo(mapa)
+                .bindPopup(`<strong>${nombre}</strong><br>${direccion}`)
+                .openPopup();
+            }, 100);
+          }
+
+          // Cargar productos del comerciante
+          try {
+            const productosQuery = query(collection(db, 'productos'), where('comercioId', '==', comercioId));
+            const productosSnap = await getDocs(productosQuery);
+
+            const contProductos = document.getElementById('lista-productos-comercio');
+
+            if (productosSnap.empty) {
+              contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Este comercio aún no tiene productos cargados.</p>';
+            } else {
+              contProductos.innerHTML = '';
+              let productosCount = 0;
+
+              productosSnap.forEach(d => {
+                const prod = d.data();
+                if (prod.suspendido) return;
+                productosCount++;
+
+                const div = document.createElement('div');
+                div.className = 'producto-card';
+                div.innerHTML = `
+                  ${prod.imagen ? `<img src="${prod.imagen}" alt="${prod.nombre}" class="producto-img" onerror="this.style.display='none'">` : '<div class="producto-img" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:3rem;">📦</div>'}
+                  <div class="producto-info">
+                    <h4>${prod.nombre} ${prod.esOferta ? '<span class="badge-oferta">🔥 OFERTA</span>' : ''}</h4>
+                    <div class="precios">
+                      <span class="precio-br">🇧🇷 R$ ${prod.precioBrasil || 0}</span>
+                      ${prod.precioUruguay ? `<span class="precio-uy">🇺🇾 $ ${prod.precioUruguay}</span>` : ''}
+                    </div>
+                  </div>
+                `;
+                contProductos.appendChild(div);
+              });
+
+              if (productosCount === 0) {
+                contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Este comercio no tiene productos disponibles.</p>';
+              }
+            }
+          } catch (err) {
+            console.error('Error cargando productos:', err);
+            const contProductos = document.getElementById('lista-productos-comercio');
+            if (contProductos) {
+              contProductos.innerHTML = '<p style="text-align:center;color:#dc3545;">Error al cargar los productos.</p>';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error cargando perfil:', err);
+        contenedor.innerHTML = `
+          <div class="error-msg">
+            <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
+            <h2>Error al cargar el perfil</h2>
+            <p>${err.message}</p>
+            <a href="/pages/cliente.html" style="color: #0038A8; font-weight: bold;">← Volver al inicio</a>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
 </html>
