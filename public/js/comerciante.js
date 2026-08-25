@@ -3,18 +3,18 @@ import { db, storage } from './firebase-config.js';
 import { requireRole } from './session.js';
 import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { showAlert } from './utils.js';
 import { mostrarPagoComerciante } from './pagos-ui.js';
 
 // Verificar acceso - solo comerciante puede entrar
 const session = requireRole(['comerciante']);
-if (!session) {
-  // Si no tiene acceso, la función requireRole ya redirigió
-}
+const userId = session ? session.userId : null;
 
-const userId = session.userId;
+if (!userId) {
+  console.error('No se pudo obtener el userId');
+}
 
 // Hacer disponible globalmente
 window.mostrarPago = () => mostrarPagoComerciante(diasRestantesGlobal, userId);
@@ -103,7 +103,7 @@ async function loadSuscripcion() {
       const barra = document.getElementById('sub-barra');
 
       if (diasRestantesGlobal <= 0) {
-        titulo.textContent = '️ Tu prueba finalizó';
+        titulo.textContent = '⚠️ Tu prueba finalizó';
         texto.innerHTML = 'Tu perfil sigue visible pero no podés subir nuevas ofertas';
         if (diasEl) diasEl.textContent = '0';
         if (barra) barra.style.width = '0%';
@@ -172,7 +172,7 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
 
   try {
     const blobComprimido = await comprimirImagen(file, 800, 0.7);
-    btn.textContent = '️ Subiendo...';
+    btn.textContent = '📤 Subiendo...';
     showAlert('✅ Imagen comprimida, subiendo...', 'info');
 
     const ext = 'jpg';
@@ -193,7 +193,7 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
     showAlert(`Error al subir: ${err.message}`, 'danger');
   } finally {
     btn.disabled = false;
-    btn.textContent = ' Subir foto';
+    btn.textContent = '📤 Subir foto';
   }
 });
 
@@ -442,10 +442,12 @@ async function loadPerfilExistente() {
 }
 
 // ========== INICIALIZACIÓN ==========
-loadPerfilExistente();
-loadStatsGenerales();
-loadSuscripcion();
-loadProductos();
-loadVideos();
-loadExcursionesComerciante();
-initMapaPerfil();
+if (userId) {
+  loadPerfilExistente();
+  loadStatsGenerales();
+  loadSuscripcion();
+  loadProductos();
+  loadVideos();
+  loadExcursionesComerciante();
+  initMapaPerfil();
+}
