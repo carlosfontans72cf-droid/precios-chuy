@@ -1,17 +1,19 @@
 // Panel Admin de Excursión - Precios Chuy
 import { db } from './firebase-config.js';
+import { requireRole } from './session.js';
 import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { showAlert } from './utils.js';
 
-const userId = sessionStorage.getItem('userId');
-const userEmail = sessionStorage.getItem('userEmail');
-const userRole = sessionStorage.getItem('userRole');
-
-if (!userId || userRole !== 'admin_excursion') {
-  window.location.href = '/index.html';
+// Verificar acceso - solo admin_excursion puede entrar
+const session = requireRole(['admin_excursion']);
+if (!session) {
+  alert('Acceso denegado. Solo administradores de excursión pueden entrar.');
 }
+
+const userId = session.userId;
+const userEmail = session.userEmail;
 
 // Verificar si está aprobado
 async function verificarAprobacion() {
@@ -185,7 +187,7 @@ async function loadReservas() {
     reservas.forEach(res => {
       const div = document.createElement('div');
       div.className = 'reserva-card';
-      const estadoClass = res.estado === 'confirmada' ? 'badge-active' : 
+      const estadoClass = res.estado === 'confirmada' ? 'badge-active' :
                          res.estado === 'cancelada' ? 'badge-inactive' : 'badge-warning';
       const whatsappLink = res.clienteTelefono ? `https://wa.me/${res.clienteTelefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${res.clienteNombre}! Soy ${res.adminNombre}, admin de la excursión ${res.ruta} del ${res.fechaExcursion}. Te contacto sobre tu reserva.`)}` : '#';
       const senaTotal = (res.sena || 0) * (res.personas || 1);
@@ -242,7 +244,7 @@ async function loadStats() {
   try {
     const qExc = query(collection(db, 'excursiones'), where('adminId', '==', userId));
     const qRes = query(collection(db, 'reservas'), where('adminId', '==', userId));
-    
+
     const excSnap = await getDocs(qExc);
     const resSnap = await getDocs(qRes);
 

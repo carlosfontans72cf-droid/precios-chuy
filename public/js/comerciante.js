@@ -1,14 +1,20 @@
 // Panel Comerciante - Precios Chuy
 import { db, storage } from './firebase-config.js';
+import { requireRole } from './session.js';
 import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { showAlert } from './utils.js';
 import { mostrarPagoComerciante } from './pagos-ui.js';
 
-const userId = sessionStorage.getItem('userId');
-if (!userId) window.location.href = '/index.html';
+// Verificar acceso - solo comerciante puede entrar
+const session = requireRole(['comerciante']);
+if (!session) {
+  // Si no tiene acceso, la función requireRole ya redirigió
+}
+
+const userId = session.userId;
 
 // Hacer disponible globalmente
 window.mostrarPago = () => mostrarPagoComerciante(diasRestantesGlobal, userId);
@@ -25,17 +31,17 @@ function comprimirImagen(file, maxWidth = 800, calidad = 0.7) {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        
+
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
         }
-        
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
           else reject(new Error('Error al comprimir'));
@@ -49,7 +55,7 @@ function comprimirImagen(file, maxWidth = 800, calidad = 0.7) {
   });
 }
 
-// ========== ESTADÍSTICAS GENERALES (contador público) ==========
+// ========== ESTADÍSTICAS GENERALES ==========
 async function loadStatsGenerales() {
   try {
     const usersSnap = await getDocs(collection(db, 'users'));
@@ -72,27 +78,22 @@ async function loadSuscripcion() {
     if (!userDoc.empty) {
       const data = userDoc.docs[0].data();
       const totalDias = 60;
-      
-      // Calcular días restantes basados en la fecha de registro/suscripción
       let diasRestantes = 60;
-      
+
       if (data.fechaSuscripcion) {
-        // Si tiene fecha de suscripción, calcular días transcurridos
         const fechaInicio = new Date(data.fechaSuscripcion);
         const hoy = new Date();
         const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
         diasRestantes = Math.max(0, totalDias - diasTranscurridos);
       } else if (data.createdAt) {
-        // Si no tiene fechaSuscripcion, usar createdAt como referencia
         const fechaInicio = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
         const hoy = new Date();
         const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
         diasRestantes = Math.max(0, totalDias - diasTranscurridos);
       } else {
-        // Si no hay ninguna fecha, guardar fecha actual como inicio
         diasRestantes = 60;
       }
-      
+
       diasRestantesGlobal = diasRestantes;
       const porcentaje = Math.max(0, Math.min(100, (diasRestantesGlobal / totalDias) * 100));
 
@@ -102,7 +103,7 @@ async function loadSuscripcion() {
       const barra = document.getElementById('sub-barra');
 
       if (diasRestantesGlobal <= 0) {
-        titulo.textContent = '⚠️ Tu prueba finalizó';
+        titulo.textContent = '️ Tu prueba finalizó';
         texto.innerHTML = 'Tu perfil sigue visible pero no podés subir nuevas ofertas';
         if (diasEl) diasEl.textContent = '0';
         if (barra) barra.style.width = '0%';
@@ -123,28 +124,23 @@ let markerPerfil;
 function initMapaPerfil() {
   const contenedor = document.getElementById('mapa-perfil');
   if (!contenedor || mapaPerfil) return;
-  
-  // Centro del Chui
+
   mapaPerfil = L.map('mapa-perfil').setView([-33.7574, -53.4614], 14);
-  
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
   }).addTo(mapaPerfil);
-  
-  // Click en el mapa para poner el pin
+
   mapaPerfil.on('click', function(e) {
     const { lat, lng } = e.latlng;
-    
-    // Eliminar marker anterior si existe
+
     if (markerPerfil) {
       mapaPerfil.removeLayer(markerPerfil);
     }
-    
-    // Agregar nuevo marker
+
     markerPerfil = L.marker([lat, lng]).addTo(mapaPerfil);
     markerPerfil.bindPopup('📍 Tu comercio').openPopup();
-    
-    // Actualizar campos
+
     document.getElementById('perfil-lat').value = lat.toFixed(6);
     document.getElementById('perfil-lng').value = lng.toFixed(6);
   });
@@ -154,10 +150,9 @@ function initMapaPerfil() {
 document.getElementById('btn-subir-foto')?.addEventListener('click', async () => {
   const fileInput = document.getElementById('foto-input');
   const file = fileInput.files[0];
-  
+
   if (!file) return showAlert('Seleccioná una imagen primero', 'warning');
-  
-  // Si no tenemos el ID aún, cargarlo primero
+
   if (!comercioDocId) {
     try {
       const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
@@ -170,35 +165,35 @@ document.getElementById('btn-subir-foto')?.addEventListener('click', async () =>
       return showAlert('Error al buscar perfil. Guardá el perfil primero.', 'danger');
     }
   }
-  
+
   const btn = document.getElementById('btn-subir-foto');
   btn.disabled = true;
   btn.textContent = '⏳ Comprimiendo...';
-  
+
   try {
     const blobComprimido = await comprimirImagen(file, 800, 0.7);
-    btn.textContent = ' Subiendo...';
+    btn.textContent = '️ Subiendo...';
     showAlert('✅ Imagen comprimida, subiendo...', 'info');
-    
+
     const ext = 'jpg';
     const fileName = `comercios/${comercioDocId}/foto.${ext}`;
     const storageRef = ref(storage, fileName);
     const snapshot = await uploadBytes(storageRef, blobComprimido);
     const fotoUrl = await getDownloadURL(snapshot.ref);
-    
+
     await updateDoc(doc(db, 'users', comercioDocId), { logo: fotoUrl });
-    
+
     const container = document.getElementById('foto-container');
     container.innerHTML = `<img src="${fotoUrl}" class="foto-preview" alt="Foto del comercio">`;
     document.getElementById('perfil-logo').value = fotoUrl;
-    
+
     showAlert('✅ Foto actualizada correctamente', 'success');
   } catch (err) {
     console.error('Error subiendo foto:', err);
     showAlert(`Error al subir: ${err.message}`, 'danger');
   } finally {
     btn.disabled = false;
-    btn.textContent = '📤 Subir foto';
+    btn.textContent = ' Subir foto';
   }
 });
 
@@ -211,8 +206,7 @@ async function savePerfil() {
   try {
     const lat = parseFloat(document.getElementById('perfil-lat').value);
     const lng = parseFloat(document.getElementById('perfil-lng').value);
-    
-    // Buscar el documento del usuario por email
+
     const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
     if (!userDoc.empty) {
       comercioDocId = userDoc.docs[0].id;
@@ -223,7 +217,6 @@ async function savePerfil() {
         telefono: document.getElementById('perfil-telefono').value.trim(),
         logo: document.getElementById('perfil-logo').value.trim(),
         horarios: document.getElementById('perfil-horarios').value.trim(),
-        // Cambio de moneda
         cambioUsdCompra: parseFloat(document.getElementById('cambio-usd-compra').value) || null,
         cambioUsdVenta: parseFloat(document.getElementById('cambio-usd-venta').value) || null,
         cambioBrlCompra: parseFloat(document.getElementById('cambio-brl-compra').value) || null,
@@ -231,18 +224,14 @@ async function savePerfil() {
         cambioFecha: new Date().toISOString(),
         updatedAt: serverTimestamp()
       };
-      
-      // Agregar coordenadas si se seleccionaron
+
       if (!isNaN(lat) && !isNaN(lng)) {
         dataToUpdate.lat = lat;
         dataToUpdate.lng = lng;
       }
-      
+
       await updateDoc(doc(db, 'users', comercioDocId), dataToUpdate);
-      
-      // Actualizar fecha de cambio
       document.getElementById('cambio-fecha').textContent = new Date().toLocaleString('es-UY');
-      
       showAlert('Perfil actualizado', 'success');
     }
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
@@ -394,7 +383,7 @@ async function loadExcursionesComerciante() {
       const div = document.createElement('div');
       div.className = 'card';
       div.innerHTML = `
-        <h3> ${exc.ruta || 'Excursión'}</h3>
+        <h3>🚌 ${exc.ruta || 'Excursión'}</h3>
         <div class="grid grid-2" style="margin:10px 0;">
           <div><strong>Fecha:</strong> ${exc.fecha}</div>
           <div><strong>Horario:</strong> ${exc.horaSalida} - ${exc.horaRetorno}</div>
@@ -421,22 +410,19 @@ async function loadPerfilExistente() {
       const docId = userDoc.docs[0].id;
       comercioDocId = docId;
       const data = userDoc.docs[0].data();
-      
-      // Cargar campos del perfil
+
       if (data.nombreComercio) document.getElementById('perfil-nombre').value = data.nombreComercio;
       if (data.tipo) document.getElementById('perfil-tipo').value = data.tipo;
       if (data.direccion) document.getElementById('perfil-direccion').value = data.direccion;
       if (data.telefono) document.getElementById('perfil-telefono').value = data.telefono;
       if (data.logo) document.getElementById('perfil-logo').value = data.logo;
       if (data.horarios) document.getElementById('perfil-horarios').value = data.horarios;
-      
-      // Cargar foto si existe
+
       if (data.logo) {
         const container = document.getElementById('foto-container');
         container.innerHTML = `<img src="${data.logo}" class="foto-preview" alt="Foto del comercio">`;
       }
-      
-      // Cargar coordenadas
+
       if (data.lat && data.lng) {
         document.getElementById('perfil-lat').value = data.lat;
         document.getElementById('perfil-lng').value = data.lng;
@@ -445,8 +431,7 @@ async function loadPerfilExistente() {
           nuevoMarker.bindPopup('📍 Tu comercio').openPopup();
         }
       }
-      
-      // Cargar cambio de moneda
+
       if (data.cambioUsdCompra) document.getElementById('cambio-usd-compra').value = data.cambioUsdCompra;
       if (data.cambioUsdVenta) document.getElementById('cambio-usd-venta').value = data.cambioUsdVenta;
       if (data.cambioBrlCompra) document.getElementById('cambio-brl-compra').value = data.cambioBrlCompra;

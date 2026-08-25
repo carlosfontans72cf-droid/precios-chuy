@@ -1,15 +1,15 @@
 // Sistema de autenticación - Precios Chuy
 import { auth, db } from './firebase-config.js';
-import { 
-  signInWithEmailAndPassword,
-  fetchSignInMethodsForEmail 
+import { guardarSesion } from './session.js';
+import {
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const btnLogin = document.getElementById('btn-login');
 const errorDiv = document.getElementById('login-error');
 
-// Buscar usuario en Firestore por email (cuando el UID no coincide)
+// Buscar usuario en Firestore por email
 async function buscarUsuarioPorEmail(email) {
   try {
     const q = query(collection(db, 'users'), where('email', '==', email));
@@ -30,6 +30,9 @@ btnLogin.addEventListener('click', async () => {
   btnLogin.disabled = true;
   btnLogin.textContent = 'Entrando...';
 
+  // IMPORTANTE: limpiar sessionStorage ANTES de cualquier cosa
+  sessionStorage.clear();
+
   try {
     if (!email || !password) {
       errorDiv.textContent = 'Completá todos los campos';
@@ -40,7 +43,7 @@ btnLogin.addEventListener('click', async () => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // PASO 1: Intentar obtener por UID (método normal)
+    // PASO 1: Intentar obtener por UID
     let userDoc = await getDoc(doc(db, 'users', user.uid));
     let userData = userDoc.exists() ? userDoc.data() : null;
     let userId = user.uid;
@@ -56,7 +59,7 @@ btnLogin.addEventListener('click', async () => {
       }
     }
 
-    // PASO 3: Si tampoco por email, crear documento vacío
+    // PASO 3: Si no existe en Firestore
     if (!userData) {
       console.error('Usuario en Auth pero no en Firestore:', email);
       errorDiv.textContent = 'Error: Usuario en sistema pero sin perfil. Contactá al admin.';
@@ -78,15 +81,8 @@ btnLogin.addEventListener('click', async () => {
       throw new Error('Cuenta pendiente');
     }
 
-    // Guardar sesión (limpiar primero por si había datos viejos)
-    sessionStorage.clear();
-    sessionStorage.setItem('userId', userId);
-    sessionStorage.setItem('userEmail', userData.email);
-    sessionStorage.setItem('userName', userData.nombre);
-    sessionStorage.setItem('userRole', userData.role);
-    if (userData.ruta) sessionStorage.setItem('userRuta', userData.ruta);
-    if (userData.plan === 'premium') sessionStorage.setItem('userPlan', 'premium');
-    else sessionStorage.setItem('userPlan', 'gratis');
+    // TODOS los checks pasaron → guardar sesión
+    guardarSesion(userId, userData);
 
     console.log('✅ Login exitoso:', { userId, email, role: userData.role, plan: userData.plan });
 
@@ -107,14 +103,13 @@ btnLogin.addEventListener('click', async () => {
     } else if (error.code === 'auth/too-many-requests') {
       errorDiv.textContent = 'Demasiados intentos. Intentá más tarde';
     }
-    // Otros errores ya tienen el mensaje en errorDiv
   } finally {
     btnLogin.disabled = false;
     btnLogin.textContent = 'Iniciar Sesión';
   }
 });
 
-// Verificar sesión activa al cargar - SOLO en página de login
+// Solo redirige si estás en la página de login y ya hay sesión activa
 auth.onAuthStateChanged((user) => {
   if (user && window.location.pathname.includes('login')) {
     const role = sessionStorage.getItem('userRole');
