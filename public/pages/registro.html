@@ -68,7 +68,7 @@
           <div class="icon">&#128652;</div>
           <h3>Admin de Excursion</h3>
           <p>Organizar viajes</p>
-          <div class="price-tag">$1/persona</div>
+          <div class="price-tag">$<span class="comision-tag">1</span>/persona</div>
           <ul class="benefits">
             <li>Crear y gestionar excursiones</li>
             <li>Ver reservas en tiempo real</li>
@@ -76,7 +76,7 @@
             <li>Soporte prioritario</li>
           </ul>
           <p style="font-size:0.9rem; color:#666;">
-            Pagas $1 por cada persona<br>
+            Pagas $<span class="comision-desc">1</span> por cada persona<br>
             que reserve tu excursion
           </p>
         </div>
@@ -128,7 +128,7 @@
           </div>
           <p style="background:#fff3cd; padding:15px; border-radius:8px; border-left:4px solid #ffc107; margin-top:10px;">
             <strong>Nota:</strong> Despues de registrarte, el admin general aprobara tu cuenta.<br>
-            Costo: $1 USD por cada persona que reserve tu excursion.
+            Costo: $<span id="comision-registro">1</span> USD por cada persona que reserve tu excursión.
           </p>
         </div>
 
@@ -165,6 +165,26 @@
       sessionStorage.setItem('selectedRole', role);
     }
   </script>
+
+  <script type="module">
+    import { db } from '../js/firebase-config.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    try {
+      const configDoc = await getDoc(doc(db, 'config', 'comision_excursion'));
+      let comision = 1;
+      if (configDoc.exists()) {
+        comision = configDoc.data().valor || 1;
+      }
+      // Actualizar todos los lugares donde aparece la comisión
+      document.getElementById('comision-registro').textContent = comision;
+      document.querySelectorAll('.comision-tag').forEach(el => el.textContent = comision);
+      document.querySelectorAll('.comision-desc').forEach(el => el.textContent = comision);
+    } catch (err) {
+      console.error('Error cargando comisión:', err);
+    }
+  </script>
+
   <script type="module" src="/js/registro.js"></script>
 </body>
 </html>

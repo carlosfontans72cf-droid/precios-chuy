@@ -322,7 +322,14 @@ async function addExcursion() {
     showAlert('Excursión publicada', 'success');
     loadExcursiones();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-}
+}          <div class="form-group" style="grid-column: span 2; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0038A8;">
+            <label style="font-weight: bold; color: #0038A8;">⚙️ Comisión por defecto para nuevos admin de excursión</label>
+            <input type="number" id="config-comision" class="form-control" step="0.01" placeholder="Ej: 1.00" style="margin-top: 8px;">
+            <button id="btn-guardar-config" class="btn btn-primary" style="margin-top: 10px;">💾 Guardar comisión por defecto</button>
+            <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+              Este valor aparecerá en el registro de nuevos admin de excursión
+            </p>
+          </div>
 
 async function loadExcursiones() {
   const cont = document.getElementById('lista-excursiones');
@@ -1029,3 +1036,4 @@ loadAprobaciones();
 loadGuia();
 loadAvisos();
 initBuscador();
+cargarConfiguracion();
