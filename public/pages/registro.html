@@ -24,9 +24,7 @@
     <div class="login-card" style="max-width: 900px;">
       <div class="logo" style="font-size:2rem;font-weight:bold;color:#0038A8;margin-bottom:10px;">Precios Chuy</div>
       <h2>Registro</h2>
-      <p style="text-align:center; color:#666; margin-bottom:20px;">
-        Elegi como queres usar la app
-      </p>
+      <p style="text-align:center; color:#666; margin-bottom:20px;">Elegi como queres usar la app</p>
 
       <div class="role-selector">
         <div class="role-card" onclick="selectRole('cliente')" id="role-cliente">
@@ -40,10 +38,7 @@
             <li>Ver ofertas basicas</li>
             <li>Reservar excursiones</li>
           </ul>
-          <p style="font-size:0.9rem; color:#666;">
-            <strong>Opcional:</strong> Premium $2/mes<br>
-            Ofertas exclusivas, alertas, GPS
-          </p>
+          <p style="font-size:0.9rem; color:#666;"><strong>Opcional:</strong> Premium $2/mes<br>Ofertas exclusivas, alertas, GPS</p>
         </div>
 
         <div class="role-card" onclick="selectRole('comerciante')" id="role-comerciante">
@@ -58,10 +53,7 @@
             <li>Estadisticas</li>
             <li>Ver excursiones proximas</li>
           </ul>
-          <p style="font-size:0.9rem; color:#666;">
-            Despues: $5/mes<br>
-            Sin contratos. Pagas y usas.
-          </p>
+          <p style="font-size:0.9rem; color:#666;">Despues: $5/mes<br>Sin contratos. Pagas y usas.</p>
         </div>
 
         <div class="role-card" onclick="selectRole('admin_excursion')" id="role-admin-excursion">
@@ -75,22 +67,13 @@
             <li>Panel de estadisticas</li>
             <li>Soporte prioritario</li>
           </ul>
-          <p style="font-size:0.9rem; color:#666;">
-            Pagas $<span class="comision-desc">1</span> por cada persona<br>
-            que reserve tu excursion
-          </p>
+          <p style="font-size:0.9rem; color:#666;">Pagas $<span class="comision-desc">1</span> por cada persona<br>que reserve tu excursion</p>
         </div>
       </div>
 
       <div id="registro-form" style="display:none;">
-        <div class="form-group">
-          <label>Nombre completo</label>
-          <input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre">
-        </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="reg-email" class="form-control" placeholder="tu@email.com">
-        </div>
+        <div class="form-group"><label>Nombre completo</label><input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="reg-email" class="form-control" placeholder="tu@email.com"></div>
         <div class="form-group" style="position:relative;">
           <label>Contrasena</label>
           <input type="password" id="reg-password" class="form-control" placeholder="Minimo 6 caracteres" style="padding-right:42px;">
@@ -98,49 +81,27 @@
         </div>
 
         <div id="comercio-fields" style="display:none;">
-          <div class="form-group">
-            <label>Nombre del comercio</label>
-            <input type="text" id="reg-comercio" class="form-control" placeholder="Ej: Supermercado Central">
-          </div>
-          <div class="form-group">
-            <label>Tipo de comercio</label>
-            <select id="reg-tipo" class="form-control">
-              <option value="supermercado">Supermercado</option>
-              <option value="carniceria">Carniceria</option>
-              <option value="farmacia">Farmacia</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="ropa">Ropa</option>
-              <option value="electronica">Electronica</option>
-              <option value="panaderia">Panaderia</option>
-              <option value="otro">Otro</option>
-            </select>
-          </div>
+          <div class="form-group"><label>Nombre del comercio</label><input type="text" id="reg-comercio" class="form-control" placeholder="Ej: Supermercado Central"></div>
+          <div class="form-group"><label>Tipo de comercio</label><select id="reg-tipo" class="form-control">
+            <option value="supermercado">Supermercado</option><option value="carniceria">Carniceria</option>
+            <option value="farmacia">Farmacia</option><option value="bebidas">Bebidas</option>
+            <option value="ropa">Ropa</option><option value="electronica">Electronica</option>
+            <option value="panaderia">Panaderia</option><option value="otro">Otro</option>
+          </select></div>
         </div>
 
         <div id="excursion-fields" style="display:none;">
-          <div class="form-group">
-            <label>Ruta que vas a gestionar</label>
-            <input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado a Chui">
-          </div>
-          <div class="form-group">
-            <label>Telefono / WhatsApp</label>
-            <input type="text" id="reg-telefono" class="form-control" placeholder="+598 99...">
-          </div>
+          <div class="form-group"><label>Ruta que vas a gestionar</label><input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado a Chui"></div>
+          <div class="form-group"><label>Telefono / WhatsApp</label><input type="text" id="reg-telefono" class="form-control" placeholder="+598 99..."></div>
           <p style="background:#fff3cd; padding:15px; border-radius:8px; border-left:4px solid #ffc107; margin-top:10px;">
             <strong>Nota:</strong> Despues de registrarte, el admin general aprobara tu cuenta.<br>
-            Costo: $<span id="comision-registro">1</span> USD por cada persona que reserve tu excursión.
+            Costo: $<span id="comision-registro">1</span> USD por cada persona que reserve tu excursion.
           </p>
         </div>
 
         <div id="registro-error" style="color:#EF3340; text-align:center; margin-bottom:10px; min-height:20px;"></div>
-
-        <button id="btn-registro" class="btn btn-primary btn-block">
-          Crear cuenta
-        </button>
-
-        <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">
-          Ya tenes cuenta? <a href="/index.html" style="color:#0038A8;">Inicia sesion</a>
-        </p>
+        <button id="btn-registro" class="btn btn-primary btn-block">Crear cuenta</button>
+        <p style="text-align:center; margin-top:15px; color:#888; font-size:0.85rem;">Ya tenes cuenta? <a href="/index.html" style="color:#0038A8;">Inicia sesion</a></p>
       </div>
     </div>
   </div>
@@ -150,13 +111,9 @@
       const p = document.getElementById('reg-password');
       p.type = p.type === 'password' ? 'text' : 'password';
     }
-
     function selectRole(role) {
-      console.log('Rol seleccionado:', role);
       const cards = document.querySelectorAll('.role-card');
-      for (let i = 0; i < cards.length; i++) {
-        cards[i].classList.remove('selected');
-      }
+      for (let i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
       const selectedCard = document.getElementById('role-' + role);
       if (selectedCard) selectedCard.classList.add('selected');
       document.getElementById('registro-form').style.display = 'block';
@@ -173,16 +130,12 @@
     try {
       const configDoc = await getDoc(doc(db, 'config', 'comision_excursion'));
       let comision = 1;
-      if (configDoc.exists()) {
-        comision = configDoc.data().valor || 1;
-      }
-      // Actualizar todos los lugares donde aparece la comisión
-      document.getElementById('comision-registro').textContent = comision;
+      if (configDoc.exists()) { comision = configDoc.data().valor || 1; }
+      const el = document.getElementById('comision-registro');
+      if (el) el.textContent = comision;
       document.querySelectorAll('.comision-tag').forEach(el => el.textContent = comision);
       document.querySelectorAll('.comision-desc').forEach(el => el.textContent = comision);
-    } catch (err) {
-      console.error('Error cargando comisión:', err);
-    }
+    } catch (err) { console.error('Error cargando comisión:', err); }
   </script>
 
   <script type="module" src="/js/registro.js"></script>
