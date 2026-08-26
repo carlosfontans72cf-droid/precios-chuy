@@ -1,7 +1,7 @@
 // Panel de Administración - Precios Chuy
 import { db } from './firebase-config.js';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp,
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, serverTimestamp,
   query, where, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { showAlert } from './utils.js';
@@ -61,15 +61,11 @@ async function addProducto() {
   const precioBr = parseFloat(document.getElementById('prod-precio-br').value) || 0;
   const comercio = document.getElementById('prod-comercio').value || null;
   const imagen = document.getElementById('prod-imagen').value.trim() || null;
-
   if (!nombre) return showAlert('Ingresá el nombre del producto', 'warning');
-
   try {
     await addDoc(collection(db, 'productos'), {
-      nombre, seccionId: seccion,
-      precioUruguay: precioUy, precioBrasil: precioBr,
-      comercioId: comercio, imagen, activo: true,
-      createdAt: serverTimestamp()
+      nombre, seccionId: seccion, precioUruguay: precioUy, precioBrasil: precioBr,
+      comercioId: comercio, imagen, activo: true, createdAt: serverTimestamp()
     });
     document.getElementById('prod-nombre').value = '';
     document.getElementById('prod-precio-uy').value = '';
@@ -113,14 +109,10 @@ async function addComercio() {
   const direccion = document.getElementById('com-direccion').value.trim();
   const telefono = document.getElementById('com-telefono').value.trim();
   const email = document.getElementById('com-email').value.trim();
-
   if (!nombre) return showAlert('Ingresá el nombre del comercio', 'warning');
-
   try {
     await addDoc(collection(db, 'comercios'), {
-      nombre, tipo, direccion, telefono, email,
-      activo: true, premium: false,
-      createdAt: serverTimestamp()
+      nombre, tipo, direccion, telefono, email, activo: true, premium: false, createdAt: serverTimestamp()
     });
     document.getElementById('com-nombre').value = '';
     document.getElementById('com-direccion').value = '';
@@ -162,25 +154,21 @@ window.deleteComercio = async (id) => {
 async function loadPagos() {
   const contCom = document.getElementById('lista-pagos-comerciantes');
   const contCli = document.getElementById('lista-pagos-clientes');
-
   if (contCom) {
     contCom.innerHTML = '<p>Cargando...</p>';
     try {
       const snap = await getDocs(collection(db, 'users'));
       const comerciantes = [];
       snap.forEach(d => { if (d.data().role === 'comerciante') comerciantes.push({ id: d.id, ...d.data() }); });
-
-      if (comerciantes.length === 0) {
-        contCom.innerHTML = '<p style="color:#666;">Sin comerciantes registrados</p>';
-      } else {
+      if (comerciantes.length === 0) { contCom.innerHTML = '<p style="color:#666;">Sin comerciantes registrados</p>'; }
+      else {
         contCom.innerHTML = '';
         comerciantes.forEach(c => {
           const div = document.createElement('div');
           div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
           const dias = c.diasRestantes || 0;
-          const estado = c.plan === 'vencido' ? '⚠️ Vencido' : (c.plan === 'activo' ? '✅ Activo' : '🆓 Prueba');
-          div.innerHTML = `<strong>${c.comercio || c.nombre}</strong><br>
-            <small>${c.email} | ${estado} | Días: ${dias}</small><br>
+          const estado = c.plan === 'vencido' ? 'Vencido' : (c.plan === 'activo' ? 'Activo' : 'Prueba');
+          div.innerHTML = `<strong>${c.comercio || c.nombre}</strong><br><small>${c.email} | ${estado} | Días: ${dias}</small><br>
             <button class="btn btn-sm btn-success" onclick="extenderCom('${c.id}',30)">+30 días</button>
             <button class="btn btn-sm btn-warning" onclick="habilitarCom('${c.id}',30)">Habilitar</button>
             <button class="btn btn-sm btn-danger" onclick="suspenderCom('${c.id}')">Suspender</button>`;
@@ -189,24 +177,20 @@ async function loadPagos() {
       }
     } catch (err) { contCom.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
   }
-
   if (contCli) {
     contCli.innerHTML = '<p>Cargando...</p>';
     try {
       const snap = await getDocs(collection(db, 'users'));
       const clientes = [];
       snap.forEach(d => { if (d.data().role === 'cliente') clientes.push({ id: d.id, ...d.data() }); });
-
-      if (clientes.length === 0) {
-        contCli.innerHTML = '<p style="color:#666;">Sin clientes registrados</p>';
-      } else {
+      if (clientes.length === 0) { contCli.innerHTML = '<p style="color:#666;">Sin clientes registrados</p>'; }
+      else {
         contCli.innerHTML = '';
         clientes.forEach(c => {
           const div = document.createElement('div');
           div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-          const plan = c.plan === 'premium' ? '⭐ Premium' : '🆓 Gratis';
-          div.innerHTML = `<strong>${c.nombre}</strong><br>
-            <small>${c.email} | ${plan}</small><br>
+          const plan = c.plan === 'premium' ? 'Premium' : 'Gratis';
+          div.innerHTML = `<strong>${c.nombre}</strong><br><small>${c.email} | ${plan}</small><br>
             <button class="btn btn-sm btn-success" onclick="activarPrem('${c.id}',30)">+30 días Premium</button>
             <button class="btn btn-sm btn-warning" onclick="quitarPrem('${c.id}')">Volver a gratis</button>`;
           contCli.appendChild(div);
@@ -217,51 +201,24 @@ async function loadPagos() {
 }
 
 window.extenderCom = async (id, dias) => {
-  try {
-    await updateDoc(doc(db, 'users', id), {
-      plan: 'activo', diasRestantes: dias, activo: true
-    });
-    showAlert(`Extendido ${dias} días`, 'success');
-    loadPagos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try { await updateDoc(doc(db, 'users', id), { plan: 'activo', diasRestantes: dias, activo: true });
+    showAlert(`Extendido ${dias} días`, 'success'); loadPagos(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
 window.habilitarCom = window.extenderCom;
-
 window.suspenderCom = async (id) => {
   if (!confirm('¿Suspender?')) return;
-  try {
-    await updateDoc(doc(db, 'users', id), { activo: false, plan: 'suspendido' });
-    showAlert('Suspendido', 'warning');
-    loadPagos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try { await updateDoc(doc(db, 'users', id), { activo: false, plan: 'suspendido' }); showAlert('Suspendido', 'warning'); loadPagos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
 window.activarPrem = async (id, dias) => {
-  const fecha = new Date();
-  fecha.setDate(fecha.getDate() + dias);
-  try {
-    await updateDoc(doc(db, 'users', id), {
-      plan: 'premium', 
-      fechaVencimientoPremium: fecha.toISOString(),
-      premiumActivo: true
-    });
-    showAlert('✅ Premium activado por 30 días', 'success');
-    loadPagos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  const fecha = new Date(); fecha.setDate(fecha.getDate() + dias);
+  try { await updateDoc(doc(db, 'users', id), { plan: 'premium', fechaVencimientoPremium: fecha.toISOString(), premiumActivo: true });
+    showAlert('Premium activado por 30 días', 'success'); loadPagos(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
 window.quitarPrem = async (id) => {
   if (!confirm('¿Quitar premium?')) return;
-  try {
-    await updateDoc(doc(db, 'users', id), { 
-      plan: 'gratis', 
-      fechaVencimientoPremium: null,
-      premiumActivo: false
-    });
-    showAlert('Vuelto a plan gratis', 'info');
-    loadPagos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try { await updateDoc(doc(db, 'users', id), { plan: 'gratis', fechaVencimientoPremium: null, premiumActivo: false });
+    showAlert('Vuelto a plan gratis', 'info'); loadPagos(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 // ========== USUARIOS ==========
@@ -273,17 +230,14 @@ async function loadUsuarios() {
     const snap = await getDocs(collection(db, 'users'));
     const users = [];
     snap.forEach(d => users.push({ id: d.id, ...d.data() }));
-
-    if (users.length === 0) {
-      cont.innerHTML = '<p style="color:#666;">Sin usuarios registrados aún</p>';
-    } else {
+    if (users.length === 0) { cont.innerHTML = '<p style="color:#666;">Sin usuarios registrados aún</p>'; }
+    else {
       cont.innerHTML = '';
       users.forEach(u => {
         const div = document.createElement('div');
         div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-        const rol = u.role === 'admin' ? '👑 Admin' : (u.role === 'comerciante' ? ' Comerciante' : '🛒 Cliente');
-        div.innerHTML = `<strong>${u.nombre}</strong> ${rol}<br>
-          <small>${u.email} | Plan: ${u.plan || 'N/A'}</small>`;
+        const rol = u.role === 'admin' ? 'Admin' : (u.role === 'comerciante' ? 'Comerciante' : 'Cliente');
+        div.innerHTML = `<strong>${u.nombre}</strong> ${rol}<br><small>${u.email} | Plan: ${u.plan || 'N/A'}</small>`;
         cont.appendChild(div);
       });
     }
@@ -302,14 +256,11 @@ async function addExcursion() {
   const lugares = parseInt(document.getElementById('exc-lugares').value) || 0;
   const van = document.getElementById('exc-van').value.trim();
   const comision = parseFloat(document.getElementById('exc-comision').value) || 1;
-
   if (!fecha || !horaSalida || !punto) return showAlert('Completá fecha, hora y punto', 'warning');
-
   try {
     await addDoc(collection(db, 'excursiones'), {
       fecha, horaSalida, punto, horaRetorno, precio, lugares,
-      lugaresOcupados: 0, van, comision, publicada: true,
-      createdAt: serverTimestamp()
+      lugaresOcupados: 0, van, comision, publicada: true, createdAt: serverTimestamp()
     });
     document.getElementById('exc-fecha').value = '';
     document.getElementById('exc-hora-salida').value = '';
@@ -322,14 +273,7 @@ async function addExcursion() {
     showAlert('Excursión publicada', 'success');
     loadExcursiones();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-}          <div class="form-group" style="grid-column: span 2; background: #f0f4ff; padding: 15px; border-radius: 8px; border-left: 4px solid #0038A8;">
-            <label style="font-weight: bold; color: #0038A8;">⚙️ Comisión por defecto para nuevos admin de excursión</label>
-            <input type="number" id="config-comision" class="form-control" step="0.01" placeholder="Ej: 1.00" style="margin-top: 8px;">
-            <button id="btn-guardar-config" class="btn btn-primary" style="margin-top: 10px;">💾 Guardar comisión por defecto</button>
-            <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">
-              Este valor aparecerá en el registro de nuevos admin de excursión
-            </p>
-          </div>
+}
 
 async function loadExcursiones() {
   const cont = document.getElementById('lista-excursiones');
@@ -340,12 +284,7 @@ async function loadExcursiones() {
     const excursiones = [];
     snap.forEach(d => excursiones.push({ id: d.id, ...d.data() }));
     excursiones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-    if (excursiones.length === 0) {
-      cont.innerHTML = '<p style="color:#666;">Sin excursiones programadas</p>';
-      return;
-    }
-
+    if (excursiones.length === 0) { cont.innerHTML = '<p style="color:#666;">Sin excursiones programadas</p>'; return; }
     cont.innerHTML = '';
     excursiones.forEach(exc => {
       const div = document.createElement('div');
@@ -355,7 +294,7 @@ async function loadExcursiones() {
       const ocupados = exc.lugaresOcupados || 0;
       const esAdminExcursion = exc.adminId ? true : false;
       div.innerHTML = `
-        <h3>${esAdminExcursion ? '🚌' : '🚐'} ${exc.ruta || 'Excursión'} ${esAdminExcursion ? '<small style="color:#666;">(Admin: ' + (exc.adminNombre || '') + ')</small>' : ''}</h3>
+        <h3>${esAdminExcursion ? '🚌' : ''} ${exc.ruta || 'Excursión'} ${esAdminExcursion ? '<small style="color:#666;">(Admin: ' + (exc.adminNombre || '') + ')</small>' : ''}</h3>
         <div class="grid grid-2">
           <div><strong>Fecha:</strong> ${exc.fecha || '-'}</div>
           <div><strong>Horario:</strong> ${exc.horaSalida || '-'} → ${exc.horaRetorno || '-'}</div>
@@ -371,37 +310,33 @@ async function loadExcursiones() {
         <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-sm btn-warning" onclick="cancelarExcursion('${exc.id}')">Cancelar (ocultar)</button>
           <button class="btn btn-sm btn-primary" onclick="editarComision('${exc.id}', ${exc.comision || 1})">Editar comisión</button>
-          <button class="btn btn-sm btn-danger" onclick="borrarExcursion('${exc.id}')"> Borrar definitivamente</button>
-        </div>
-      `;
+          <button class="btn btn-sm btn-danger" onclick="borrarExcursion('${exc.id}')">Borrar definitivamente</button>
+        </div>`;
       cont.appendChild(div);
     });
-  } catch (err) {
-    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-  }
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
 }
 
 window.cancelarExcursion = async (id) => {
-  if (!confirm('¿Cancelar (ocultar) esta excursión? Los clientes ya no la verán, pero quedará en la base de datos.')) return;
-  try {
-    await updateDoc(doc(db, 'excursiones', id), { activa: false, publicada: false });
-    showAlert('Excursión cancelada (oculta)', 'warning');
-    loadExcursiones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+  if (!confirm('¿Cancelar (ocultar) esta excursión?')) return;
+  try { await updateDoc(doc(db, 'excursiones', id), { activa: false, publicada: false });
+    showAlert('Excursión cancelada (oculta)', 'warning'); loadExcursiones(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+window.borrarExcursion = async (id) => {
+  if (!confirm('¿Borrar DEFINITIVAMENTE?')) return;
+  if (!confirm('¿Estás SEGURO?')) return;
+  try { await deleteDoc(doc(db, 'excursiones', id)); showAlert('Excursión borrada', 'danger'); loadExcursiones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
-window.borrarExcursion = async (id) => {
-  if (!confirm('⚠️ ATENCIÓN: Esto borrará la excursión DEFINITIVAMENTE de la base de datos. ¿Continuar?')) return;
-  if (!confirm('¿Estás SEGURO? Esta acción no se puede deshacer.')) return;
-  try {
-    await deleteDoc(doc(db, 'excursiones', id));
-    showAlert('Excursión borrada definitivamente', 'danger');
-    loadExcursiones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+window.editarComision = (id, comisionActual) => {
+  const nuevaComision = prompt(`Comisión actual: $${comisionActual}\nIngresá la nueva comisión ($):`, comisionActual);
+  if (nuevaComision === null) return;
+  const comision = parseFloat(nuevaComision);
+  if (isNaN(comision) || comision < 0) { showAlert('Comisión inválida', 'danger'); return; }
+  updateDoc(doc(db, 'excursiones', id), { comision }).then(() => {
+    showAlert(`Comisión actualizada a $${comision}`, 'success'); loadExcursiones();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 };
 
 // ========== VIDEOS ==========
@@ -423,11 +358,9 @@ async function loadVideos() {
     });
   } catch (err) { console.error('Error videos:', err); }
 }
-
 window.deleteVid = async (id) => {
   if (!confirm('¿Eliminar?')) return;
-  try { await deleteDoc(doc(db, 'videos', id)); loadVideos(); }
-  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try { await deleteDoc(doc(db, 'videos', id)); loadVideos(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 // ========== APROBACIONES ==========
@@ -435,166 +368,103 @@ async function loadAprobaciones() {
   const cont = document.getElementById('lista-aprobaciones');
   if (!cont) return;
   cont.innerHTML = '<p>Cargando...</p>';
-
   try {
     const snap = await getDocs(collection(db, 'users'));
     const pendientes = [];
-    snap.forEach(d => {
-      const data = d.data();
-      if (data.role === 'admin_excursion' && !data.aprobado) {
-        pendientes.push({ id: d.id, ...data });
-      }
-    });
-
-    if (pendientes.length === 0) {
-      cont.innerHTML = '<p style="color:#666;">No hay aprobaciones pendientes</p>';
-      return;
-    }
-
+    snap.forEach(d => { const data = d.data(); if (data.role === 'admin_excursion' && !data.aprobado) pendientes.push({ id: d.id, ...data }); });
+    if (pendientes.length === 0) { cont.innerHTML = '<p style="color:#666;">No hay aprobaciones pendientes</p>'; return; }
     cont.innerHTML = '';
     pendientes.forEach(p => {
       const div = document.createElement('div');
       div.style.cssText = 'padding:15px; border-bottom:1px solid #eee; background:#fff3cd; border-radius:8px; margin-bottom:10px;';
-      div.innerHTML = `
-        <strong>${p.nombre}</strong><br>
-        <small>${p.email}</small><br>
-        <small>🚌 Ruta: ${p.ruta || 'Sin definir'}</small><br>
-        <small> ${p.telefono || 'Sin teléfono'}</small><br>
-        <button class="btn btn-sm btn-success" onclick="aprobarAdmin('${p.id}', '${p.email}')">✅ Aprobar</button>
-        <button class="btn btn-sm btn-danger" onclick="rechazarAdmin('${p.id}', '${p.email}')">❌ Rechazar</button>
-      `;
+      div.innerHTML = `<strong>${p.nombre}</strong><br><small>${p.email}</small><br><small>🚌 Ruta: ${p.ruta || 'Sin definir'}</small><br><small>${p.telefono || 'Sin teléfono'}</small><br>
+        <button class="btn btn-sm btn-success" onclick="aprobarAdmin('${p.id}')">✅ Aprobar</button>
+        <button class="btn btn-sm btn-danger" onclick="rechazarAdmin('${p.id}')">❌ Rechazar</button>`;
       cont.appendChild(div);
     });
-  } catch (err) {
-    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-  }
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
 }
 
-window.aprobarAdmin = async (id, email) => {
-  if (!confirm(`¿Aprobar a ${email} como admin de excursión?`)) return;
-  try {
-    await updateDoc(doc(db, 'users', id), { aprobado: true });
-    showAlert('Admin aprobado', 'success');
-    loadAprobaciones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+window.aprobarAdmin = async (id) => {
+  if (!confirm('¿Aprobar admin de excursión?')) return;
+  try { await updateDoc(doc(db, 'users', id), { aprobado: true }); showAlert('Aprobado', 'success'); loadAprobaciones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
-window.rechazarAdmin = async (id, email) => {
-  if (!confirm(`¿Rechazar a ${email}?`)) return;
-  try {
-    await deleteDoc(doc(db, 'users', id));
-    showAlert('Admin rechazado', 'warning');
-    loadAprobaciones();
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+window.rechazarAdmin = async (id) => {
+  if (!confirm('¿Rechazar y eliminar?')) return;
+  try { await deleteDoc(doc(db, 'users', id)); showAlert('Rechazado', 'warning'); loadAprobaciones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+window.desaprobarAdmin = async (id) => {
+  if (!confirm('¿Desaprobar?')) return;
+  try { await updateDoc(doc(db, 'users', id), { aprobado: false }); showAlert('Desaprobado', 'warning'); loadAprobaciones(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 // ========== GENERAR USUARIOS FICTICIOS ==========
 document.getElementById('btn-generar-usuarios')?.addEventListener('click', generarFicticios);
-
 async function generarFicticios() {
   const resultadoDiv = document.getElementById('resultado-generacion');
   if (resultadoDiv) resultadoDiv.innerHTML = '<p>Generando...</p>';
-
   const nombresUY = ['Juan','María','Carlos','Ana','Pedro','Laura','Diego','Sofía','Martín','Valentina','Santiago','Camila'];
   const apellidosUY = ['Pérez','González','Rodríguez','Fernández','López','Martínez','Sánchez','Ramírez','Silva','Alvarez'];
   const nombresBR = ['João','Maria','José','Ana','Carlos','Paula','Pedro','Mariana','Lucas','Julia'];
   const apellidosBR = ['Silva','Santos','Oliveira','Souza','Rodrigues','Ferreira','Alves','Pereira','Lima'];
   const tiposCom = ['supermercado','carniceria','farmacia','bebidas','ropa','electronica','panaderia'];
   const nombresCom = ['Super Central','Mercado Popular','Farma Vida','Depósito Bebidas','Moda Style','TecnoDigital','Panadería El Horno','Carnes El Gaucho'];
-
   function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
   let exitosos = 0;
-
   try {
-    // 180 clientes
     for (let i = 0; i < 180; i++) {
       const esUY = Math.random() > 0.4;
       const nombre = esUY ? nombresUY[rand(0,nombresUY.length-1)] : nombresBR[rand(0,nombresBR.length-1)];
       const apellido = esUY ? apellidosUY[rand(0,apellidosUY.length-1)] : apellidosBR[rand(0,apellidosBR.length-1)];
       const esPremium = Math.random() > 0.85;
-
       await addDoc(collection(db, 'users'), {
-        nombre: `${nombre} ${apellido}`,
-        email: `${nombre.toLowerCase().charAt(0)}${apellido.toLowerCase()}${rand(10,999)}@gmail.com`,
-        role: 'cliente',
-        plan: esPremium ? 'premium' : 'gratis',
-        pais: esUY ? 'UY' : 'BR',
-        activo: true,
-        ficticio: true,
-        createdAt: serverTimestamp()
+        nombre: `${nombre} ${apellido}`, email: `${nombre.toLowerCase().charAt(0)}${apellido.toLowerCase()}${rand(10,999)}@gmail.com`,
+        role: 'cliente', plan: esPremium ? 'premium' : 'gratis', pais: esUY ? 'UY' : 'BR', activo: true, ficticio: true, createdAt: serverTimestamp()
       });
       exitosos++;
     }
-
-    // 70 comercios
     for (let i = 0; i < 70; i++) {
       const esUY = Math.random() > 0.7;
       const nombreCom = `${nombresCom[rand(0,nombresCom.length-1)]} ${rand(1,99)}`;
-
       await addDoc(collection(db, 'users'), {
         nombre: `${nombresUY[rand(0,nombresUY.length-1)]} ${apellidosUY[rand(0,apellidosUY.length-1)]}`,
-        email: `comercio${rand(10,999)}@gmail.com`,
-        role: 'comerciante',
-        comercio: nombreCom,
-        tipoComercio: tiposCom[rand(0,tiposCom.length-1)],
-        plan: 'prueba',
-        pais: esUY ? 'UY' : 'BR',
-        diasRestantes: rand(15, 60),
-        activo: true,
-        ficticio: true,
-        createdAt: serverTimestamp()
+        email: `comercio${rand(10,999)}@gmail.com`, role: 'comerciante', comercio: nombreCom,
+        tipoComercio: tiposCom[rand(0,tiposCom.length-1)], plan: 'prueba', pais: esUY ? 'UY' : 'BR',
+        diasRestantes: rand(15, 60), activo: true, ficticio: true, createdAt: serverTimestamp()
       });
       exitosos++;
     }
-
-    if (resultadoDiv) {
-      resultadoDiv.innerHTML = `<div class="alert alert-success">✅ Generados ${exitosos} usuarios ficticios<br>180 clientes + 70 comercios</div>`;
-    }
+    if (resultadoDiv) resultadoDiv.innerHTML = `<div class="alert alert-success">✅ Generados ${exitosos} usuarios ficticios</div>`;
     loadUsuarios();
     showAlert(`${exitosos} usuarios generados`, 'success');
-  } catch (err) {
-    if (resultadoDiv) resultadoDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
-  }
+  } catch (err) { if (resultadoDiv) resultadoDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`; }
 }
 
 // ========== BUSCADOR DE USUARIOS ==========
 function initBuscador() {
   const contenedor = document.getElementById('buscador-usuarios-container');
   if (!contenedor) return;
-
   contenedor.innerHTML = `
     <div class="card" style="background:#f0f4ff; border-left:4px solid #0038A8; margin-bottom:20px;">
-      <div class="card-header"> Buscar Usuario</div>
+      <div class="card-header">Buscar Usuario</div>
       <div class="grid grid-2">
-        <div class="form-group">
-          <label>Buscar por nombre, email o comercio</label>
-          <input type="text" id="buscador-input" class="form-control" placeholder="Ej: Carlos, carlos@..., Super Central...">
-        </div>
-        <div class="form-group">
-          <label>Filtrar por rol</label>
-          <select id="buscador-rol" class="form-control">
-            <option value="">Todos los roles</option>
-            <option value="admin">Admin General</option>
-            <option value="comerciante">Comerciante</option>
-            <option value="cliente">Cliente</option>
-            <option value="admin_excursion">Admin Excursión</option>
-          </select>
-        </div>
+        <div class="form-group"><label>Buscar por nombre, email o comercio</label><input type="text" id="buscador-input" class="form-control" placeholder="Ej: Carlos, carlos@..., Super Central..."></div>
+        <div class="form-group"><label>Filtrar por rol</label><select id="buscador-rol" class="form-control">
+          <option value="">Todos los roles</option><option value="admin">Admin General</option>
+          <option value="comerciante">Comerciante</option><option value="cliente">Cliente</option>
+          <option value="admin_excursion">Admin Excursión</option>
+        </select></div>
       </div>
-      <div class="btn-group" style="margin-top:10px;">
-        <button id="btn-buscar" class="btn btn-primary"> Buscar</button>
+      <div style="margin-top:10px;">
+        <button id="btn-buscar" class="btn btn-primary">Buscar</button>
         <button id="btn-limpiar-buscador" class="btn btn-warning">Limpiar</button>
         <span id="resultado-contador" style="padding:10px; color:#666;"></span>
       </div>
     </div>
-    <div id="buscador-resultados" style="margin-top:20px;"></div>
-  `;
-
+    <div id="buscador-resultados" style="margin-top:20px;"></div>`;
   document.getElementById('btn-buscar').addEventListener('click', buscarUsuarios);
   document.getElementById('btn-limpiar-buscador').addEventListener('click', () => {
     document.getElementById('buscador-input').value = '';
@@ -602,10 +472,7 @@ function initBuscador() {
     document.getElementById('buscador-resultados').innerHTML = '';
     document.getElementById('resultado-contador').textContent = '';
   });
-
-  document.getElementById('buscador-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') buscarUsuarios();
-  });
+  document.getElementById('buscador-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') buscarUsuarios(); });
 }
 
 async function buscarUsuarios() {
@@ -613,48 +480,31 @@ async function buscarUsuarios() {
   const rolFiltro = document.getElementById('buscador-rol').value;
   const contenedor = document.getElementById('buscador-resultados');
   const contador = document.getElementById('resultado-contador');
-
-  if (!searchQuery && !rolFiltro) {
-    contenedor.innerHTML = '<div class="alert alert-warning">Ingresá un término de búsqueda o seleccioná un rol</div>';
-    return;
-  }
-
+  if (!searchQuery && !rolFiltro) { contenedor.innerHTML = '<div class="alert alert-warning">Ingresá un término de búsqueda o seleccioná un rol</div>'; return; }
   contenedor.innerHTML = '<p style="text-align:center;color:#666;">Buscando...</p>';
   contador.textContent = '';
-
   try {
     const snap = await getDocs(collection(db, 'users'));
     const todos = [];
     snap.forEach(d => todos.push({ id: d.id, ...d.data() }));
-
     const filtrados = todos.filter(u => {
-      const matchQuery = !searchQuery ||
-        (u.nombre && u.nombre.toLowerCase().includes(searchQuery)) ||
-        (u.email && u.email.toLowerCase().includes(searchQuery)) ||
-        (u.comercio && u.comercio.toLowerCase().includes(searchQuery)) ||
-        (u.ruta && u.ruta.toLowerCase().includes(searchQuery));
+      const matchQuery = !searchQuery || (u.nombre && u.nombre.toLowerCase().includes(searchQuery)) ||
+        (u.email && u.email.toLowerCase().includes(searchQuery)) || (u.comercio && u.comercio.toLowerCase().includes(searchQuery)) || (u.ruta && u.ruta.toLowerCase().includes(searchQuery));
       const matchRol = !rolFiltro || u.role === rolFiltro;
       return matchQuery && matchRol;
     });
-
     contador.textContent = `Encontrados: ${filtrados.length} de ${todos.length}`;
-
-    if (filtrados.length === 0) {
-      contenedor.innerHTML = '<div class="alert alert-warning">No se encontraron usuarios</div>';
-      return;
-    }
-
+    if (filtrados.length === 0) { contenedor.innerHTML = '<div class="alert alert-warning">No se encontraron usuarios</div>'; return; }
     contenedor.innerHTML = '';
     filtrados.forEach(u => {
       const div = document.createElement('div');
       div.className = 'card';
       div.style.marginBottom = '10px';
       let infoHTML = `<div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;"><div style="flex:1; min-width:250px;">`;
-      infoHTML += `<h4>${u.role === 'admin' ? '' : u.role === 'comerciante' ? '🏪' : u.role === 'admin_excursion' ? '🚌' : ''} ${u.nombre || 'Sin nombre'}</h4>`;
-      infoHTML += `<p style="margin:5px 0;"><small>📧 ${u.email || '-'}</small></p>`;
-
+      infoHTML += `<h4>${u.role === 'admin' ? '👑' : u.role === 'comerciante' ? '🏪' : u.role === 'admin_excursion' ? '🚌' : ''} ${u.nombre || 'Sin nombre'}</h4>`;
+      infoHTML += `<p style="margin:5px 0;"><small> ${u.email || '-'}</small></p>`;
       if (u.role === 'comerciante') {
-        infoHTML += `<p style="margin:5px 0;"><small> ${u.comercio || '-'}</small></p>`;
+        infoHTML += `<p style="margin:5px 0;"><small>🏪 ${u.comercio || '-'}</small></p>`;
         infoHTML += `<p style="margin:5px 0;"><small>💰 Plan: <strong>${u.plan || 'prueba'}</strong> | Días: ${u.diasRestantes || 0}</small></p>`;
       } else if (u.role === 'cliente') {
         infoHTML += `<p style="margin:5px 0;"><small>⭐ Plan: <strong>${u.plan === 'premium' ? 'Premium' : 'Gratis'}</strong></small></p>`;
@@ -663,37 +513,25 @@ async function buscarUsuarios() {
         infoHTML += `<p style="margin:5px 0;"><small>✅ Aprobado: <strong>${u.aprobado ? 'Sí' : 'No'}</strong></small></p>`;
       }
       infoHTML += `</div><div style="display:flex; flex-direction:column; gap:5px;">`;
-
       if (u.role === 'cliente') {
-        if (u.plan === 'premium') {
-          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPrem('${u.id}')">Quitar Premium</button>`;
-        } else {
-          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPrem('${u.id}', 30)">+30 días Premium</button>`;
-        }
+        if (u.plan === 'premium') infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.quitarPrem('${u.id}')">Quitar Premium</button>`;
+        else infoHTML += `<button class="btn btn-sm btn-success" onclick="window.activarPrem('${u.id}', 30)">+30 días Premium</button>`;
         infoHTML += `<button class="btn btn-sm btn-primary" onclick="window.activarPremEmail('${u.email}')">Premium (x Email)</button>`;
       } else if (u.role === 'comerciante') {
         infoHTML += `<button class="btn btn-sm btn-success" onclick="window.extenderCom('${u.id}', 30)">+30 días</button>`;
         infoHTML += `<button class="btn btn-sm btn-primary" onclick="window.habilitarCom('${u.id}', 30)">Habilitar</button>`;
         infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.suspenderCom('${u.id}')">Suspender</button>`;
       } else if (u.role === 'admin_excursion') {
-        if (!u.aprobado) {
-          infoHTML += `<button class="btn btn-sm btn-success" onclick="window.aprobarAdmin('${u.id}')">✅ Aprobar</button>`;
-        } else {
-          infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.desaprobarAdmin('${u.id}')">Desaprobar</button>`;
-        }
-        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.rechazarAdmin('${u.id}')">🗑 Rechazar</button>`;
+        if (!u.aprobado) infoHTML += `<button class="btn btn-sm btn-success" onclick="window.aprobarAdmin('${u.id}')">✅ Aprobar</button>`;
+        else infoHTML += `<button class="btn btn-sm btn-warning" onclick="window.desaprobarAdmin('${u.id}')">Desaprobar</button>`;
+        infoHTML += `<button class="btn btn-sm btn-danger" onclick="window.rechazarAdmin('${u.id}')">Rechazar</button>`;
       }
       infoHTML += `</div></div>`;
       div.innerHTML = infoHTML;
       contenedor.appendChild(div);
     });
-
-  } catch (err) {
-    contenedor.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
-  }
+  } catch (err) { contenedor.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`; }
 }
-
-// ===== FUNCIONES GLOBALES DE ADMIN (fuera de buscarUsuarios para tener query y where en scope) =====
 
 window.activarPremEmail = async (email) => {
   const dias = parseInt(prompt('¿Cuántos días de Premium?', '30')) || 30;
@@ -701,90 +539,44 @@ window.activarPremEmail = async (email) => {
   try {
     const q = query(collection(db, 'users'), where('email', '==', email));
     const snap = await getDocs(q);
-    if (snap.empty) { showAlert('❌ Usuario no encontrado', 'danger'); return; }
-    let count = 0;
-    for (const d of snap.docs) {
-      await updateDoc(doc(db, 'users', d.id), { 
-        plan: 'premium', fechaVencimientoPremium: fecha.toISOString(), premiumActivo: true 
-      });
-      count++;
-    }
-    showAlert(`✅ Premium activado para ${email} (${count} doc(s))`, 'success');
+    if (snap.empty) { showAlert('Usuario no encontrado', 'danger'); return; }
+    for (const d of snap.docs) { await updateDoc(doc(db, 'users', d.id), { plan: 'premium', fechaVencimientoPremium: fecha.toISOString(), premiumActivo: true }); }
+    showAlert(`Premium activado para ${email}`, 'success');
     buscarUsuarios(); loadPagos();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
 window.quitarPremEmail = async (email) => {
   if (!confirm(`¿Quitar Premium a ${email}?`)) return;
   try {
     const q = query(collection(db, 'users'), where('email', '==', email));
     const snap = await getDocs(q);
-    for (const d of snap.docs) {
-      await updateDoc(doc(db, 'users', d.id), { 
-        plan: 'gratis', fechaVencimientoPremium: null, premiumActivo: false 
-      });
-    }
-    showAlert('✅ Vuelto a gratis', 'info');
+    for (const d of snap.docs) { await updateDoc(doc(db, 'users', d.id), { plan: 'gratis', fechaVencimientoPremium: null, premiumActivo: false }); }
+    showAlert('Vuelto a gratis', 'info');
     buscarUsuarios(); loadPagos();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
-window.aprobarAdmin = async (id) => {
-  if (!confirm('¿Aprobar admin de excursión?')) return;
-  try { 
-    await updateDoc(doc(db, 'users', id), { aprobado: true }); 
-    showAlert('✅ Aprobado', 'success'); 
-    loadAprobaciones(); 
-    if (typeof buscarUsuarios === 'function') buscarUsuarios();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-};
-
-window.desaprobarAdmin = async (id) => {
-  if (!confirm('¿Desaprobar?')) return;
-  try { 
-    await updateDoc(doc(db, 'users', id), { aprobado: false }); 
-    showAlert('⚠️ Desaprobado', 'warning'); 
-    loadAprobaciones();
-    if (typeof buscarUsuarios === 'function') buscarUsuarios();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-};
-
-window.rechazarAdmin = async (id) => {
-  if (!confirm('¿Rechazar y eliminar?')) return;
-  try { 
-    await deleteDoc(doc(db, 'users', id)); 
-    showAlert('🗑 Eliminado', 'danger'); 
-    loadAprobaciones();
-    if (typeof buscarUsuarios === 'function') buscarUsuarios();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-};
-
-// ========== GUÍA DEL CHUY (gestión de contenido) ==========
+// ========== GUÍA DEL CHUY ==========
 async function loadGuia() {
   const cont = document.getElementById('lista-guia');
   if (!cont) return;
   cont.innerHTML = '<p>Cargando...</p>';
   try {
     const snap = await getDocs(collection(db, 'guia_chuy'));
-    if (snap.empty) { 
-      cont.innerHTML = '<p style="color:#666;">No hay artículos en la guía. Agregá el primero abajo.</p>'; 
-      return; 
-    }
+    if (snap.empty) { cont.innerHTML = '<p style="color:#666;">No hay artículos en la guía.</p>'; return; }
     cont.innerHTML = '';
     snap.forEach(d => {
       const data = d.data();
       const div = document.createElement('div');
       div.className = 'card';
       div.style.marginBottom = '10px';
-      div.innerHTML = `
-        <h4>${data.tipo || ''} ${data.titulo}</h4>
+      div.innerHTML = `<h4>${data.tipo || ''} ${data.titulo}</h4>
         <p style="color:#666; margin:5px 0;">${(data.contenido || '').substring(0, 100)}...</p>
         <p style="margin:5px 0;"><small>📅 ${data.fecha || '-'}</small></p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-sm btn-warning" onclick="window.editarGuia('${d.id}', '${data.titulo}', '${(data.contenido||'').replace(/'/g, "\\'")}', '${data.tipo || ''}')">✏️ Editar</button>
           <button class="btn btn-sm btn-danger" onclick="window.borrarGuia('${d.id}')">🗑 Borrar</button>
-        </div>
-      `;
+        </div>`;
       cont.appendChild(div);
     });
   } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
@@ -795,21 +587,11 @@ document.getElementById('btn-add-guia')?.addEventListener('click', () => {
   const tipo = document.getElementById('guia-tipo').value;
   const contenido = document.getElementById('guia-contenido').value.trim();
   const esPremium = document.getElementById('guia-premium').checked;
-  
   if (!titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
-  
-  addDoc(collection(db, 'guia_chuy'), {
-    titulo, tipo, contenido,
-    premium: esPremium,
-    fecha: new Date().toISOString().split('T')[0],
-    createdAt: serverTimestamp()
-  }).then(() => {
-    document.getElementById('guia-titulo').value = '';
-    document.getElementById('guia-contenido').value = '';
-    document.getElementById('guia-premium').checked = false;
-    showAlert('✅ Artículo agregado a la guía', 'success');
-    loadGuia();
-  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+  addDoc(collection(db, 'guia_chuy'), { titulo, tipo, contenido, premium: esPremium, fecha: new Date().toISOString().split('T')[0], createdAt: serverTimestamp() })
+    .then(() => { document.getElementById('guia-titulo').value = ''; document.getElementById('guia-contenido').value = ''; document.getElementById('guia-premium').checked = false;
+      showAlert('Artículo agregado', 'success'); loadGuia(); })
+    .catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 });
 
 window.editarGuia = (id, titulo, contenido, tipo) => {
@@ -826,29 +608,20 @@ document.getElementById('btn-save-guia')?.addEventListener('click', () => {
   const tipo = document.getElementById('guia-tipo').value;
   const contenido = document.getElementById('guia-contenido').value.trim();
   const esPremium = document.getElementById('guia-premium').checked;
-  
   if (!id || !titulo || !contenido) return showAlert('Completá todos los campos', 'warning');
-  
-  updateDoc(doc(db, 'guia_chuy', id), {
-    titulo, tipo, contenido, premium: esPremium
-  }).then(() => {
-    document.getElementById('guia-titulo').value = '';
-    document.getElementById('guia-contenido').value = '';
-    document.getElementById('guia-edit-id').value = '';
-    document.getElementById('guia-premium').checked = false;
-    showAlert('✅ Artículo actualizado', 'success');
-    loadGuia();
-  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+  updateDoc(doc(db, 'guia_chuy', id), { titulo, tipo, contenido, premium: esPremium })
+    .then(() => { document.getElementById('guia-titulo').value = ''; document.getElementById('guia-contenido').value = '';
+      document.getElementById('guia-edit-id').value = ''; document.getElementById('guia-premium').checked = false;
+      showAlert('Artículo actualizado', 'success'); loadGuia(); })
+    .catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 });
 
 window.borrarGuia = async (id) => {
-  if (!confirm('¿Borrar este artículo de la guía?')) return;
-  try {
-    await deleteDoc(doc(db, 'guia_chuy', id));
-    showAlert(' Artículo borrado', 'danger');
-    loadGuia();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  if (!confirm('¿Borrar este artículo?')) return;
+  try { await deleteDoc(doc(db, 'guia_chuy', id)); showAlert('Artículo borrado', 'danger'); loadGuia(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
+
 // ========== AVISOS / NOTICIAS ==========
 document.getElementById('btn-add-aviso')?.addEventListener('click', () => {
   const titulo = document.getElementById('aviso-titulo').value.trim();
@@ -857,78 +630,51 @@ document.getElementById('btn-add-aviso')?.addEventListener('click', () => {
   const link = document.getElementById('aviso-link').value.trim() || null;
   const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
   const prioridad = document.getElementById('aviso-prioridad').value;
-
   if (!titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
-
-  addDoc(collection(db, 'avisos'), {
-    titulo, contenido, imagen, link, linkTexto, prioridad,
-    activo: true,
-    creadoPor: 'admin',
-    createdAt: serverTimestamp()
-  }).then(() => {
-    document.getElementById('aviso-titulo').value = '';
-    document.getElementById('aviso-contenido').value = '';
-    document.getElementById('aviso-imagen').value = '';
-    document.getElementById('aviso-link').value = '';
-    document.getElementById('aviso-link-texto').value = '';
-    document.getElementById('aviso-prioridad').value = 'media';
-    showAlert('✅ Aviso publicado', 'success');
-    loadAvisos();
-  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+  addDoc(collection(db, 'avisos'), { titulo, contenido, imagen, link, linkTexto, prioridad, activo: true, creadoPor: 'admin', createdAt: serverTimestamp() })
+    .then(() => { document.getElementById('aviso-titulo').value = ''; document.getElementById('aviso-contenido').value = '';
+      document.getElementById('aviso-imagen').value = ''; document.getElementById('aviso-link').value = '';
+      document.getElementById('aviso-link-texto').value = ''; document.getElementById('aviso-prioridad').value = 'media';
+      showAlert('Aviso publicado', 'success'); loadAvisos(); })
+    .catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 });
 
 async function loadAvisos() {
   const cont = document.getElementById('lista-avisos');
   if (!cont) return;
   cont.innerHTML = '<p>Cargando...</p>';
-
   try {
     const snap = await getDocs(collection(db, 'avisos'));
     const avisos = [];
     snap.forEach(d => avisos.push({ id: d.id, ...d.data() }));
-    avisos.sort((a, b) => {
-      const orden = { alta: 0, media: 1, baja: 2 };
-      return (orden[a.prioridad] || 1) - (orden[b.prioridad] || 1);
-    });
-
-    if (avisos.length === 0) {
-      cont.innerHTML = '<p style="color:#666;">No hay avisos publicados</p>';
-      return;
-    }
-
+    avisos.sort((a, b) => ({ alta: 0, media: 1, baja: 2 }[a.prioridad] || 1) - ({ alta: 0, media: 1, baja: 2 }[b.prioridad] || 1));
+    if (avisos.length === 0) { cont.innerHTML = '<p style="color:#666;">No hay avisos publicados</p>'; return; }
     cont.innerHTML = '';
     avisos.forEach(a => {
       const div = document.createElement('div');
       div.className = 'card';
       div.style.marginBottom = '10px';
-      const colorPrioridad = a.prioridad === 'alta' ? '#EF3340' : a.prioridad === 'media' ? '#FFC107' : '#009C3B';
-      const iconoPrioridad = a.prioridad === 'alta' ? '' : a.prioridad === 'media' ? '🟡' : '🟢';
-      div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:250px;">
-            <h4 style="margin:0 0 5px 0;">${iconoPrioridad} ${a.titulo}</h4>
-            <p style="margin:5px 0; color:#666; white-space:pre-wrap;">${(a.contenido || '').substring(0, 120)}${(a.contenido || '').length > 120 ? '...' : ''}</p>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-              <span style="background:${colorPrioridad}; color:white; padding:2px 8px; border-radius:4px; font-size:0.75rem;">${a.prioridad}</span>
-              ${a.activo ? '<span style="color:#009C3B; font-size:0.8rem;">✅ Activo</span>' : '<span style="color:#EF3340; font-size:0.8rem;">️ Inactivo</span>'}
-              ${a.link ? `<a href="${a.link}" target="_blank" style="font-size:0.8rem; color:#0038A8;">🔗 ${a.linkTexto || 'Ver link'}</a>` : ''}
-            </div>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:5px;">
-            <button class="btn btn-sm btn-warning" onclick="window.editarAviso('${a.id}')">✏️ Editar</button>
-            <button class="btn btn-sm ${a.activo ? 'btn-danger' : 'btn-success'}" onclick="window.toggleAviso('${a.id}', ${a.activo})">
-              ${a.activo ? '⏸️ Desactivar' : '▶️ Activar'}
-            </button>
-            <button class="btn btn-sm btn-danger" onclick="window.borrarAviso('${a.id}')">🗑 Borrar</button>
+      const colorP = a.prioridad === 'alta' ? '#EF3340' : a.prioridad === 'media' ? '#FFC107' : '#009C3B';
+      const iconoP = a.prioridad === 'alta' ? '🔴' : a.prioridad === 'media' ? '' : '🟢';
+      div.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:250px;">
+          <h4 style="margin:0 0 5px 0;">${iconoP} ${a.titulo}</h4>
+          <p style="margin:5px 0; color:#666; white-space:pre-wrap;">${(a.contenido || '').substring(0, 120)}${(a.contenido || '').length > 120 ? '...' : ''}</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <span style="background:${colorP}; color:white; padding:2px 8px; border-radius:4px; font-size:0.75rem;">${a.prioridad}</span>
+            ${a.activo ? '<span style="color:#009C3B; font-size:0.8rem;">✅ Activo</span>' : '<span style="color:#EF3340; font-size:0.8rem;">⏸️ Inactivo</span>'}
+            ${a.link ? `<a href="${a.link}" target="_blank" style="font-size:0.8rem; color:#0038A8;">🔗 ${a.linkTexto || 'Ver link'}</a>` : ''}
           </div>
         </div>
-        ${a.imagen ? `<img src="${a.imagen}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px;" onerror="this.style.display='none'">` : ''}
-      `;
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <button class="btn btn-sm btn-warning" onclick="window.editarAviso('${a.id}')">✏️ Editar</button>
+          <button class="btn btn-sm ${a.activo ? 'btn-danger' : 'btn-success'}" onclick="window.toggleAviso('${a.id}', ${a.activo})">${a.activo ? '⏸️ Desactivar' : '▶️ Activar'}</button>
+          <button class="btn btn-sm btn-danger" onclick="window.borrarAviso('${a.id}')">🗑 Borrar</button>
+        </div>
+      </div>${a.imagen ? `<img src="${a.imagen}" style="width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px;" onerror="this.style.display='none'">` : ''}`;
       cont.appendChild(div);
     });
-  } catch (err) {
-    cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-  }
+  } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
 }
 
 window.editarAviso = async (id) => {
@@ -946,11 +692,8 @@ window.editarAviso = async (id) => {
     document.getElementById('btn-add-aviso').style.display = 'none';
     document.getElementById('btn-save-aviso').style.display = 'inline-block';
     document.getElementById('btn-cancelar-aviso').style.display = 'inline-block';
-    document.getElementById('tab-avisos').scrollIntoView({ behavior: 'smooth' });
-    showAlert('Editando aviso. Modificá y guardá.', 'info');
-  } catch (err) {
-    showAlert(`Error: ${err.message}`, 'danger');
-  }
+    showAlert('Editando aviso.', 'info');
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
 document.getElementById('btn-save-aviso')?.addEventListener('click', () => {
@@ -961,25 +704,17 @@ document.getElementById('btn-save-aviso')?.addEventListener('click', () => {
   const link = document.getElementById('aviso-link').value.trim() || null;
   const linkTexto = document.getElementById('aviso-link-texto').value.trim() || null;
   const prioridad = document.getElementById('aviso-prioridad').value;
-
   if (!id || !titulo || !contenido) return showAlert('Completá título y contenido', 'warning');
-
-  updateDoc(doc(db, 'avisos', id), {
-    titulo, contenido, imagen, link, linkTexto, prioridad
-  }).then(() => {
-    document.getElementById('aviso-titulo').value = '';
-    document.getElementById('aviso-contenido').value = '';
-    document.getElementById('aviso-imagen').value = '';
-    document.getElementById('aviso-link').value = '';
-    document.getElementById('aviso-link-texto').value = '';
-    document.getElementById('aviso-prioridad').value = 'media';
-    document.getElementById('aviso-edit-id').value = '';
-    document.getElementById('btn-add-aviso').style.display = 'inline-block';
-    document.getElementById('btn-save-aviso').style.display = 'none';
-    document.getElementById('btn-cancelar-aviso').style.display = 'none';
-    showAlert('✅ Aviso actualizado', 'success');
-    loadAvisos();
-  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
+  updateDoc(doc(db, 'avisos', id), { titulo, contenido, imagen, link, linkTexto, prioridad })
+    .then(() => { document.getElementById('aviso-titulo').value = ''; document.getElementById('aviso-contenido').value = '';
+      document.getElementById('aviso-imagen').value = ''; document.getElementById('aviso-link').value = '';
+      document.getElementById('aviso-link-texto').value = ''; document.getElementById('aviso-prioridad').value = 'media';
+      document.getElementById('aviso-edit-id').value = '';
+      document.getElementById('btn-add-aviso').style.display = 'inline-block';
+      document.getElementById('btn-save-aviso').style.display = 'none';
+      document.getElementById('btn-cancelar-aviso').style.display = 'none';
+      showAlert('Aviso actualizado', 'success'); loadAvisos(); })
+    .catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 });
 
 document.getElementById('btn-cancelar-aviso')?.addEventListener('click', () => {
@@ -996,34 +731,40 @@ document.getElementById('btn-cancelar-aviso')?.addEventListener('click', () => {
 });
 
 window.toggleAviso = async (id, activo) => {
-  try {
-    await updateDoc(doc(db, 'avisos', id), { activo: !activo });
-    showAlert(activo ? 'Aviso desactivado' : 'Aviso activado', 'success');
-    loadAvisos();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try { await updateDoc(doc(db, 'avisos', id), { activo: !activo });
+    showAlert(activo ? 'Aviso desactivado' : 'Aviso activado', 'success'); loadAvisos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
-
 window.borrarAviso = async (id) => {
   if (!confirm('¿Borrar este aviso?')) return;
+  try { await deleteDoc(doc(db, 'avisos', id)); showAlert('Aviso borrado', 'danger'); loadAvisos(); }
+  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+
+// ========== CONFIGURACIÓN DE COMISIÓN ==========
+document.getElementById('btn-guardar-config')?.addEventListener('click', async () => {
+  const comision = parseFloat(document.getElementById('config-comision').value);
+  if (isNaN(comision) || comision < 0) return showAlert('Comisión inválida', 'danger');
   try {
-    await deleteDoc(doc(db, 'avisos', id));
-    showAlert('Aviso borrado', 'danger');
-    loadAvisos();
+    await setDoc(doc(db, 'config', 'comision_excursion'), { valor: comision, updatedAt: serverTimestamp() });
+    showAlert(`Comisión por defecto actualizada a $${comision}`, 'success');
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-};
-window.editarComision = (id, comisionActual) => {
-  const nuevaComision = prompt(`Comisión actual: $${comisionActual}\nIngresá la nueva comisión ($):`, comisionActual);
-  if (nuevaComision === null) return;
-  const comision = parseFloat(nuevaComision);
-  if (isNaN(comision) || comision < 0) {
-    showAlert('Comisión inválida', 'danger');
-    return;
+});
+
+async function cargarConfiguracion() {
+  try {
+    const configDoc = await getDoc(doc(db, 'config', 'comision_excursion'));
+    if (configDoc.exists()) {
+      document.getElementById('config-comision').value = configDoc.data().valor || 1;
+    } else {
+      document.getElementById('config-comision').value = 1;
+    }
+  } catch (err) {
+    console.error('Error cargando config:', err);
+    document.getElementById('config-comision').value = 1;
   }
-  updateDoc(doc(db, 'excursiones', id), { comision }).then(() => {
-    showAlert(`Comisión actualizada a $${comision}`, 'success');
-    loadExcursiones();
-  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
-};
+}
+
 // ========== INICIALIZAR TODO ==========
 loadSecciones();
 loadProductos();
