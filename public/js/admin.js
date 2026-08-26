@@ -301,13 +301,14 @@ async function addExcursion() {
   const precio = parseFloat(document.getElementById('exc-precio').value) || 0;
   const lugares = parseInt(document.getElementById('exc-lugares').value) || 0;
   const van = document.getElementById('exc-van').value.trim();
+  const comision = parseFloat(document.getElementById('exc-comision').value) || 1;
 
   if (!fecha || !horaSalida || !punto) return showAlert('Completá fecha, hora y punto', 'warning');
 
   try {
     await addDoc(collection(db, 'excursiones'), {
       fecha, horaSalida, punto, horaRetorno, precio, lugares,
-      lugaresOcupados: 0, van, publicada: true,
+      lugaresOcupados: 0, van, comision, publicada: true,
       createdAt: serverTimestamp()
     });
     document.getElementById('exc-fecha').value = '';
@@ -317,6 +318,7 @@ async function addExcursion() {
     document.getElementById('exc-precio').value = '';
     document.getElementById('exc-lugares').value = '';
     document.getElementById('exc-van').value = '';
+    document.getElementById('exc-comision').value = '';
     showAlert('Excursión publicada', 'success');
     loadExcursiones();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
@@ -352,6 +354,7 @@ async function loadExcursiones() {
           <div><strong>Horario:</strong> ${exc.horaSalida || '-'} → ${exc.horaRetorno || '-'}</div>
           <div><strong>Punto:</strong> ${exc.punto || '-'}</div>
           <div><strong>Precio:</strong> $${exc.precio || 0}</div>
+          <div><strong>Comisión:</strong> $${exc.comision || 1} por reserva</div>
           ${exc.sena ? `<div><strong>Seña:</strong> $${exc.sena} por persona</div>` : ''}
           <div><strong>Lugares:</strong> ${ocupados}/${totalLugares}</div>
           ${exc.adminWhatsapp ? `<div><strong>WhatsApp:</strong> ${exc.adminWhatsapp}</div>` : ''}
@@ -360,6 +363,7 @@ async function loadExcursiones() {
         ${exc.descripcion ? `<p style="margin-top:10px; color:#666;">${exc.descripcion}</p>` : ''}
         <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-sm btn-warning" onclick="cancelarExcursion('${exc.id}')">Cancelar (ocultar)</button>
+          <button class="btn btn-sm btn-primary" onclick="editarComision('${exc.id}', ${exc.comision || 1})">Editar comisión</button>
           <button class="btn btn-sm btn-danger" onclick="borrarExcursion('${exc.id}')"> Borrar definitivamente</button>
         </div>
       `;
@@ -999,6 +1003,19 @@ window.borrarAviso = async (id) => {
     showAlert('Aviso borrado', 'danger');
     loadAvisos();
   } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+};
+window.editarComision = (id, comisionActual) => {
+  const nuevaComision = prompt(`Comisión actual: $${comisionActual}\nIngresá la nueva comisión ($):`, comisionActual);
+  if (nuevaComision === null) return;
+  const comision = parseFloat(nuevaComision);
+  if (isNaN(comision) || comision < 0) {
+    showAlert('Comisión inválida', 'danger');
+    return;
+  }
+  updateDoc(doc(db, 'excursiones', id), { comision }).then(() => {
+    showAlert(`Comisión actualizada a $${comision}`, 'success');
+    loadExcursiones();
+  }).catch(err => showAlert(`Error: ${err.message}`, 'danger'));
 };
 // ========== INICIALIZAR TODO ==========
 loadSecciones();
