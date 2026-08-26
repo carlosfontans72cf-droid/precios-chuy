@@ -7,153 +7,23 @@
   <link rel="stylesheet" href="/css/styles.css">
   <meta name="theme-color" content="#0038A8">
   <style>
-    /* ===== BANNER CF APPS DEVELOPER ===== */
-    .cf-banner {
-      margin-top: 30px;
-      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 40%, #0f2b4c 100%);
-      border-radius: 16px;
-      padding: 28px 24px 24px 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-    .cf-banner::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 200%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.03), transparent);
-      animation: cf-shine 6s ease-in-out infinite;
-    }
-    @keyframes cf-shine {
-      0%, 100% { transform: translateX(-50%); }
-      50% { transform: translateX(50%); }
-    }
-    .cf-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-    .cf-icon {
-      font-family: 'Courier New', monospace;
-      font-size: 1.4rem;
-      color: #00ff88;
-      font-weight: bold;
-      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-    }
-    .cf-name {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 2.2rem;
-      font-weight: 900;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, #d4af37 0%, #f5e6a3 30%, #d4af37 50%, #aa8a2e 70%, #d4af37 100%);
-      background-size: 200% 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: cf-gold 4s ease-in-out infinite;
-      filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
-    }
-    @keyframes cf-gold {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-    .cf-subtitle {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 0.95rem;
-      color: #8892b0;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin: 0 0 16px 0;
-      font-weight: 300;
-    }
-    .cf-divider {
-      width: 60px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #d4af37, transparent);
-      margin: 0 auto 16px auto;
-    }
-    .cf-text {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 0.95rem;
-      color: #ccd6f6;
-      line-height: 1.6;
-      margin: 0 0 18px 0;
-      max-width: 320px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .cf-text strong {
-      color: #f5e6a3;
-      font-weight: 600;
-    }
-    .cf-contact {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px 20px;
-      margin-bottom: 18px;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 0.85rem;
-      color: #8892b0;
-    }
-    .cf-contact span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cf-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: white;
-      padding: 12px 28px;
-      border-radius: 25px;
-      text-decoration: none;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-      transition: all 0.3s ease;
-      position: relative;
-      z-index: 1;
-    }
-    .cf-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
-    }
-    .cf-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      animation: cf-pulse 2s ease-in-out infinite;
-    }
-    @keyframes cf-pulse {
-      0% { width: 0; height: 0; opacity: 1; }
-      100% { width: 120px; height: 120px; opacity: 0; }
-    }
-    .cf-powered {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 0.7rem;
-      color: #4a5568;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-top: 14px;
-    }
+    .cf-banner { margin-top: 30px; background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 40%, #0f2b4c 100%); border-radius: 16px; padding: 28px 24px 24px 24px; text-align: center; position: relative; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+    .cf-banner::before { content: ''; position: absolute; top: 0; left: -100%; width: 200%; height: 100%; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.03), transparent); animation: cf-shine 6s ease-in-out infinite; }
+    @keyframes cf-shine { 0%, 100% { transform: translateX(-50%); } 50% { transform: translateX(50%); } }
+    .cf-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
+    .cf-icon { font-family: 'Courier New', monospace; font-size: 1.4rem; color: #00ff88; font-weight: bold; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+    .cf-name { font-family: 'Segoe UI', Arial, sans-serif; font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; background: linear-gradient(135deg, #d4af37 0%, #f5e6a3 30%, #d4af37 50%, #aa8a2e 70%, #d4af37 100%); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: cf-gold 4s ease-in-out infinite; filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3)); }
+    @keyframes cf-gold { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .cf-subtitle { font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.95rem; color: #8892b0; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 16px 0; font-weight: 300; }
+    .cf-divider { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, #d4af37, transparent); margin: 0 auto 16px auto; }
+    .cf-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.95rem; color: #ccd6f6; line-height: 1.6; margin: 0 0 18px 0; max-width: 320px; margin-left: auto; margin-right: auto; }
+    .cf-text strong { color: #f5e6a3; font-weight: 600; }
+    .cf-contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; margin-bottom: 18px; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.85rem; color: #8892b0; }
+    .cf-contact span { display: flex; align-items: center; gap: 6px; }
+    .cf-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #25D366, #128C7E); color: white; padding: 12px 28px; border-radius: 25px; text-decoration: none; font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; position: relative; z-index: 1; }
+    .cf-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5); }
+    .cf-powered { font-family: 'Segoe UI', Arial, sans-serif; font-size: 0.7rem; color: #4a5568; letter-spacing: 2px; text-transform: uppercase; margin-top: 14px; }
+    .excursion-note { background:#fff3cd; padding:12px; border-radius:8px; border-left:4px solid #ffc107; margin-top:10px; font-size:0.85rem; color:#856404; }
   </style>
 </head>
 <body>
@@ -164,25 +34,20 @@
         <img src="/img/logo.png" alt="Precios Chuy" class="logo" style="max-width:200px;">
       </div>
       <h2 class="app-title">Precios Chuy</h2>
-      <p class="app-subtitle">Compará precios Uruguay 🇺🇾 y Brasil 🇧🇷</p>
+      <p class="app-subtitle">Compará precios Uruguay y Brasil</p>
 
-      <!-- Formulario de Login -->
       <div id="login-form">
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="email" class="form-control" placeholder="tu@email.com" autocomplete="off">
         </div>
-
         <div class="form-group" style="position: relative;">
           <label>Contraseña</label>
           <input type="password" id="password" class="form-control" placeholder="Contraseña" style="padding-right:42px;">
           <button type="button" class="btn-toggle-password" onclick="togglePassword()"></button>
         </div>
-
         <div id="login-error" class="error-message"></div>
-
         <button id="btn-login" class="btn btn-primary btn-block">Iniciar Sesión</button>
-
         <p class="switch-form">
           <span>¿No tenés cuenta?</span>
           <a href="#" onclick="showRegister()">Registrate gratis</a>
@@ -191,7 +56,6 @@
           <span>¿Sos comerciante?</span>
           <a href="#" onclick="showRegister()">Registrá tu comercio</a>
         </p>
-
         <p class="legal-text">
           Al registrarte, aceptás nuestra
           <a href="/pages/politica-privacidad.html" target="_blank">Política de Privacidad</a>
@@ -200,40 +64,69 @@
         </p>
       </div>
 
-      <!-- Formulario de Registro -->
       <div id="register-form" style="display:none;">
         <div class="form-group">
           <label>Nombre completo</label>
           <input type="text" id="reg-nombre" class="form-control" placeholder="Tu nombre">
         </div>
-
         <div class="form-group">
           <label>Email</label>
           <input type="email" id="reg-email" class="form-control" placeholder="tu@email.com">
         </div>
-
         <div class="form-group">
           <label>Contraseña</label>
           <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 6 caracteres">
         </div>
-
         <div class="form-group">
           <label>Quiero registrarme como:</label>
-          <select id="reg-role" class="form-control">
-            <option value="cliente"> Cliente</option>
-            <option value="comerciante">🏪 Comerciante</option>
+          <select id="reg-role" class="form-control" onchange="onRoleChange()">
+            <option value="cliente">Cliente</option>
+            <option value="comerciante">Comerciante</option>
+            <option value="admin_excursion">Admin de Excursión</option>
           </select>
         </div>
 
+        <div id="comercio-fields" style="display:none;">
+          <div class="form-group">
+            <label>Nombre del comercio</label>
+            <input type="text" id="reg-comercio" class="form-control" placeholder="Ej: Supermercado Central">
+          </div>
+          <div class="form-group">
+            <label>Tipo de comercio</label>
+            <select id="reg-tipo" class="form-control">
+              <option value="supermercado">Supermercado</option>
+              <option value="carniceria">Carnicería</option>
+              <option value="farmacia">Farmacia</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="ropa">Ropa</option>
+              <option value="electronica">Electrónica</option>
+              <option value="panaderia">Panadería</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="excursion-fields" style="display:none;">
+          <div class="form-group">
+            <label>Ruta que vas a gestionar</label>
+            <input type="text" id="reg-ruta" class="form-control" placeholder="Ej: Maldonado a Chuy">
+          </div>
+          <div class="form-group">
+            <label>Teléfono / WhatsApp</label>
+            <input type="text" id="reg-telefono" class="form-control" placeholder="+598 99...">
+          </div>
+          <div class="excursion-note">
+            <strong>Nota:</strong> Después de registrarte, el admin general aprobará tu cuenta.<br>
+            Costo: $1 USD por cada persona que reserve tu excursión.
+          </div>
+        </div>
+
         <div id="register-error" class="error-message"></div>
-
         <button id="btn-register" class="btn btn-primary btn-block">Crear cuenta</button>
-
         <p class="switch-form">
           <span>¿Ya tenés cuenta?</span>
           <a href="#" onclick="showLogin()">Iniciá sesión</a>
         </p>
-
         <p class="legal-text">
           Al registrarte, aceptás nuestra
           <a href="/pages/politica-privacidad.html" target="_blank">Política de Privacidad</a>
@@ -242,7 +135,6 @@
         </p>
       </div>
 
-      <!-- ===== BANNER CF APPS DEVELOPER ===== -->
       <div class="cf-banner">
         <div class="cf-logo">
           <span class="cf-icon">&lt;/&gt;</span>
@@ -255,15 +147,14 @@
           Desarrollo a medida para comercios, restaurantes y servicios.
         </p>
         <div class="cf-contact">
-          <span>🇺🇾 +598 95 205598</span>
-          <span>🇧🇷 +55 3991 757952</span>
+          <span>+598 95 205598</span>
+          <span>+55 3991 757952</span>
         </div>
         <a href="https://wa.me/59895205598?text=Hola!%20Quiero%20info%20sobre%20desarrollo%20de%20apps" target="_blank" class="cf-btn">
-          💬 Contactanos por WhatsApp
+          Contactanos por WhatsApp
         </a>
         <p class="cf-powered">Powered by CF Apps Developer</p>
       </div>
-      <!-- ===== FIN BANNER CF APPS DEVELOPER ===== -->
 
     </div>
   </div>
@@ -279,15 +170,18 @@
         r.type = r.type === 'password' ? 'text' : 'password';
       }
     }
-
     function showRegister() {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('register-form').style.display = 'block';
     }
-
     function showLogin() {
       document.getElementById('register-form').style.display = 'none';
       document.getElementById('login-form').style.display = 'block';
+    }
+    function onRoleChange() {
+      const role = document.getElementById('reg-role').value;
+      document.getElementById('comercio-fields').style.display = (role === 'comerciante') ? 'block' : 'none';
+      document.getElementById('excursion-fields').style.display = (role === 'admin_excursion') ? 'block' : 'none';
     }
   </script>
 
