@@ -117,7 +117,7 @@
           </div>
           <div class="excursion-note">
             <strong>Nota:</strong> Después de registrarte, el admin general aprobará tu cuenta.<br>
-            Costo: $1 USD por cada persona que reserve tu excursión.
+            Costo: $<span id="comision-index">1</span> USD por cada persona que reserve tu excursión.
           </div>
         </div>
 
@@ -186,5 +186,18 @@
   </script>
 
   <script type="module" src="/js/auth.js"></script>
+
+  <script type="module">
+    import { db } from '/js/firebase-config.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    try {
+      const configDoc = await getDoc(doc(db, 'config', 'comision_excursion'));
+      let comision = 1;
+      if (configDoc.exists()) { comision = configDoc.data().valor || 1; }
+      const el = document.getElementById('comision-index');
+      if (el) el.textContent = comision;
+    } catch (err) { console.error('Error cargando comisión:', err); }
+  </script>
 </body>
 </html>
