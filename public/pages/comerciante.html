@@ -37,6 +37,7 @@
     .loading, .error-msg { text-align: center; padding: 40px; }
     .loading { color: #666; }
     .error-msg { color: #dc3545; }
+    .debug-box { background:#fff3cd; border:2px solid #ffc107; border-radius:8px; padding:15px; margin-bottom:15px; font-family:monospace; font-size:0.85rem; }
   </style>
 </head>
 <body>
@@ -48,17 +49,37 @@
     import { db } from '../js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ✅ LIMPIA LA URL AUTOMÁTICAMENTE Y SOLO USA TU SESIÓN
-    if (window.location.search.includes('id')) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    // ✅ BUSCA EL ID EN TODOS LOS NOMBRES POSIBLES
+    const comercioId = 
+      sessionStorage.getItem('userId') || 
+      sessionStorage.getItem('userid') || 
+      sessionStorage.getItem('UID') || 
+      sessionStorage.getItem('uid') || 
+      sessionStorage.getItem('usuarioId') || 
+      sessionStorage.getItem('perfilComercioId') || 
+      new URLSearchParams(window.location.search).get("id");
 
-    // ✅ ÚNICAMENTE desde sesión — NUNCA desde la URL
-    const comercioId = sessionStorage.getItem('userId');
     const contenedor = document.getElementById('contenido-perfil');
 
+    // ✅ DIAGNÓSTICO: MOSTRAR QUÉ SE ESTÁ LEYENDO
+    const debugInfo = `
+      <div class="debug-box">
+        <strong>🔍 Diagnóstico:</strong><br>
+        userId = ${sessionStorage.getItem('userId') || 'NO ENCONTRADO'}<br>
+        userRole = ${sessionStorage.getItem('userRole') || 'NO ENCONTRADO'}<br>
+        ID usado = ${comercioId || 'NINGUNO'}
+      </div>
+    `;
+
     if (!comercioId) {
-      contenedor.innerHTML = '<div class="error-msg"><h2>Sesión no encontrada</h2><p>Iniciá sesión como comerciante primero.</p><a href="/index.html" style="color:#0038A8;font-weight:bold;">← Iniciar sesión</a></div>';
+      contenedor.innerHTML = `
+        ${debugInfo}
+        <div class="error-msg">
+          <h2>Sesión no encontrada</h2>
+          <p>El navegador no tiene acceso a tu sesión. Cierra todas las pestañas, vuelve a iniciar sesión y entra desde el botón de tu menú.</p>
+          <a href="/index.html" style="color:#0038A8;font-weight:bold;">← Iniciar sesión</a>
+        </div>
+      `;
     } else {
       cargarPerfilCompleto(comercioId);
     }
@@ -67,7 +88,14 @@
       try {
         const userDoc = await getDoc(doc(db, 'users', id));
         if (!userDoc.exists()) {
-          contenedor.innerHTML = '<div class="error-msg"><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+          contenedor.innerHTML = `
+            ${debugInfo}
+            <div class="error-msg">
+              <h2>Comercio no encontrado en la base de datos</h2>
+              <p>ID usado: ${id}</p>
+              <a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a>
+            </div>
+          `;
           return;
         }
         const data = userDoc.data();
@@ -81,7 +109,7 @@
         const lng = data.lng;
         const iconos = { supermercado: '', carniceria: '🥩', farmacia: '💊', bebidas: '', ropa: '👕', electronica: '📱', panaderia: '', ferreteria: '', otro: '' };
         const icono = iconos[tipo] || '';
-        let html = '<div class="perfil-header">';
+        let html = debugInfo + '<div class="perfil-header">';
         if (logo) {
           html += '<img src="' + logo + '" alt="' + nombre + '" class="perfil-foto" onerror="this.style.display=\'none\'">';
         } else {
@@ -121,9 +149,9 @@
           const productosSnap = await getDocs(productosQuery);
           const contProductos = document.getElementById('lista-productos-comercio');
           if (productosSnap.empty) {
-            contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Sin productos cargados.</p>';
+            contProductos.innerHTML += '<p style="text-align:center;color:#666;padding:20px;">Sin productos cargados.</p>';
           } else {
-            contProductos.innerHTML = '';
+            contProductos.innerHTML += '';
             productosSnap.forEach(function(d) {
               const prod = d.data();
               if (prod.suspendido) return;
@@ -138,11 +166,18 @@
           }
         } catch (err) {
           console.error('Error productos:', err);
-          document.getElementById('lista-productos-comercio').innerHTML = '<p style="color:red;">Error al cargar productos</p>';
+          document.getElementById('lista-productos-comercio').innerHTML += '<p style="color:red;">Error al cargar productos</p>';
         }
       } catch (err) {
         console.error('Error:', err);
-        contenedor.innerHTML = '<div class="error-msg"><h2>Error al cargar</h2><p>' + err.message + '</p><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+        contenedor.innerHTML = `
+          ${debugInfo}
+          <div class="error-msg">
+            <h2>Error al cargar</h2>
+            <p>${err.message}</p>
+            <a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a>
+          </div>
+        `;
       }
     }
   </script>
