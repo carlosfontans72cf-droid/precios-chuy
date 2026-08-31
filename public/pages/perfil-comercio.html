@@ -6,7 +6,6 @@
   <title>Perfil del Comercio - Precios Chuy</title>
   <link rel="stylesheet" href="/css/styles.css">
   <meta name="theme-color" content="#0038A8">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     .perfil-header { background: linear-gradient(135deg, #0038A8, #009C3B); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 20px 20px; margin-bottom: 20px; }
     .perfil-foto { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #FFDF00; margin-bottom: 15px; }
@@ -45,124 +44,113 @@
   <div id="contenido-perfil">
     <div class="loading"><div style="font-size:3rem;margin-bottom:15px;">⏳</div><p style="font-size:1.2rem;">Cargando perfil del comercio...</p></div>
   </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script type="module">
     import { db } from '../js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    const comercioId = sessionStorage.getItem('perfilComercioId');
+
+    // ✅ BUSCA EL ID DE LAS DOS FORMAS (URL o sesión)
+    const params = new URLSearchParams(window.location.search);
+    const comercioId = params.get("id") || sessionStorage.getItem('perfilComercioId');
     const contenedor = document.getElementById('contenido-perfil');
+
     if (!comercioId) {
-      contenedor.innerHTML = '<div class="error-msg"><div style="font-size:3rem;margin-bottom:15px;"></div><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+      contenedor.innerHTML = '<div class="error-msg"><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
     } else {
+      cargarPerfilCompleto(comercioId);
+    }
+
+    async function cargarPerfilCompleto(id) {
       try {
-        const userDoc = await getDoc(doc(db, 'users', comercioId));
+        const userDoc = await getDoc(doc(db, 'users', id));
         if (!userDoc.exists()) {
-          contenedor.innerHTML = '<div class="error-msg"><div style="font-size:3rem;margin-bottom:15px;">❌</div><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
-        } else {
-          const data = userDoc.data();
-          const nombre = data.nombreComercio || data.comercio || 'Comercio';
-          const tipo = data.tipo || 'comercio';
-          const direccion = data.direccion || 'No disponible';
-          const telefono = data.telefono || '';
-          const horarios = data.horarios || 'No disponible';
-          const logo = data.logo || '';
-          const lat = data.lat;
-          const lng = data.lng;
-          const iconos = { supermercado: '', carniceria: '🥩', farmacia: '💊', bebidas: '', ropa: '👕', electronica: '📱', panaderia: '', ferreteria: '', otro: '' };
-          const icono = iconos[tipo] || '';
-          let html = '<div class="perfil-header">';
-          if (logo) {
-            html += '<img src="' + logo + '" alt="' + nombre + '" class="perfil-foto" onerror="this.style.display=\'none\'">';
-          } else {
-            html += '<div class="perfil-foto-placeholder">' + icono + '</div>';
-          }
-          html += '<h1 class="perfil-nombre">' + icono + ' ' + nombre + '</h1>';
-          html += '<p class="perfil-tipo">' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + '</p>';
-          if (telefono) {
-            html += '<a href="https://wa.me/' + telefono.replace(/[^0-9]/g, '') + '" target="_blank" class="btn-whatsapp">WhatsApp</a>';
-          }
-          html += '</div><div class="container">';
-          html += '<div class="info-card"><h3>Información</h3>';
-          html += '<div class="info-row"><span class="icono"></span><div class="texto"><div class="label">Dirección</div><div class="valor">' + direccion + '</div></div></div>';
-          html += '<div class="info-row"><span class="icono"></span><div class="texto"><div class="label">Teléfono</div><div class="valor">' + (telefono || 'No disponible') + '</div></div></div>';
-          html += '<div class="info-row"><span class="icono"></span><div class="texto"><div class="label">Horarios</div><div class="valor">' + horarios + '</div></div></div>';
-          html += '</div>';
-          if (data.cambioUsdCompra || data.cambioUsdVenta || data.cambioBrlCompra || data.cambioBrlVenta) {
-            html += '<div class="info-card"><h3>Cambio de Moneda</h3><div class="cambio-grid">';
-            if (data.cambioUsdCompra) html += '<div class="cambio-item"><div class="moneda">Compra USD</div><div class="valor">$' + data.cambioUsdCompra.toFixed(2) + '</div></div>';
-            if (data.cambioUsdVenta) html += '<div class="cambio-item"><div class="moneda">Venta USD</div><div class="valor">$' + data.cambioUsdVenta.toFixed(2) + '</div></div>';
-            if (data.cambioBrlCompra) html += '<div class="cambio-item"><div class="moneda">Compra Real</div><div class="valor">R$' + data.cambioBrlCompra.toFixed(2) + '</div></div>';
-            if (data.cambioBrlVenta) html += '<div class="cambio-item"><div class="moneda">Venta Real</div><div class="valor">R$' + data.cambioBrlVenta.toFixed(2) + '</div></div>';
-            html += '</div></div>';
-          }
-          if (lat && lng) {
-            html += '<div class="info-card"><h3>Ubicación</h3><div id="mapa-perfil-comercio" style="height:300px;border-radius:12px;border:2px solid #ddd;"></div></div>';
-          }
-          html += '<div class="info-card"><h3>Productos</h3><div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
-          contenedor.innerHTML = html;
-          if (lat && lng) {
-            setTimeout(function() {
-              var mapa = L.map('mapa-perfil-comercio').setView([lat, lng], 16);
-              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapa);
-              L.marker([lat, lng]).addTo(mapa).bindPopup('<strong>' + nombre + '</strong><br>' + direccion).openPopup();
-            }, 100);
-          }
-          try {
-            var productosQuery = query(collection(db, 'productos'), where('comercioId', '==', comercioId));
-            var productosSnap = await getDocs(productosQuery);
-            var contProductos = document.getElementById('lista-productos-comercio');
-            if (productosSnap.empty) {
-              contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Sin productos cargados.</p>';
-            } else {
-              contProductos.innerHTML = '';
-              productosSnap.forEach(function(d) {
-                var prod = d.data();
-                if (prod.suspendido) return;
-                var div = document.createElement('div');
-                div.className = 'producto-card';
-                var imgHtml = prod.imagen ? '<img src="' + prod.imagen + '" alt="' + prod.nombre + '" class="producto-img" onerror="this.style.display=\'none\'">' : '<div class="producto-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:#f0f0f0;"></div>';
-                var ofertaBadge = prod.esOferta ? '<span class="badge-oferta">OFERTA</span>' : '';
-                var precioUy = prod.precioUruguay ? '<span class="precio-uy">$' + prod.precioUruguay + '</span>' : '';
-                div.innerHTML = imgHtml + '<div class="producto-info"><h4>' + prod.nombre + ' ' + ofertaBadge + '</h4><div class="precios"><span class="precio-br">R$ ' + prod.precioBrasil + '</span>' + precioUy + '</div></div>';
-                contProductos.appendChild(div);
-              });
-            }
-          } catch (err) {
-            console.error('Error productos:', err);
-          }
+          contenedor.innerHTML = '<div class="error-msg"><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+          return;
         }
+
+        const data = userDoc.data();
+        const nombre = data.nombreComercio || data.comercio || 'Comercio';
+        const tipo = data.tipo || 'comercio';
+        const direccion = data.direccion || 'No disponible';
+        const telefono = data.telefono || '';
+        const horarios = data.horarios || 'No disponible';
+        const logo = data.logo || '';
+        const lat = data.lat;
+        const lng = data.lng;
+
+        const iconos = { supermercado: '', carniceria: '🥩', farmacia: '💊', bebidas: '', ropa: '👕', electronica: '📱', panaderia: '', ferreteria: '', otro: '' };
+        const icono = iconos[tipo] || '';
+
+        let html = '<div class="perfil-header">';
+        if (logo) {
+          html += '<img src="' + logo + '" alt="' + nombre + '" class="perfil-foto" onerror="this.style.display=\'none\'">';
+        } else {
+          html += '<div class="perfil-foto-placeholder">' + icono + '</div>';
+        }
+        html += '<h1 class="perfil-nombre">' + icono + ' ' + nombre + '</h1>';
+        html += '<p class="perfil-tipo">' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + '</p>';
+        if (telefono) {
+          html += '<a href="https://wa.me/' + telefono.replace(/[^0-9]/g, '') + '" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>';
+        }
+        html += '</div><div class="container">';
+
+        html += '<div class="info-card"><h3>📍 Información</h3>';
+        html += '<div class="info-row"><span class="icono">🏠</span><div class="texto"><div class="label">Dirección</div><div class="valor">' + direccion + '</div></div></div>';
+        html += '<div class="info-row"><span class="icono">📞</span><div class="texto"><div class="label">Teléfono</div><div class="valor">' + (telefono || 'No disponible') + '</div></div></div>';
+        html += '<div class="info-row"><span class="icono">🕐</span><div class="texto"><div class="label">Horarios</div><div class="valor">' + horarios + '</div></div></div>';
+        html += '</div>';
+
+        if (data.cambioUsdCompra || data.cambioUsdVenta || data.cambioBrlCompra || data.cambioBrlVenta) {
+          html += '<div class="info-card"><h3>💱 Cotizaciones</h3><div class="cambio-grid">';
+          if (data.cambioUsdCompra) html += '<div class="cambio-item"><div class="moneda">Compra USD</div><div class="valor">$' + data.cambioUsdCompra.toFixed(2) + '</div></div>';
+          if (data.cambioUsdVenta) html += '<div class="cambio-item"><div class="moneda">Venta USD</div><div class="valor">$' + data.cambioUsdVenta.toFixed(2) + '</div></div>';
+          if (data.cambioBrlCompra) html += '<div class="cambio-item"><div class="moneda">Compra Real</div><div class="valor">R$' + data.cambioBrlCompra.toFixed(2) + '</div></div>';
+          if (data.cambioBrlVenta) html += '<div class="cambio-item"><div class="moneda">Venta Real</div><div class="valor">R$' + data.cambioBrlVenta.toFixed(2) + '</div></div>';
+          html += '</div></div>';
+        }
+
+        if (lat && lng) {
+          html += '<div class="info-card"><h3>🗺️ Ubicación</h3>';
+          html += '<p>Lat: ' + lat.toFixed(6) + ' | Lng: ' + lng.toFixed(6) + '</p>';
+          html += '<a href="https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng + '" target="_blank" style="display:inline-block;padding:10px 20px;background:#0038A8;color:white;border-radius:25px;text-decoration:none;font-weight:bold;margin-top:10px;">📍 Abrir en Google Maps</a>';
+          html += '</div>';
+        } else {
+          html += '<div class="info-card"><h3>🗺️ Ubicación</h3><p style="color:#666;">Ubicación no disponible</p></div>';
+        }
+
+        html += '<div class="info-card"><h3>🛒 Productos</h3><div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
+        contenedor.innerHTML = html;
+
+        try {
+          const productosQuery = query(collection(db, 'productos'), where('comercioId', '==', id));
+          const productosSnap = await getDocs(productosQuery);
+          const contProductos = document.getElementById('lista-productos-comercio');
+          if (productosSnap.empty) {
+            contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Sin productos cargados.</p>';
+          } else {
+            contProductos.innerHTML = '';
+            productosSnap.forEach(function(d) {
+              const prod = d.data();
+              if (prod.suspendido) return;
+              const imgHtml = prod.imagen ? '<img src="' + prod.imagen + '" alt="' + prod.nombre + '" class="producto-img" onerror="this.style.display=\'none\'">' : '<div class="producto-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:#f0f0f0;">📷</div>';
+              const ofertaBadge = prod.esOferta ? '<span class="badge-oferta">🔥 OFERTA</span>' : '';
+              const precioUy = prod.precioUruguay ? '<span class="precio-uy">$U ' + prod.precioUruguay + '</span>' : '';
+              const div = document.createElement('div');
+              div.className = 'producto-card';
+              div.innerHTML = imgHtml + '<div class="producto-info"><h4>' + prod.nombre + ' ' + ofertaBadge + '</h4><div class="precios"><span class="precio-br">R$ ' + prod.precioBrasil + '</span>' + precioUy + '</div></div>';
+              contProductos.appendChild(div);
+            });
+          }
+        } catch (err) {
+          console.error('Error productos:', err);
+          document.getElementById('lista-productos-comercio').innerHTML = '<p style="color:red;">Error al cargar productos</p>';
+        }
+
       } catch (err) {
         console.error('Error:', err);
-        contenedor.innerHTML = '<div class="error-msg"><div style="font-size:3rem;margin-bottom:15px;"></div><h2>Error al cargar</h2><p>' + err.message + '</p><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+        contenedor.innerHTML = '<div class="error-msg"><h2>Error al cargar</h2><p>' + err.message + '</p><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
       }
     }
-  </script> <div id="perfil-comercio"></div>
-
-<script type="module">
-  import { db } from "../js/firebase-config.js";
-  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const params = new URLSearchParams(window.location.search);
-  const comercioId = params.get("id");
-
-  if (comercioId) cargarPerfil(comercioId);
-  else document.getElementById("perfil-comercio").innerHTML = "<p>Comercio no encontrado</p>";
-
-  async function cargarPerfil(id) {
-    const snap = await getDoc(doc(db, "users", id));
-    if (!snap.exists()) {
-      document.getElementById("perfil-comercio").innerHTML = "<p>Comercio no existe</p>";
-      return;
-    }
-    const c = snap.data();
-    document.getElementById("perfil-comercio").innerHTML = `
-      ${c.logo ? `<img src="${c.logo}" style="max-width:150px;">` : ''}
-      <h2>${c.nombreComercio || 'Sin nombre'}</h2>
-      <p>Dirección: ${c.direccion || 'No especificada'}</p>
-      <p>Teléfono: ${c.telefono || 'No especificado'}</p>
-      <p>Horarios: ${c.horarios || 'No especificados'}</p>
-    `;
-  }
-</script>
+  </script>
 </body>
 </html>
