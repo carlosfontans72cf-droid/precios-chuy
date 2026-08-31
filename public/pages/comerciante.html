@@ -37,7 +37,6 @@
     .loading, .error-msg { text-align: center; padding: 40px; }
     .loading { color: #666; }
     .error-msg { color: #dc3545; }
-    #mapa-perfil-comercio { height: 300px; border-radius: 12px; border: 2px solid #ddd; }
   </style>
 </head>
 <body>
@@ -48,15 +47,18 @@
   <script type="module">
     import { db } from '../js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ✅ SOLO lee desde la URL (como funcionaba ANTES)
     const params = new URLSearchParams(window.location.search);
-    // ✅ LÍNEA CORREGIDA: Ahora busca también userId
-    const comercioId = params.get("id") || sessionStorage.getItem('perfilComercioId') || sessionStorage.getItem('userId');
+    const comercioId = params.get("id"); // ← SOLO esto, SIN sesión
     const contenedor = document.getElementById('contenido-perfil');
+
     if (!comercioId) {
       contenedor.innerHTML = '<div class="error-msg"><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
     } else {
       cargarPerfilCompleto(comercioId);
     }
+
     async function cargarPerfilCompleto(id) {
       try {
         const userDoc = await getDoc(doc(db, 'users', id));
