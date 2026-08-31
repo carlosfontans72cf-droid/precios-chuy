@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil del Comercio - Precios Chuy</title>
+  <title>Panel del Comerciante - Precios Chuy</title>
   <link rel="stylesheet" href="/css/styles.css">
   <meta name="theme-color" content="#0038A8">
   <style>
@@ -42,20 +42,22 @@
 <body>
   <a href="/pages/cliente.html" class="btn-volver">← Volver</a>
   <div id="contenido-perfil">
-    <div class="loading"><div style="font-size:3rem;margin-bottom:15px;">⏳</div><p style="font-size:1.2rem;">Cargando perfil del comercio...</p></div>
+    <div class="loading"><div style="font-size:3rem;margin-bottom:15px;">⏳</div><p style="font-size:1.2rem;">Cargando tu panel...</p></div>
   </div>
   <script type="module">
     import { db } from '../js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    // ✅ userId PRIMERO — porque es el que SÍ funciona
-    const params = new URLSearchParams(window.location.search);
-    const comercioId = sessionStorage.getItem('userId') || params.get("id") || sessionStorage.getItem('perfilComercioId');
+
+    // ✅ SOLO LEE TU SESIÓN — IGNORA LA URL COMPLETAMENTE
+    const comercioId = sessionStorage.getItem('userId');
     const contenedor = document.getElementById('contenido-perfil');
+
     if (!comercioId) {
-      contenedor.innerHTML = '<div class="error-msg"><h2>Comercio no encontrado</h2><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
+      contenedor.innerHTML = '<div class="error-msg"><h2>Sesión no encontrada</h2><p>Iniciá sesión como comerciante primero.</p><a href="/index.html" style="color:#0038A8;font-weight:bold;">← Iniciar sesión</a></div>';
     } else {
       cargarPerfilCompleto(comercioId);
     }
+
     async function cargarPerfilCompleto(id) {
       try {
         const userDoc = await getDoc(doc(db, 'users', id));
@@ -81,7 +83,7 @@
           html += '<div class="perfil-foto-placeholder">' + icono + '</div>';
         }
         html += '<h1 class="perfil-nombre">' + icono + ' ' + nombre + '</h1>';
-        html += '<p class="perfil-tipo">' + tipo.charAt(0).toUpperCase() + tipo.slice(1) + '</p>';
+        html += '<p class="perfil-tipo">TU PANEL DE COMERCIANTE</p>';
         if (telefono) {
           html += '<a href="https://wa.me/' + telefono.replace(/[^0-9]/g, '') + '" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>';
         }
@@ -107,7 +109,7 @@
         } else {
           html += '<div class="info-card"><h3>🗺️ Ubicación</h3><p style="color:#666;">Ubicación no disponible</p></div>';
         }
-        html += '<div class="info-card"><h3>🛒 Productos</h3><div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
+        html += '<div class="info-card"><h3>🛒 Tus Productos</h3><div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
         contenedor.innerHTML = html;
         try {
           const productosQuery = query(collection(db, 'productos'), where('comercioId', '==', id));
