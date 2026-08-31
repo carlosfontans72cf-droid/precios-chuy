@@ -42,13 +42,18 @@
 <body>
   <a href="/pages/cliente.html" class="btn-volver">← Volver</a>
   <div id="contenido-perfil">
-    <div class="loading"><div style="font-size:3rem;margin-bottom:15px;">⏳</div><p style="font-size:1.2rem;">Cargando tu panel...</p></div>
+    <div class="loading"><div style="font-size:3rem;margin-bottom:15px;">⏳</div><p style="font-size:1.2rem;">Cargando TU panel...</p></div>
   </div>
   <script type="module">
     import { db } from '../js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ✅ SOLO LEE TU SESIÓN — IGNORA LA URL COMPLETAMENTE
+    // ✅ LIMPIA LA URL AUTOMÁTICAMENTE Y SOLO USA TU SESIÓN
+    if (window.location.search.includes('id')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // ✅ ÚNICAMENTE desde sesión — NUNCA desde la URL
     const comercioId = sessionStorage.getItem('userId');
     const contenedor = document.getElementById('contenido-perfil');
 
@@ -83,7 +88,7 @@
           html += '<div class="perfil-foto-placeholder">' + icono + '</div>';
         }
         html += '<h1 class="perfil-nombre">' + icono + ' ' + nombre + '</h1>';
-        html += '<p class="perfil-tipo">TU PANEL DE COMERCIANTE</p>';
+        html += '<p class="perfil-tipo">✅ TU PANEL PRIVADO</p>';
         if (telefono) {
           html += '<a href="https://wa.me/' + telefono.replace(/[^0-9]/g, '') + '" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>';
         }
