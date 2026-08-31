@@ -447,7 +447,112 @@ window.mostrarSoporteVIP = () => {
   modal.innerHTML = `<div style="background:white;padding:30px;border-radius:16px;max-width:400px;width:90%;text-align:center;"><h2 style="color:#0038A8;">Soporte VIP</h2><div style="background:#E8F5E9; padding:20px; border-radius:10px; margin:20px 0;"><p style="font-size:3rem; margin:0;">💬</p><p style="margin:10px 0;"><strong>WhatsApp Directo</strong></p></div><a href="https://wa.me/59895205598?text=Hola!%20Soy%20cliente%20Premium" target="_blank" class="btn btn-success" style="display:inline-block; text-decoration:none; margin-bottom:10px;">📱 Contactar</a><button class="btn btn-block" style="background:#ddd;" onclick="this.closest('div[style*=fixed]').remove()">Cerrar</button></div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-};
+};// ========== BUSCADOR DE COMERCIOS ==========
+let comerciosCache = []; // guardamos todos los comercios para buscar rápido
+
+async function cargarComerciosCache() {
+  try {
+    const snapUsers = await getDocs(collection(db, 'users'));
+    comerciosCache = [];
+    snapUsers.forEach(d => {
+      const data = d.data();
+      if (data.role !== 'comerciante' || data.activo === false) return;
+      comerciosCache.push({
+        id: d.id,
+        nombre: data.nombreComercio || data.comercio || 'Comercio',
+        tipo: data.tipo || 'comercio',
+        direccion: data.direccion || '',
+        telefono: data.telefono || '',
+        logo: data.logo || '',
+        lat: data.lat,
+        lng: data.lng
+      });
+    });
+ } catch (err) { console.error('Error cargando cache de comercios:', err); }
+}
+
+function buscarComercios(texto) {
+  const cont = document.getElementById('resultados-busqueda');
+  const btnLimpiar = document.getElementById('btn-limpiar-buscar');
+  if (!cont) return;
+  
+  texto = texto.trim().toLowerCase();
+  
+  if (!texto) {
+    cont.innerHTML = '';
+    cont.style.display = 'none';
+    if (btnLimpiar) btnLimpiar.style.display = 'none';
+    return;
+  }
+  
+  if (btnLimpiar) btnLimpiar.style.display = 'block';
+  
+  const resultados = comerciosCache.filter(c => 
+    c.nombre.toLowerCase().includes(texto) ||
+    (c.tipo && c.tipo.toLowerCase().includes(texto)) ||
+    (c.direccion && c.direccion.toLowerCase().includes(texto))
+  );
+  
+  if (resultados.length === 0) {
+    cont.innerHTML = '<div class="resultado-vacio">😕 No se encontraron comercios</div>';
+    cont.style.display = 'block';
+    return;
+  }
+  
+  cont.innerHTML = '';
+  cont.style.display = 'block';
+  
+  resultados.slice(0, 10).forEach(c => {
+    const icono = obtenerIcono(c.tipo);
+    const div = document.createElement('div');
+    div.className = 'resultado-item';
+    div.innerHTML = `
+     <div class="resultado-icono">${icono}</div>
+      <div class="resultado-info">
+        <strong>${c.nombre}</strong>
+        <small>${c.tipo}${c.direccion ? ' • ' + c.direccion : ''}</small>
+      </div>
+    `;
+    div.addEventListener('click', () => irAComercio(c));
+    cont.appendChild(div);
+  });
+}
+
+function irAComercio(comercio) {
+  // Ir al perfil del comercio
+  irAPerfilComercio(comercio.id);
+  
+  // Opcional: si querés que también centre el mapa y abra el popup, descomentá:
+  // if (comercio.lat && comercio.lng && mapa) {
+  //   mapa.setView([comercio.lat, comercio.lng], 16);
+  //   const marker = marcadoresMapa.find(m => 
+ //     m.getLatLng().lat === comercio.lat && m.getLatLng().lng === comercio.lng
+  //   );
+  //   if (marker) marker.openPopup();
+  // }
+}
+
+function limpiarBusqueda() {
+  const input = document.getElementById('buscar-comercio');
+  if (input) input.value = '';
+  buscarComercios('');
+}
+
+// Event listeners del buscador
+document.getElementById('buscar-comercio')?.addEventListener('input', (e) => {
+  buscarComercios(e.target.value);
+});
+
+document.getElementById('btn-limpiar-buscar')?.addEventListener('click', limpiarBusqueda);
+
+// Cerrar resultados al hacer click fuera
+document.addEventListener('click', (e) => {
+  const buscador = document.querySelector('.buscador-comercios');
+  if (buscador && !buscador.contains(e.target)) {
+    const cont = document.getElementById('resultados-busqueda');
+    if (cont) cont.style.display = 'none';
+  }
+});
 
 // ========== INICIALIZACIÓN ==========
 loadStats();
@@ -458,3 +563,4 @@ loadComercios();
 loadExcursiones();
 loadGuia();
 loadAvisosCliente();
+cargarComerciosCache(); //

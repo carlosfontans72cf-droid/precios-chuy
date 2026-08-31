@@ -136,6 +136,33 @@
         contenedor.innerHTML = '<div class="error-msg"><div style="font-size:3rem;margin-bottom:15px;"></div><h2>Error al cargar</h2><p>' + err.message + '</p><a href="/pages/cliente.html" style="color:#0038A8;font-weight:bold;">← Volver</a></div>';
       }
     }
-  </script>
+  </script> <div id="perfil-comercio"></div>
+
+<script type="module">
+  import { db } from "../js/firebase-config.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const params = new URLSearchParams(window.location.search);
+  const comercioId = params.get("id");
+
+  if (comercioId) cargarPerfil(comercioId);
+  else document.getElementById("perfil-comercio").innerHTML = "<p>Comercio no encontrado</p>";
+
+  async function cargarPerfil(id) {
+    const snap = await getDoc(doc(db, "users", id));
+    if (!snap.exists()) {
+      document.getElementById("perfil-comercio").innerHTML = "<p>Comercio no existe</p>";
+      return;
+    }
+    const c = snap.data();
+    document.getElementById("perfil-comercio").innerHTML = `
+      ${c.logo ? `<img src="${c.logo}" style="max-width:150px;">` : ''}
+      <h2>${c.nombreComercio || 'Sin nombre'}</h2>
+      <p>Dirección: ${c.direccion || 'No especificada'}</p>
+      <p>Teléfono: ${c.telefono || 'No especificado'}</p>
+      <p>Horarios: ${c.horarios || 'No especificados'}</p>
+    `;
+  }
+</script>
 </body>
 </html>
