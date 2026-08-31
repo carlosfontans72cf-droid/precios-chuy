@@ -9,7 +9,7 @@ const userName = sessionStorage.getItem('userName');
 window.mostrarPremium = () => mostrarPremiumCliente(userId);
 window.irAPerfilComercio = (comercioId) => {
   sessionStorage.setItem('perfilComercioId', comercioId);
-  window.location.href = '/pages/perfil-comercio.html';
+  window.location.href = '/pages/perfil-comercio.html?id=' + comercioId;
 };
 
 // ========== CARGAR ESTADÍSTICAS ==========
@@ -208,7 +208,7 @@ document.addEventListener('click', function(e) {
     const comercioId = popupCard.getAttribute('data-comercio-id');
     if (comercioId) {
       sessionStorage.setItem('perfilComercioId', comercioId);
-      window.location.href = '/pages/perfil-comercio.html';
+      window.location.href = '/pages/perfil-comercio.html?id=' + comercioId;
     }
   }
 });
