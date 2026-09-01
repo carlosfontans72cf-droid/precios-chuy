@@ -3,7 +3,8 @@ import { auth, db } from './firebase-config.js';
 import { guardarSesion } from './session.js';
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc, setDoc, collection, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -209,6 +210,35 @@ if (btnRegister) {
     }
   });
 }
+
+// ========== RECUPERAR CONTRASEÑA ==========
+window.recuperarPassword = async () => {
+  const emailInput = document.getElementById('email');
+  let email = emailInput.value.trim();
+
+  if (!email) {
+    email = prompt('Ingresá el email de tu cuenta para recuperar la contraseña:');
+    if (!email) return;
+    email = email.trim();
+  }
+
+  errorDiv.textContent = '';
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    errorDiv.style.color = '#009C3B';
+    errorDiv.textContent = `Te enviamos un email a ${email} con instrucciones para restablecer tu contraseña. Revisá también la carpeta de spam.`;
+  } catch (error) {
+    errorDiv.style.color = '';
+    if (error.code === 'auth/invalid-email') {
+      errorDiv.textContent = 'Ese email no es válido';
+    } else if (error.code === 'auth/user-not-found') {
+      errorDiv.textContent = 'No encontramos una cuenta con ese email';
+    } else {
+      errorDiv.textContent = 'Error al enviar el email. Intentá de nuevo.';
+    }
+  }
+};
 
 // Solo redirige si estás en la página de login y ya hay sesión activa
 auth.onAuthStateChanged((user) => {

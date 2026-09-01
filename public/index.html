@@ -42,8 +42,11 @@
         <div class="form-group" style="position: relative;">
           <label>Contraseña</label>
           <input type="password" id="password" class="form-control" placeholder="Contraseña" style="padding-right:42px;">
-          <button type="button" class="btn-toggle-password" onclick="togglePassword()"></button>
+          <button type="button" id="toggle-password" class="btn-toggle-password" onclick="togglePassword()" style="position:absolute; right:8px; top:34px; background:none; border:none; font-size:1.2rem; cursor:pointer; line-height:1;">👁️</button>
         </div>
+        <p style="text-align:right; margin:-8px 0 12px 0;">
+          <a href="#" onclick="recuperarPassword(); return false;" style="font-size:0.9rem; color:#0038A8;">¿Olvidaste tu contraseña?</a>
+        </p>
         <div id="login-error" class="error-message"></div>
         <button id="btn-login" class="btn btn-primary btn-block">Iniciar Sesión</button>
         <p class="switch-form">
@@ -73,7 +76,7 @@
         <div class="form-group" style="position: relative;">
           <label>Contraseña</label>
           <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 6 caracteres" style="padding-right:42px;">
-          <button type="button" class="btn-toggle-password" onclick="togglePassword()"></button>
+          <button type="button" id="toggle-reg-password" class="btn-toggle-password" onclick="togglePassword()" style="position:absolute; right:8px; top:34px; background:none; border:none; font-size:1.2rem; cursor:pointer; line-height:1;">👁️</button>
         </div>
         <div class="form-group">
           <label>Quiero registrarme como:</label>
@@ -158,8 +161,10 @@
       const r = document.getElementById('reg-password');
       if (loginForm.style.display !== 'none') {
         p.type = p.type === 'password' ? 'text' : 'password';
+        document.getElementById('toggle-password').textContent = p.type === 'password' ? '👁️' : '🙈';
       } else {
         r.type = r.type === 'password' ? 'text' : 'password';
+        document.getElementById('toggle-reg-password').textContent = r.type === 'password' ? '👁️' : '🙈';
       }
     }
     function showRegister() {

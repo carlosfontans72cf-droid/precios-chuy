@@ -214,41 +214,70 @@ document.addEventListener('click', function(e) {
 });
 
 // ========== COMERCIOS ==========
+let todosLosComercios = [];
+
 async function loadComercios() {
   const cont = document.getElementById('lista-comercios-cliente');
   if (!cont) return;
   try {
     const snapUsers = await getDocs(collection(db, 'users'));
-    cont.innerHTML = '';
-    let totalComercios = 0;
+    todosLosComercios = [];
 
     snapUsers.forEach(d => {
       const data = d.data();
       if (data.role !== 'comerciante' || data.activo === false) return;
-      const nombre = data.nombreComercio || data.comercio || 'Comercio';
-      const tipo = data.tipo || 'comercio';
-      const logo = data.logo || '';
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.style.cursor = 'pointer';
-      div.onclick = () => irAPerfilComercio(d.id);
-      div.innerHTML = `
-        ${logo ? `<img src="${logo}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:15px;float:left;border:2px solid #FFDF00;" onerror="this.style.display='none'">` : ''}
-        <h3 style="margin:0;">🏪 ${nombre}</h3>
-        <p style="color:#666;margin:5px 0;">${tipo}</p>
-        ${data.direccion ? `<p style="margin:5px 0;"><small>📍 ${data.direccion}</small></p>` : ''}
-        ${data.telefono ? `<p style="margin:5px 0;"><small>📱 ${data.telefono}</small></p>` : ''}
-        <div style="clear:both;"></div>`;
-      cont.appendChild(div);
-      totalComercios++;
+      todosLosComercios.push({ id: d.id, ...data });
     });
 
-    if (totalComercios === 0) { cont.innerHTML = '<p style="text-align:center;color:#666;">Sin comercios registrados</p>'; }
+    renderComercios(todosLosComercios);
   } catch (err) {
     console.error('Error comercios:', err);
     cont.innerHTML = '<p style="text-align:center;color:#666;">Error al cargar comercios</p>';
   }
 }
+
+function renderComercios(lista) {
+  const cont = document.getElementById('lista-comercios-cliente');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  if (lista.length === 0) {
+    cont.innerHTML = '<p style="text-align:center;color:#666;">No se encontraron comercios</p>';
+    return;
+  }
+
+  lista.forEach(data => {
+    const nombre = data.nombreComercio || data.comercio || 'Comercio';
+    const tipo = data.tipo || 'comercio';
+    const logo = data.logo || '';
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.cursor = 'pointer';
+    div.onclick = () => irAPerfilComercio(data.id);
+    div.innerHTML = `
+      ${logo ? `<img src="${logo}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:15px;float:left;border:2px solid #FFDF00;" onerror="this.style.display='none'">` : ''}
+      <h3 style="margin:0;">🏪 ${nombre}</h3>
+      <p style="color:#666;margin:5px 0;">${tipo}</p>
+      ${data.direccion ? `<p style="margin:5px 0;"><small>📍 ${data.direccion}</small></p>` : ''}
+      ${data.telefono ? `<p style="margin:5px 0;"><small>📱 ${data.telefono}</small></p>` : ''}
+      <div style="clear:both;"></div>`;
+    cont.appendChild(div);
+  });
+}
+
+window.filtrarComercios = () => {
+  const termino = (document.getElementById('buscar-comercio').value || '').trim().toLowerCase();
+  if (!termino) { renderComercios(todosLosComercios); return; }
+
+  const filtrados = todosLosComercios.filter(data => {
+    const nombre = (data.nombreComercio || data.comercio || '').toLowerCase();
+    const tipo = (data.tipo || '').toLowerCase();
+    const direccion = (data.direccion || '').toLowerCase();
+    return nombre.includes(termino) || tipo.includes(termino) || direccion.includes(termino);
+  });
+
+  renderComercios(filtrados);
+};
 
 // ========== EXCURSIONES ==========
 async function loadExcursiones() {
