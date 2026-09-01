@@ -1,6 +1,6 @@
 // Panel Cliente - Precios Chuy
 import { db } from './firebase-config.js';
-import { collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, doc, getDoc, setDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { mostrarPremiumCliente } from './pagos-ui.js';
 
 const userId = sessionStorage.getItem('userId');
@@ -82,6 +82,24 @@ async function loadOfertas() {
   } catch (err) { console.error('Error cargando ofertas:', err); }
 }
 
+// ========== REGISTRAR BÚSQUEDAS (para "lo que buscan los clientes") ==========
+let searchDebounceTimer = null;
+function registrarBusqueda(termino) {
+  const t = (termino || '').trim().toLowerCase();
+  if (t.length < 3) return;
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(async () => {
+    try {
+      const termId = t.replace(/\//g, '-').slice(0, 100);
+      await setDoc(doc(db, 'busquedas', termId), {
+        termino: t,
+        conteo: increment(1),
+        ultimaBusqueda: serverTimestamp()
+      }, { merge: true });
+    } catch (err) { console.error('Error registrando búsqueda:', err); }
+  }, 800);
+}
+
 // ========== PRODUCTOS ==========
 async function loadProductos() {
   const cont = document.getElementById('lista-productos-cliente');
@@ -105,6 +123,8 @@ async function loadProductos() {
     const snap = await getDocs(collection(db, 'productos'));
     const busqueda = inputBusqueda?.value.trim().toLowerCase() || '';
     const seccionFiltro = selectSeccion?.value || '';
+
+    registrarBusqueda(busqueda);
 
     if (snap.empty) { cont.innerHTML = '<p style="text-align:center;color:#666;grid-column:span 2;">📦 Sin productos cargados.</p>'; return; }
 

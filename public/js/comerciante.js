@@ -1,7 +1,7 @@
 // Panel Comerciante - Precios Chuy
 import { db, storage } from './firebase-config.js';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, serverTimestamp
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { showAlert } from './utils.js';
@@ -186,18 +186,21 @@ async function savePerfil() {
 }
 
 // ========== SECCIONES ==========
+let seccionesMap = {};
 async function loadSeccionesComerciante() {
   const selectSeccion = document.getElementById('prod-seccion');
   if (!selectSeccion) return;
   try {
     const snap = await getDocs(collection(db, 'secciones'));
     selectSeccion.innerHTML = '<option value="">-- Seleccionar --</option>';
+    seccionesMap = {};
     snap.forEach(d => {
       const data = d.data();
       const option = document.createElement('option');
       option.value = d.id;
       option.textContent = `${data.icono || ''} ${data.nombre}`;
       selectSeccion.appendChild(option);
+      if (data.nombre) seccionesMap[data.nombre.trim().toLowerCase()] = d.id;
     });
     console.log(`✅ ${snap.size} secciones cargadas`);
   } catch (err) { console.error('Error cargando secciones:', err); }
@@ -420,8 +423,177 @@ async function loadPerfilExistente() {
       if (data.cambioBrlCompra) document.getElementById('cambio-brl-compra').value = data.cambioBrlCompra;
       if (data.cambioBrlVenta) document.getElementById('cambio-brl-venta').value = data.cambioBrlVenta;
       if (data.cambioFecha) document.getElementById('cambio-fecha').textContent = new Date(data.cambioFecha).toLocaleString('es-UY');
+      const statVistas = document.getElementById('stat-vistas-com');
+      if (statVistas) statVistas.textContent = data.vistas || 0;
     }
   } catch (err) { console.error('Error cargando perfil:', err); }
+}
+
+// ========== IMPORTAR PRODUCTOS POR CSV ==========
+
+// Parser simple de CSV, soporta campos entre comillas con comas adentro
+function parsearCSV(texto) {
+  const filas = [];
+  let fila = [];
+  let campo = '';
+  let entreComillas = false;
+  const limpio = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  for (let i = 0; i < limpio.length; i++) {
+    const c = limpio[i];
+    if (entreComillas) {
+      if (c === '"') {
+        if (limpio[i + 1] === '"') { campo += '"'; i++; }
+        else entreComillas = false;
+      } else campo += c;
+    } else {
+      if (c === '"') entreComillas = true;
+      else if (c === ',') { fila.push(campo); campo = ''; }
+      else if (c === '\n') { fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+      else campo += c;
+    }
+  }
+  if (campo.length > 0 || fila.length > 0) { fila.push(campo); filas.push(fila); }
+  return filas.filter(f => f.some(c => c.trim() !== ''));
+}
+
+document.getElementById('btn-descargar-plantilla')?.addEventListener('click', () => {
+  const contenido = 'nombre,seccion,precioBrasil,precioUruguay,imagen,esOferta\n' +
+    'Arroz 1kg,Almacen,8.50,120,https://ejemplo.com/arroz.jpg,no\n' +
+    'Whisky Old Times,Bebidas,45.90,,,,si\n';
+  const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'plantilla-productos.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btn-importar-csv')?.addEventListener('click', async () => {
+  const fileInput = document.getElementById('csv-productos-file');
+  const resultado = document.getElementById('resultado-importacion');
+  const file = fileInput.files[0];
+  if (!file) { showAlert('Seleccioná un archivo CSV', 'warning'); return; }
+
+  resultado.innerHTML = '<p style="color:#666;">Leyendo archivo...</p>';
+
+  try {
+    const texto = await file.text();
+    const filas = parsearCSV(texto);
+    if (filas.length < 2) {
+      resultado.innerHTML = '<p style="color:#dc3545;">El archivo está vacío o no tiene datos.</p>';
+      return;
+    }
+
+    const encabezado = filas[0].map(h => h.trim().toLowerCase());
+    const idxNombre = encabezado.indexOf('nombre');
+    const idxSeccion = encabezado.indexOf('seccion');
+    const idxPrecioBr = encabezado.indexOf('preciobrasil');
+    const idxPrecioUy = encabezado.indexOf('preciouruguay');
+    const idxImagen = encabezado.indexOf('imagen');
+    const idxOferta = encabezado.indexOf('esoferta');
+
+    if (idxNombre === -1 || idxSeccion === -1 || idxPrecioBr === -1) {
+      resultado.innerHTML = '<p style="color:#dc3545;">Faltan columnas obligatorias: nombre, seccion, precioBrasil. Descargá la plantilla de ejemplo.</p>';
+      return;
+    }
+
+    let agregados = 0;
+    const errores = [];
+    const filasDeDatos = filas.slice(1);
+
+    resultado.innerHTML = `<p style="color:#666;">Importando 0 / ${filasDeDatos.length}...</p>`;
+
+    for (let i = 0; i < filasDeDatos.length; i++) {
+      const f = filasDeDatos[i];
+      const nombre = (f[idxNombre] || '').trim();
+      const seccionTexto = (f[idxSeccion] || '').trim();
+      const precioBrasil = parseFloat((f[idxPrecioBr] || '').replace(',', '.'));
+      const precioUruguay = idxPrecioUy > -1 ? parseFloat((f[idxPrecioUy] || '').replace(',', '.')) || 0 : 0;
+      const imagen = idxImagen > -1 ? (f[idxImagen] || '').trim() || null : null;
+      const ofertaTexto = idxOferta > -1 ? (f[idxOferta] || '').trim().toLowerCase() : 'no';
+      const esOferta = ['si', 'sí', 'yes', 'true', '1'].includes(ofertaTexto);
+
+      const fila = i + 2; // +2 porque la fila 1 es el encabezado y los índices empiezan en 0
+
+      if (!nombre) { errores.push(`Fila ${fila}: falta el nombre`); continue; }
+      if (isNaN(precioBrasil)) { errores.push(`Fila ${fila}: precioBrasil inválido`); continue; }
+
+      const seccionId = seccionesMap[seccionTexto.toLowerCase()];
+      if (!seccionId) { errores.push(`Fila ${fila}: sección "${seccionTexto}" no existe`); continue; }
+
+      try {
+        await addDoc(collection(db, 'productos'), {
+          nombre, precioBrasil, precioUruguay,
+          comercioId: userId, comercioNombre: sessionStorage.getItem('userName'),
+          seccionId, imagen, esOferta,
+          activo: true, suspendido: false, createdAt: serverTimestamp()
+        });
+        agregados++;
+      } catch (err) {
+        errores.push(`Fila ${fila}: error al guardar (${err.message})`);
+      }
+
+      resultado.innerHTML = `<p style="color:#666;">Importando ${i + 1} / ${filasDeDatos.length}...</p>`;
+    }
+
+    let html = `<p style="color:#009C3B;font-weight:bold;">✅ ${agregados} producto(s) importado(s) correctamente.</p>`;
+    if (errores.length > 0) {
+      html += `<p style="color:#dc3545;font-weight:bold;">⚠️ ${errores.length} fila(s) con problemas:</p><ul style="color:#dc3545;font-size:0.9rem;">`;
+      errores.forEach(e => { html += `<li>${e}</li>`; });
+      html += '</ul>';
+    }
+    resultado.innerHTML = html;
+    fileInput.value = '';
+    loadProductos();
+  } catch (err) {
+    console.error('Error importando CSV:', err);
+    resultado.innerHTML = `<p style="color:#dc3545;">Error al procesar el archivo: ${err.message}</p>`;
+  }
+});
+
+// ========== LO QUE BUSCAN LOS CLIENTES ==========
+async function loadMasBuscados() {
+  const cont = document.getElementById('lista-mas-buscados');
+  if (!cont) return;
+  try {
+    // Nombres de mis propios productos (para detectar qué NO tengo)
+    const misProductosSnap = await getDocs(query(collection(db, 'productos'), where('comercioId', '==', userId)));
+    const misNombres = [];
+    misProductosSnap.forEach(d => {
+      const n = (d.data().nombre || '').toLowerCase();
+      if (n) misNombres.push(n);
+    });
+    const yaLoTengo = (termino) => misNombres.some(n => n.includes(termino) || termino.includes(n));
+
+    // Top de términos buscados en toda la app
+    const q = query(collection(db, 'busquedas'), orderBy('conteo', 'desc'), limit(20));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      cont.innerHTML = '<p style="color:#666;">Todavía no hay suficientes búsquedas registradas.</p>';
+      return;
+    }
+
+    let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    snap.forEach(d => {
+      const data = d.data();
+      const termino = data.termino || d.id;
+      const conteo = data.conteo || 0;
+      const esOportunidad = !yaLoTengo(termino);
+      html += `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:${esOportunidad ? '#FFF3CD' : '#f8f9fa'};border-left:4px solid ${esOportunidad ? '#FF6B00' : '#ddd'};">
+          <span>${esOportunidad ? '🎯 ' : ''}${termino}</span>
+          <span style="font-weight:bold;color:#0038A8;">${conteo} búsqueda${conteo === 1 ? '' : 's'}</span>
+        </div>`;
+    });
+    html += '</div>';
+    cont.innerHTML = html;
+  } catch (err) {
+    console.error('Error cargando más buscados:', err);
+    cont.innerHTML = '<p style="color:#dc3545;">Error al cargar este dato.</p>';
+  }
 }
 
 // ========== INICIALIZACIÓN ==========
@@ -432,4 +604,5 @@ loadSeccionesComerciante();
 loadProductos();
 loadVideos();
 loadExcursionesComerciante();
+loadMasBuscados();
 initMapaPerfil();

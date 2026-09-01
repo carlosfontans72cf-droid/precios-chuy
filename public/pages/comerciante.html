@@ -140,6 +140,20 @@
         <button id="btn-add-producto" class="btn btn-success">Agregar Producto</button>
       </div>
       <div class="card">
+        <div class="card-header">📦 Cargar varios productos a la vez (CSV / Excel)</div>
+        <p style="color:#666; font-size:0.9rem; margin-bottom:12px;">
+          Armá tu lista en Excel o Google Sheets con las columnas: <strong>nombre, seccion, precioBrasil, precioUruguay, imagen, esOferta</strong>.
+          Luego guardala como CSV (Archivo → Descargar → Valores separados por comas) y subila acá.
+        </p>
+        <button id="btn-descargar-plantilla" type="button" class="btn" style="background:#0038A8;color:white;margin-bottom:12px;">⬇️ Descargar plantilla de ejemplo</button>
+        <div class="form-group">
+          <label>Archivo CSV</label>
+          <input type="file" id="csv-productos-file" accept=".csv" class="form-control">
+        </div>
+        <button id="btn-importar-csv" type="button" class="btn btn-success">📤 Importar productos</button>
+        <div id="resultado-importacion" style="margin-top:12px;"></div>
+      </div>
+      <div class="card">
         <div class="card-header">Productos Cargados</div>
         <div id="lista-mis-productos"></div>
       </div>
@@ -169,6 +183,13 @@
           <div class="stat-card"><div class="number" id="stat-ofertas-com" style="font-size:2.5rem;font-weight:bold;color:#009C3B;">0</div><div class="label">Ofertas</div></div>
           <div class="stat-card"><div class="number" id="stat-vistas-com" style="font-size:2.5rem;font-weight:bold;color:#FF6B00;">0</div><div class="label">Vistas</div></div>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-header">🔍 Lo que buscan los clientes</div>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:12px;">
+          Términos más buscados en toda la app en los últimos 30 días. Los marcados con 🎯 son oportunidades: se buscan seguido pero vos todavía no los tenés en tu lista.
+        </p>
+        <div id="lista-mas-buscados"><p style="color:#666;">Cargando...</p></div>
       </div>
     </div>
 
