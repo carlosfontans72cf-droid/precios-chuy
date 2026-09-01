@@ -129,6 +129,12 @@
     <div id="tab-mapa" class="tab-content">
       <h3 class="section-title">🗺️ Comercios en Chuy</h3>
       <div class="card">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Buscar comercio</label>
+          <input type="text" id="buscar-comercio" class="form-control" placeholder="Ej: Supermercado Central, farmacia, ropa..." oninput="filtrarComercios()">
+        </div>
+      </div>
+      <div class="card">
         <div id="mapa-comercios"></div>
       </div>
       <p style="text-align:center; color:#666; margin-top:10px;">Click en cada pin para ver la información del comercio</p>
