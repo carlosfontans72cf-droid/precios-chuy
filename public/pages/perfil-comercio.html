@@ -59,6 +59,35 @@
       cargarPerfilCompleto(comercioId);
     }
 
+    function renderProductosComercio(lista) {
+      const contProductos = document.getElementById('lista-productos-comercio');
+      if (!contProductos) return;
+      if (lista.length === 0) {
+        contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No se encontraron productos.</p>';
+        return;
+      }
+      contProductos.innerHTML = '';
+      lista.forEach(function(prod) {
+        const imgHtml = prod.imagen ? '<img src="' + prod.imagen + '" alt="' + prod.nombre + '" class="producto-img" onerror="this.style.display=\'none\'">' : '<div class="producto-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:#f0f0f0;">📷</div>';
+        const ofertaBadge = prod.esOferta ? '<span class="badge-oferta">🔥 OFERTA</span>' : '';
+        const precioUy = prod.precioUruguay ? '<span class="precio-uy">$U ' + prod.precioUruguay + '</span>' : '';
+        const div = document.createElement('div');
+        div.className = 'producto-card';
+        div.innerHTML = imgHtml + '<div class="producto-info"><h4>' + prod.nombre + ' ' + ofertaBadge + '</h4><div class="precios"><span class="precio-br">R$ ' + prod.precioBrasil + '</span>' + precioUy + '</div></div>';
+        contProductos.appendChild(div);
+      });
+    }
+
+    window.filtrarProductosComercio = function() {
+      const termino = (document.getElementById('buscar-producto-comercio').value || '').trim().toLowerCase();
+      const lista = window.todosLosProductosComercio || [];
+      if (!termino) { renderProductosComercio(lista); return; }
+      const filtrados = lista.filter(function(p) {
+        return (p.nombre || '').toLowerCase().includes(termino);
+      });
+      renderProductosComercio(filtrados);
+    };
+
     async function cargarPerfilCompleto(id) {
       try {
         const userDoc = await getDoc(doc(db, 'users', id));
@@ -110,28 +139,20 @@
         } else {
           html += '<div class="info-card"><h3>🗺️ Ubicación</h3><p style="color:#666;">Ubicación no disponible</p></div>';
         }
-        html += '<div class="info-card"><h3>🛒 Productos</h3><div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
+        html += '<div class="info-card"><h3>🛒 Productos</h3>';
+        html += '<div class="form-group" style="margin-bottom:15px;"><input type="text" id="buscar-producto-comercio" class="form-control" placeholder="Buscar producto de este comercio..." oninput="filtrarProductosComercio()"></div>';
+        html += '<div id="lista-productos-comercio"><div class="loading">Cargando productos...</div></div></div></div>';
         contenedor.innerHTML = html;
         try {
           const productosQuery = query(collection(db, 'productos'), where('comercioId', '==', id));
           const productosSnap = await getDocs(productosQuery);
           const contProductos = document.getElementById('lista-productos-comercio');
-          if (productosSnap.empty) {
-            contProductos.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Sin productos cargados.</p>';
-          } else {
-            contProductos.innerHTML = '';
-            productosSnap.forEach(function(d) {
-              const prod = d.data();
-              if (prod.suspendido) return;
-              const imgHtml = prod.imagen ? '<img src="' + prod.imagen + '" alt="' + prod.nombre + '" class="producto-img" onerror="this.style.display=\'none\'">' : '<div class="producto-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;background:#f0f0f0;">📷</div>';
-              const ofertaBadge = prod.esOferta ? '<span class="badge-oferta">🔥 OFERTA</span>' : '';
-              const precioUy = prod.precioUruguay ? '<span class="precio-uy">$U ' + prod.precioUruguay + '</span>' : '';
-              const div = document.createElement('div');
-              div.className = 'producto-card';
-              div.innerHTML = imgHtml + '<div class="producto-info"><h4>' + prod.nombre + ' ' + ofertaBadge + '</h4><div class="precios"><span class="precio-br">R$ ' + prod.precioBrasil + '</span>' + precioUy + '</div></div>';
-              contProductos.appendChild(div);
-            });
-          }
+          window.todosLosProductosComercio = [];
+          productosSnap.forEach(function(d) {
+            const prod = d.data();
+            if (!prod.suspendido) window.todosLosProductosComercio.push(prod);
+          });
+          renderProductosComercio(window.todosLosProductosComercio);
         } catch (err) {
           console.error('Error productos:', err);
           document.getElementById('lista-productos-comercio').innerHTML = '<p style="color:red;">Error al cargar productos</p>';

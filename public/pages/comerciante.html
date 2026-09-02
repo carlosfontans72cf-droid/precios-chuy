@@ -131,7 +131,14 @@
         <div class="card-header">Agregar Producto</div>
         <div class="grid grid-2">
           <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" class="form-control"></div>
-          <div class="form-group"><label>Sección</label><select id="prod-seccion" class="form-control"><option value="">-- Seleccionar --</option></select></div>
+          <div class="form-group">
+            <label>Sección</label>
+            <select id="prod-seccion" class="form-control" onchange="onSeccionChange()"><option value="">-- Seleccionar --</option></select>
+            <div id="nueva-seccion-box" style="display:none; margin-top:8px; display:flex; gap:8px;">
+              <input type="text" id="nueva-seccion-nombre" class="form-control" placeholder="Nombre de la sección nueva (ej: Perfumería)">
+              <button type="button" id="btn-crear-seccion" class="btn" style="background:#0038A8;color:white;white-space:nowrap;">➕ Crear</button>
+            </div>
+          </div>
           <div class="form-group"><label>Precio Brasil (R$)</label><input type="number" id="prod-precio" class="form-control" step="0.01"></div>
           <div class="form-group"><label>Precio Uruguay ($U)</label><input type="number" id="prod-precio-uy" class="form-control" step="0.01" placeholder="Opcional"></div>
           <div class="form-group"><label>Imagen (URL)</label><input type="text" id="prod-imagen" class="form-control" placeholder="https://..."></div>

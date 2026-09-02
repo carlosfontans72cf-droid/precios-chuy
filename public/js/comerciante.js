@@ -202,9 +202,44 @@ async function loadSeccionesComerciante() {
       selectSeccion.appendChild(option);
       if (data.nombre) seccionesMap[data.nombre.trim().toLowerCase()] = d.id;
     });
+    const optNueva = document.createElement('option');
+    optNueva.value = '__nueva__';
+    optNueva.textContent = '➕ Crear nueva sección...';
+    selectSeccion.appendChild(optNueva);
     console.log(`✅ ${snap.size} secciones cargadas`);
   } catch (err) { console.error('Error cargando secciones:', err); }
 }
+
+window.onSeccionChange = function() {
+  const select = document.getElementById('prod-seccion');
+  const box = document.getElementById('nueva-seccion-box');
+  if (!select || !box) return;
+  box.style.display = select.value === '__nueva__' ? 'flex' : 'none';
+};
+
+document.getElementById('btn-crear-seccion')?.addEventListener('click', async () => {
+  const input = document.getElementById('nueva-seccion-nombre');
+  const nombre = (input.value || '').trim();
+  if (!nombre) { showAlert('Escribí un nombre para la sección', 'warning'); return; }
+  if (seccionesMap[nombre.toLowerCase()]) {
+    showAlert('Ya existe una sección con ese nombre', 'warning');
+    return;
+  }
+  try {
+    await addDoc(collection(db, 'secciones'), { nombre, icono: '🏷️', creadoPor: userId, createdAt: serverTimestamp() });
+    showAlert(`Sección "${nombre}" creada`, 'success');
+    input.value = '';
+    document.getElementById('nueva-seccion-box').style.display = 'none';
+    await loadSeccionesComerciante();
+    // Dejar seleccionada la sección recién creada
+    const select = document.getElementById('prod-seccion');
+    const id = seccionesMap[nombre.toLowerCase()];
+    if (select && id) select.value = id;
+  } catch (err) {
+    console.error('Error creando sección:', err);
+    showAlert('Error al crear la sección. Puede que falte actualizar los permisos en Firestore.', 'danger');
+  }
+});
 
 // ========== PRODUCTOS ==========
 document.getElementById('btn-add-producto')?.addEventListener('click', addProducto);
