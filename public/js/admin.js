@@ -6,6 +6,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { showAlert } from './utils.js';
 
+// Calcula el estado real de un comerciante, igual que lo hace su propio panel.
+function calcularEstadoComercio(c) {
+  const hoy = new Date();
+
+  if (c.plan === 'suspendido') return { estado: 'suspendido', dias: 0 };
+
+  if (c.plan === 'premium' && c.fechaVencimientoPremium) {
+    const fin = new Date(c.fechaVencimientoPremium);
+    if (fin > hoy) return { estado: 'premium', dias: Math.ceil((fin - hoy) / 86400000) };
+  }
+
+  const totalDias = 60;
+  let dias = 60;
+  if (c.fechaVencimiento) {
+    dias = Math.ceil((new Date(c.fechaVencimiento) - hoy) / 86400000);
+  } else if (c.fechaSuscripcion) {
+    const inicio = new Date(c.fechaSuscripcion);
+    dias = totalDias - Math.floor((hoy - inicio) / 86400000);
+  } else if (c.createdAt) {
+    const inicio = c.createdAt.toDate ? c.createdAt.toDate() : new Date(c.createdAt);
+    dias = totalDias - Math.floor((hoy - inicio) / 86400000);
+  }
+  dias = Math.max(0, dias);
+
+  return { estado: dias <= 0 ? 'vencido' : 'prueba', dias };
+}
+
 const role = sessionStorage.getItem('userRole');
 if (role !== 'admin') window.location.href = '/index.html';
 
@@ -152,6 +179,50 @@ window.deleteComercio = async (id) => {
 
 // ========== PAGOS ==========
 async function loadPagos() {
+  const cont = document.getElementById('lista-por-vencer');
+  if (cont) {
+    cont.innerHTML = '<p>Cargando...</p>';
+    try {
+      const snap = await getDocs(collection(db, 'users'));
+      const porVencer = [];
+      snap.forEach(d => {
+        const c = { id: d.id, ...d.data() };
+        if (c.role !== 'comerciante') return;
+        const { estado, dias } = calcularEstadoComercio(c);
+        if (estado === 'suspendido') return; // ya está suspendido, no tiene sentido recordarle
+        if (dias <= 10) porVencer.push({ ...c, estado, dias });
+      });
+      porVencer.sort((a, b) => a.dias - b.dias);
+
+      if (porVencer.length === 0) {
+        cont.innerHTML = '<p style="color:#666;">Nadie por vencer en este momento 🎉</p>';
+      } else {
+        cont.innerHTML = '';
+        porVencer.forEach(c => {
+          const nombre = c.comercio || c.nombreComercio || c.nombre || 'Comercio';
+          const telefono = (c.telefono || '').replace(/[^0-9]/g, '');
+          const vencido = c.dias <= 0;
+          const etiqueta = c.estado === 'premium' ? 'Premium por vencer' : (vencido ? 'VENCIDO' : 'Prueba por vencer');
+          const colorEtiqueta = vencido ? '#dc3545' : '#FF6B00';
+          const mensaje = vencido
+            ? `Hola ${nombre}! 👋 Vimos que tu suscripción en Precios Chuy venció. Extrañamos tus ofertas y nuestros clientes también 😊 ¿Renovamos tu plan para que puedas seguir subiendo productos?`
+            : `Hola ${nombre}! 👋 Te quedan ${c.dias} día(s) de tu ${c.estado === 'premium' ? 'plan premium' : 'período de prueba'} en Precios Chuy. ¿Renovamos para que no se te corte la visibilidad?`;
+          const link = telefono ? `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}` : null;
+
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+          div.innerHTML = `
+            <strong>${nombre}</strong>
+            <span style="background:${colorEtiqueta};color:white;font-size:0.75rem;padding:2px 8px;border-radius:10px;margin-left:6px;">${etiqueta}</span>
+            <br><small>${c.email} | Días: ${Math.max(0, c.dias)}${telefono ? '' : ' | ⚠️ Sin teléfono cargado'}</small><br>
+            ${link ? `<a href="${link}" target="_blank" class="btn btn-sm" style="background:#25D366;color:white;">📲 Recordar por WhatsApp</a>` : ''}
+            <button class="btn btn-sm btn-success" onclick="extenderCom('${c.id}',30)">+30 días</button>`;
+          cont.appendChild(div);
+        });
+      }
+    } catch (err) { cont.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; }
+  }
+
   const contCom = document.getElementById('lista-pagos-comerciantes');
   const contCli = document.getElementById('lista-pagos-clientes');
   if (contCom) {
@@ -166,9 +237,9 @@ async function loadPagos() {
         comerciantes.forEach(c => {
           const div = document.createElement('div');
           div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-          const dias = c.diasRestantes || 0;
-          const estado = c.plan === 'vencido' ? 'Vencido' : (c.plan === 'activo' ? 'Activo' : 'Prueba');
-          div.innerHTML = `<strong>${c.comercio || c.nombre}</strong><br><small>${c.email} | ${estado} | Días: ${dias}</small><br>
+          const { estado, dias } = calcularEstadoComercio(c);
+          const estadoTexto = { vencido: 'Vencido', premium: 'Premium', suspendido: 'Suspendido', prueba: 'Prueba' }[estado];
+          div.innerHTML = `<strong>${c.comercio || c.nombreComercio || c.nombre}</strong><br><small>${c.email} | ${estadoTexto} | Días: ${dias}</small><br>
             <button class="btn btn-sm btn-success" onclick="extenderCom('${c.id}',30)">+30 días</button>
             <button class="btn btn-sm btn-warning" onclick="habilitarCom('${c.id}',30)">Habilitar</button>
             <button class="btn btn-sm btn-danger" onclick="suspenderCom('${c.id}')">Suspender</button>`;
@@ -201,8 +272,21 @@ async function loadPagos() {
 }
 
 window.extenderCom = async (id, dias) => {
-  try { await updateDoc(doc(db, 'users', id), { plan: 'activo', diasRestantes: dias, activo: true });
-    showAlert(`Extendido ${dias} días`, 'success'); loadPagos(); } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+  try {
+    const userSnap = await getDoc(doc(db, 'users', id));
+    const data = userSnap.data() || {};
+    const hoy = new Date();
+    // Si ya tenía fecha de vencimiento futura, se suma desde ahí; si no, desde hoy.
+    const base = (data.fechaVencimiento && new Date(data.fechaVencimiento) > hoy) ? new Date(data.fechaVencimiento) : hoy;
+    base.setDate(base.getDate() + dias);
+    await updateDoc(doc(db, 'users', id), {
+      plan: 'prueba',
+      activo: true,
+      fechaVencimiento: base.toISOString(),
+      ultimoAvisoRenovacion: null
+    });
+    showAlert(`Extendido ${dias} días`, 'success'); loadPagos();
+  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 window.habilitarCom = window.extenderCom;
 window.suspenderCom = async (id) => {

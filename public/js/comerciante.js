@@ -12,6 +12,7 @@ if (!userId) window.location.href = '/index.html';
 
 window.mostrarPago = () => mostrarPagoComerciante(diasRestantesGlobal, userId);
 let diasRestantesGlobal = 60;
+let cuentaBloqueada = false;
 let comercioDocId = '';
 
 // ========== COMPRIMIR IMAGEN ==========
@@ -53,41 +54,117 @@ async function loadStatsGenerales() {
   } catch (err) { console.error('Error stats:', err); }
 }
 
+// ========== AVISO EMERGENTE DE SUSCRIPCIÓN ==========
+function yaAviseHoy(data) {
+  const hoyStr = new Date().toISOString().slice(0, 10);
+  return data.ultimoAvisoRenovacion === hoyStr;
+}
+
+function marcarAvisoHoy() {
+  const hoyStr = new Date().toISOString().slice(0, 10);
+  updateDoc(doc(db, 'users', userId), { ultimoAvisoRenovacion: hoyStr }).catch(() => {});
+}
+
+function mostrarAvisoSuscripcion(titulo, mensaje, urgente) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  const contenido = document.createElement('div');
+  contenido.style.cssText = 'background:white;padding:30px;border-radius:16px;max-width:420px;width:90%;text-align:center;';
+  contenido.innerHTML = `
+    <div style="font-size:3rem;margin-bottom:10px;">${urgente ? '⏰' : '🎉'}</div>
+    <h2 style="color:${urgente ? '#dc3545' : '#0038A8'};margin-bottom:12px;">${titulo}</h2>
+    <p style="color:#555;margin-bottom:20px;">${mensaje}</p>
+    <button id="btn-aviso-ver-pago" class="btn btn-success btn-block" style="margin-bottom:10px;">💳 Ver opciones de pago</button>
+    <button id="btn-aviso-cerrar" class="btn" style="background:#ddd;width:100%;">Cerrar</button>
+  `;
+  modal.appendChild(contenido);
+  document.body.appendChild(modal);
+  document.getElementById('btn-aviso-ver-pago').addEventListener('click', () => { modal.remove(); window.mostrarPago(); });
+  document.getElementById('btn-aviso-cerrar').addEventListener('click', () => modal.remove());
+  marcarAvisoHoy();
+}
+
 // ========== SUSCRIPCIÓN ==========
 async function loadSuscripcion() {
   try {
     const userDoc = await getDocs(query(collection(db, 'users'), where('email', '==', sessionStorage.getItem('userEmail'))));
-    if (!userDoc.empty) {
-      const data = userDoc.docs[0].data();
-      const totalDias = 60;
-      let diasRestantes = 60;
-      if (data.fechaSuscripcion) {
-        const fechaInicio = new Date(data.fechaSuscripcion);
-        const hoy = new Date();
-        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-        diasRestantes = Math.max(0, totalDias - diasTranscurridos);
-      } else if (data.createdAt) {
-        const fechaInicio = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-        const hoy = new Date();
-        const diasTranscurridos = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
-        diasRestantes = Math.max(0, totalDias - diasTranscurridos);
+    if (userDoc.empty) return;
+    const data = userDoc.docs[0].data();
+    const hoy = new Date();
+    const titulo = document.getElementById('sub-titulo');
+    const texto = document.getElementById('sub-texto');
+    const diasEl = document.getElementById('sub-dias');
+    const barra = document.getElementById('sub-barra');
+
+    // Cuenta suspendida manualmente por el admin: bloqueo total, sin importar días.
+    if (data.plan === 'suspendido') {
+      cuentaBloqueada = true;
+      if (titulo) titulo.textContent = '🚫 Cuenta suspendida';
+      if (texto) texto.innerHTML = 'Tu cuenta fue suspendida. Contactanos por WhatsApp para regularizar tu situación.';
+      if (diasEl) diasEl.textContent = '0';
+      if (barra) barra.style.width = '0%';
+      return;
+    }
+
+    // Plan premium pago y vigente: sin límite de días.
+    if (data.plan === 'premium' && data.fechaVencimientoPremium) {
+      const finPremium = new Date(data.fechaVencimientoPremium);
+      if (finPremium > hoy) {
+        cuentaBloqueada = false;
+        const diasPremium = Math.ceil((finPremium - hoy) / (1000 * 60 * 60 * 24));
+        if (titulo) titulo.textContent = '⭐ Plan Premium activo';
+        if (texto) texto.innerHTML = `Te quedan <strong>${diasPremium}</strong> días de tu plan pago`;
+        if (diasEl) diasEl.textContent = diasPremium;
+        if (barra) barra.style.width = '100%';
+        if (diasPremium > 0 && diasPremium % 10 === 0 && !yaAviseHoy(data)) {
+          mostrarAvisoSuscripcion('⭐ Tu plan Premium sigue activo', `Te quedan <strong>${diasPremium} días</strong> de tu plan pago. ¡Gracias por confiar en Precios Chuy!`, false);
+        }
+        return;
       }
-      diasRestantesGlobal = diasRestantes;
-      const porcentaje = Math.max(0, Math.min(100, (diasRestantesGlobal / totalDias) * 100));
-      const titulo = document.getElementById('sub-titulo');
-      const texto = document.getElementById('sub-texto');
-      const diasEl = document.getElementById('sub-dias');
-      const barra = document.getElementById('sub-barra');
-      if (diasRestantesGlobal <= 0) {
-        titulo.textContent = '⚠️ Tu prueba finalizó';
-        texto.innerHTML = 'Tu perfil sigue visible pero no podés subir nuevas ofertas';
-        if (diasEl) diasEl.textContent = '0';
-        if (barra) barra.style.width = '0%';
-      } else {
-        titulo.textContent = '🎉 Período de prueba activo';
-        texto.innerHTML = `Te quedan <strong>${diasRestantesGlobal}</strong> días gratis`;
-        if (diasEl) diasEl.textContent = diasRestantesGlobal;
-        if (barra) barra.style.width = porcentaje + '%';
+      // Si el premium venció, sigue de largo y cae en la lógica de prueba/vencido de abajo.
+    }
+
+    // Período de prueba (o prueba vencida): se calcula sobre fechaVencimiento real.
+    const totalDias = 60;
+    let diasRestantes = 60;
+    if (data.fechaVencimiento) {
+      const fin = new Date(data.fechaVencimiento);
+      diasRestantes = Math.max(0, Math.ceil((fin - hoy) / (1000 * 60 * 60 * 24)));
+    } else if (data.fechaSuscripcion) {
+      const inicio = new Date(data.fechaSuscripcion);
+      diasRestantes = Math.max(0, totalDias - Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24)));
+    } else if (data.createdAt) {
+      const inicio = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+      diasRestantes = Math.max(0, totalDias - Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24)));
+    }
+
+    diasRestantesGlobal = diasRestantes;
+    cuentaBloqueada = diasRestantes <= 0;
+    const porcentaje = Math.max(0, Math.min(100, (diasRestantes / totalDias) * 100));
+
+    if (cuentaBloqueada) {
+      if (titulo) titulo.textContent = '⚠️ Tu prueba finalizó';
+      if (texto) texto.innerHTML = 'Tu perfil sigue visible, pero no podés agregar ni importar productos nuevos hasta activar un plan pago.';
+      if (diasEl) diasEl.textContent = '0';
+      if (barra) barra.style.width = '0%';
+      // Reflejar el vencimiento real en la base, así el cliente deja de verlo en el listado.
+      if (data.plan !== 'vencido') {
+        updateDoc(doc(db, 'users', userId), { plan: 'vencido' }).catch(err => console.error('Error marcando vencido:', err));
+      }
+      if (!yaAviseHoy(data)) {
+        mostrarAvisoSuscripcion(
+          '😔 Se te terminó la suscripción',
+          'Renová tu plan para poder seguir subiendo tus ofertas nuevas a los clientes. Tu perfil sigue visible, pero no podés agregar productos hasta regularizar el pago.',
+          true
+        );
+      }
+    } else {
+      if (titulo) titulo.textContent = '🎉 Período de prueba activo';
+      if (texto) texto.innerHTML = `Te quedan <strong>${diasRestantes}</strong> días gratis`;
+      if (diasEl) diasEl.textContent = diasRestantes;
+      if (barra) barra.style.width = porcentaje + '%';
+      if (diasRestantes < totalDias && diasRestantes % 10 === 0 && !yaAviseHoy(data)) {
+        mostrarAvisoSuscripcion('🎉 Tu período de prueba sigue activo', `Te quedan <strong>${diasRestantes} días</strong> gratis en Precios Chuy. Aprovechalos para cargar todos tus productos.`, false);
       }
     }
   } catch (err) { console.error('Error suscripción:', err); }
@@ -244,6 +321,11 @@ document.getElementById('btn-crear-seccion')?.addEventListener('click', async ()
 // ========== PRODUCTOS ==========
 document.getElementById('btn-add-producto')?.addEventListener('click', addProducto);
 async function addProducto() {
+  if (cuentaBloqueada) {
+    showAlert('Tu período de prueba finalizó. Activá un plan pago para seguir agregando productos.', 'warning');
+    window.mostrarPago();
+    return;
+  }
   const nombre = document.getElementById('prod-nombre').value.trim();
   const precio = parseFloat(document.getElementById('prod-precio').value);
   const seccionId = document.getElementById('prod-seccion').value;
@@ -340,6 +422,11 @@ window.toggleSuspenderProducto = async (id, suspendido) => {
 // ========== VIDEOS ==========
 document.getElementById('btn-upload-video')?.addEventListener('click', uploadVideo);
 async function uploadVideo() {
+  if (cuentaBloqueada) {
+    showAlert('Tu período de prueba finalizó. Activá un plan pago para seguir subiendo ofertas.', 'warning');
+    window.mostrarPago();
+    return;
+  }
   const file = document.getElementById('video-file').files[0];
   const titulo = document.getElementById('video-titulo').value.trim();
   if (!file) return showAlert('Seleccioná un video', 'warning');
@@ -506,6 +593,11 @@ document.getElementById('btn-descargar-plantilla')?.addEventListener('click', ()
 });
 
 document.getElementById('btn-importar-csv')?.addEventListener('click', async () => {
+  if (cuentaBloqueada) {
+    showAlert('Tu período de prueba finalizó. Activá un plan pago para importar productos.', 'warning');
+    window.mostrarPago();
+    return;
+  }
   const fileInput = document.getElementById('csv-productos-file');
   const resultado = document.getElementById('resultado-importacion');
   const file = fileInput.files[0];
