@@ -129,10 +129,13 @@
     <div id="tab-mapa" class="tab-content">
       <h3 class="section-title">🗺️ Comercios en Chuy</h3>
       <div class="card">
-        <div class="form-group" style="margin-bottom:0;">
+        <div class="form-group" style="margin-bottom:8px;">
           <label>Buscar comercio</label>
           <input type="text" id="buscar-comercio" class="form-control" placeholder="Ej: Supermercado Central, farmacia, ropa..." oninput="filtrarComercios()">
         </div>
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem;">
+          <input type="checkbox" id="check-solo-favoritos" onchange="filtrarComercios()"> ❤️ Ver solo mis favoritos
+        </label>
       </div>
       <div class="card">
         <div id="mapa-comercios"></div>

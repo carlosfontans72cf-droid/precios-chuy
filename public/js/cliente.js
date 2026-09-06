@@ -1,6 +1,6 @@
 // Panel Cliente - Precios Chuy
 import { db } from './firebase-config.js';
-import { collection, getDocs, query, orderBy, doc, getDoc, setDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, doc, getDoc, setDoc, increment, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { mostrarPremiumCliente } from './pagos-ui.js';
 
 const userId = sessionStorage.getItem('userId');
@@ -235,11 +235,40 @@ document.addEventListener('click', function(e) {
 
 // ========== COMERCIOS ==========
 let todosLosComercios = [];
+let misFavoritos = new Set();
+
+async function loadFavoritos() {
+  if (!userId) return;
+  try {
+    const userSnap = await getDoc(doc(db, 'users', userId));
+    const data = userSnap.exists() ? userSnap.data() : {};
+    misFavoritos = new Set(data.favoritos || []);
+  } catch (err) { console.error('Error cargando favoritos:', err); }
+}
+
+window.toggleFavorito = async (event, comercioId) => {
+  event.stopPropagation(); // que no navegue al perfil al tocar el corazón
+  const esFavorito = misFavoritos.has(comercioId);
+  try {
+    if (esFavorito) {
+      misFavoritos.delete(comercioId);
+      await updateDoc(doc(db, 'users', userId), { favoritos: arrayRemove(comercioId) });
+    } else {
+      misFavoritos.add(comercioId);
+      await updateDoc(doc(db, 'users', userId), { favoritos: arrayUnion(comercioId) });
+    }
+    const corazon = document.getElementById(`fav-${comercioId}`);
+    if (corazon) corazon.textContent = misFavoritos.has(comercioId) ? '❤️' : '🤍';
+  } catch (err) {
+    console.error('Error guardando favorito:', err);
+  }
+};
 
 async function loadComercios() {
   const cont = document.getElementById('lista-comercios-cliente');
   if (!cont) return;
   try {
+    await loadFavoritos();
     const snapUsers = await getDocs(collection(db, 'users'));
     todosLosComercios = [];
 
@@ -248,6 +277,9 @@ async function loadComercios() {
       if (data.role !== 'comerciante' || data.activo === false) return;
       todosLosComercios.push({ id: d.id, ...data });
     });
+
+    // Favoritos primero
+    todosLosComercios.sort((a, b) => (misFavoritos.has(b.id) ? 1 : 0) - (misFavoritos.has(a.id) ? 1 : 0));
 
     renderComercios(todosLosComercios);
   } catch (err) {
@@ -270,11 +302,14 @@ function renderComercios(lista) {
     const nombre = data.nombreComercio || data.comercio || 'Comercio';
     const tipo = data.tipo || 'comercio';
     const logo = data.logo || '';
+    const esFav = misFavoritos.has(data.id);
     const div = document.createElement('div');
     div.className = 'card';
     div.style.cursor = 'pointer';
+    div.style.position = 'relative';
     div.onclick = () => irAPerfilComercio(data.id);
     div.innerHTML = `
+      <span id="fav-${data.id}" onclick="toggleFavorito(event, '${data.id}')" style="position:absolute; top:10px; right:10px; font-size:1.5rem; cursor:pointer;">${esFav ? '❤️' : '🤍'}</span>
       ${logo ? `<img src="${logo}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;margin-right:15px;float:left;border:2px solid #FFDF00;" onerror="this.style.display='none'">` : ''}
       <h3 style="margin:0;">🏪 ${nombre}</h3>
       <p style="color:#666;margin:5px 0;">${tipo}</p>
@@ -287,9 +322,14 @@ function renderComercios(lista) {
 
 window.filtrarComercios = () => {
   const termino = (document.getElementById('buscar-comercio').value || '').trim().toLowerCase();
-  if (!termino) { renderComercios(todosLosComercios); return; }
+  const soloFavoritos = document.getElementById('check-solo-favoritos')?.checked;
 
-  const filtrados = todosLosComercios.filter(data => {
+  let base = todosLosComercios;
+  if (soloFavoritos) base = base.filter(c => misFavoritos.has(c.id));
+
+  if (!termino) { renderComercios(base); return; }
+
+  const filtrados = base.filter(data => {
     const nombre = (data.nombreComercio || data.comercio || '').toLowerCase();
     const tipo = (data.tipo || '').toLowerCase();
     const direccion = (data.direccion || '').toLowerCase();
