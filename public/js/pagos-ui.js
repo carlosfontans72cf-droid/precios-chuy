@@ -1,5 +1,63 @@
 // Interfaz de pagos - Precios Chuy
 
+// Abre/cierra un bloque de método de pago (efecto acordeón)
+function toggleMetodoPago(idBloque) {
+  document.querySelectorAll('.metodo-pago-detalle').forEach(el => {
+    if (el.id !== idBloque) el.style.display = 'none';
+  });
+  const el = document.getElementById(idBloque);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleMetodoPago = toggleMetodoPago;
+
+// Bloques de métodos de pago reutilizados en ambos modales (comerciante y cliente)
+function bloquesMetodosPago() {
+  return `
+    <div style="border:2px solid #0038A8; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-pesos')" class="btn" style="width:100%; text-align:left; background:#f0f4ff; border:none; padding:14px;">
+        🏦 Cuenta en pesos uruguayos
+      </button>
+      <div id="mp-pesos" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="margin:5px 0;"><strong>Banco Santander</strong></p>
+        <p style="margin:5px 0;"><strong>Titular:</strong> Carlos Fontans</p>
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">001206586016</p>
+      </div>
+    </div>
+
+    <div style="border:2px solid #009C3B; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-dolares')" class="btn" style="width:100%; text-align:left; background:#f0fff4; border:none; padding:14px;">
+        💵 Cuenta en dólares
+      </button>
+      <div id="mp-dolares" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="margin:5px 0;"><strong>Banco Santander</strong></p>
+        <p style="margin:5px 0;"><strong>Titular:</strong> Carlos Fontans</p>
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">005206747953</p>
+      </div>
+    </div>
+
+    <div style="border:2px solid #FFDF00; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-prex')" class="btn" style="width:100%; text-align:left; background:#fffdf0; border:none; padding:14px;">
+        💳 PREX
+      </button>
+      <div id="mp-prex" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">19793785</p>
+        <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
+      </div>
+    </div>
+
+    <div style="border:2px solid #25D366; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-efectivo')" class="btn" style="width:100%; text-align:left; background:#f0fff8; border:none; padding:14px;">
+        💵 Efectivo
+      </button>
+      <div id="mp-efectivo" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="color:#666; margin-bottom:10px;">Coordinemos el pago en persona por WhatsApp:</p>
+        <a href="https://wa.me/59895205598?text=Hola!%20Quiero%20coordinar%20un%20pago%20en%20efectivo%20de%20Precios%20Chuy" target="_blank" class="btn btn-success" style="width:100%; margin-bottom:8px;">🇺🇾 WhatsApp Uruguay</a>
+        <a href="https://wa.me/5553999265575?text=Ol%C3%A1!%20Quero%20combinar%20um%20pagamento%20em%20dinheiro%20do%20Precios%20Chuy" target="_blank" class="btn btn-success" style="width:100%;">🇧🇷 WhatsApp Brasil</a>
+      </div>
+    </div>
+  `;
+}
+
 // Mostrar modal de pago para comerciantes
 export function mostrarPagoComerciante(diasRestantes, userId) {
   const modal = document.createElement('div');
@@ -29,37 +87,12 @@ export function mostrarPagoComerciante(diasRestantes, userId) {
       </div>
     `}
 
-    <h3 style="margin-bottom:15px;">Métodos de pago:</h3>
+    <h3 style="margin-bottom:15px;">Elegí cómo pagar (tocá para ver los datos):</h3>
 
-    <div style="border:2px solid #ddd; border-radius:12px; padding:15px; margin-bottom:15px;">
-      <h4>🇧🇷 PIX (Próximamente)</h4>
-      <p style="color:#666; font-size:0.9rem;">Disponible en 30-60 días</p>
-      <p style="font-size:0.9rem;"><strong>CPF:</strong> 129.485.421-62</p>
-    </div>
+    ${bloquesMetodosPago()}
 
-    <div style="border:2px solid #0038A8; border-radius:12px; padding:15px; margin-bottom:15px;">
-      <h4>🇾🇺 Transferencia bancaria</h4>
-      <p style="margin:10px 0;"><strong>Banco Santander</strong></p>
-      <p style="margin:5px 0;"><strong>Pesos uruguayos:</strong></p>
-      <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">001206586016</p>
-      <p style="margin:10px 0;"><strong>Dólares:</strong></p>
-      <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">005206747953</p>
-      <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
-    </div>
-
-    <div style="border:2px solid #009C3B; border-radius:12px; padding:15px; margin-bottom:15px;">
-      <h4>💵 Efectivo</h4>
-      <p style="color:#666; font-size:0.9rem;">Coordinar pago en persona</p>
-    </div>
-
-    <div style="border:2px solid #FFDF00; border-radius:12px; padding:15px; margin-bottom:20px;">
-      <h4>💳 PREX</h4>
-      <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">19793785</p>
-      <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
-    </div>
-
-    <p style="margin-bottom:15px; color:#666;">
-      Después de pagar, envianos el comprobante por WhatsApp:
+    <p style="margin:15px 0; color:#666;">
+      Después de pagar por transferencia o PREX, envianos el comprobante:
     </p>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -67,13 +100,13 @@ export function mostrarPagoComerciante(diasRestantes, userId) {
          target="_blank" 
          class="btn btn-success"
          style="flex:1; min-width:200px;">
-         WhatsApp Uruguay
+         🇺🇾 WhatsApp Uruguay
       </a>
-      <a href="https://wa.me/5553991757952?text=Olá,%20quero%20enviar%20comprovante%20de%20pagamento%20Precios%20Chuy" 
+      <a href="https://wa.me/5553999265575?text=Ol%C3%A1,%20quero%20enviar%20comprovante%20de%20pagamento%20Precios%20Chuy" 
          target="_blank" 
          class="btn btn-success"
          style="flex:1; min-width:200px;">
-        📱 WhatsApp Brasil
+        🇧🇷 WhatsApp Brasil
       </a>
     </div>
 
@@ -129,30 +162,19 @@ export function mostrarPremiumCliente(userId) {
       Pagás y usás 30 días. Si no renovás, volvés al plan gratis.
     </p>
 
-    <h3 style="margin-bottom:15px;">Opciones de pago:</h3>
+    <h3 style="margin-bottom:15px;">Elegí cómo pagar (tocá para ver los datos):</h3>
 
-    <div style="border:2px solid #009C3B; border-radius:12px; padding:15px; margin-bottom:15px;">
-      <h4>💳 PREX</h4>
-      <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">19793785</p>
-      <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
-    </div>
+    ${bloquesMetodosPago()}
 
-    <div style="border:2px solid #0038A8; border-radius:12px; padding:15px; margin-bottom:15px;">
-      <h4>🏦 Transferencia bancaria</h4>
-      <p style="margin:10px 0;"><strong>Santander Pesos:</strong></p>
-      <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">001206586016</p>
-      <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
-    </div>
-
-    <p style="margin-bottom:15px; color:#666;">
-      Después de pagar, envianos el comprobante:
+    <p style="margin:15px 0; color:#666;">
+      Después de pagar por transferencia o PREX, envianos el comprobante:
     </p>
 
     <a href="https://wa.me/59895205598?text=Hola,%20quiero%20hacerme%20Premium%20en%20Precios%20Chuy" 
        target="_blank" 
        class="btn btn-success btn-block"
        style="margin-bottom:10px;">
-      📱 Enviar comprobante por WhatsApp
+      🇺🇾 Enviar comprobante por WhatsApp
     </a>
 
     <button onclick="this.closest('div[style*=fixed]').remove()" 

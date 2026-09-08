@@ -127,55 +127,77 @@ window.deleteProducto = async (id) => {
   catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
 };
 
-// ========== COMERCIOS ==========
-document.getElementById('btn-add-comercio')?.addEventListener('click', addComercio);
-
-async function addComercio() {
-  const nombre = document.getElementById('com-nombre').value.trim();
-  const tipo = document.getElementById('com-tipo').value;
-  const direccion = document.getElementById('com-direccion').value.trim();
-  const telefono = document.getElementById('com-telefono').value.trim();
-  const email = document.getElementById('com-email').value.trim();
-  if (!nombre) return showAlert('Ingresá el nombre del comercio', 'warning');
-  try {
-    await addDoc(collection(db, 'comercios'), {
-      nombre, tipo, direccion, telefono, email, activo: true, premium: false, createdAt: serverTimestamp()
-    });
-    document.getElementById('com-nombre').value = '';
-    document.getElementById('com-direccion').value = '';
-    document.getElementById('com-telefono').value = '';
-    document.getElementById('com-email').value = '';
-    showAlert('Comercio agregado', 'success');
-    loadComercios();
-  } catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
-}
+// ========== COMERCIOS (datos reales: users con role === 'comerciante') ==========
+let todosLosComerciosAdmin = [];
 
 async function loadComercios() {
   const cont = document.getElementById('lista-comercios');
-  if (!cont) return;
-  cont.innerHTML = '';
+  const select = document.getElementById('prod-comercio');
+  if (select) select.innerHTML = '<option value="">Sin comercio</option>';
+  todosLosComerciosAdmin = [];
   try {
-    const snap = await getDocs(collection(db, 'comercios'));
-    const select = document.getElementById('prod-comercio');
-    if (select) select.innerHTML = '<option value="">Sin comercio</option>';
+    const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'comerciante')));
     snap.forEach(d => {
       const data = d.data();
-      const div = document.createElement('div');
-      div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
-      div.innerHTML = `<strong>${data.nombre}</strong> (${data.tipo})<br>
-        <small>${data.direccion || 'Sin dirección'} | ${data.telefono || 'Sin teléfono'}</small><br>
-        <button class="btn btn-sm btn-danger" onclick="deleteComercio('${d.id}')">Eliminar</button>`;
-      cont.appendChild(div);
-      if (select) select.innerHTML += `<option value="${d.id}">${data.nombre}</option>`;
+      todosLosComerciosAdmin.push({ id: d.id, ...data });
+      if (select) {
+        const nombre = data.nombreComercio || data.comercio || data.nombre || 'Comercio';
+        select.innerHTML += `<option value="${d.id}">${nombre}</option>`;
+      }
     });
+    renderComerciosAdmin(todosLosComerciosAdmin);
   } catch (err) { console.error('Error comercios:', err); }
 }
 
-window.deleteComercio = async (id) => {
-  if (!confirm('¿Eliminar?')) return;
-  try { await deleteDoc(doc(db, 'comercios', id)); loadComercios(); }
-  catch (err) { showAlert(`Error: ${err.message}`, 'danger'); }
+function renderComerciosAdmin(lista) {
+  const cont = document.getElementById('lista-comercios');
+  if (!cont) return;
+  cont.innerHTML = '';
+  if (lista.length === 0) {
+    cont.innerHTML = '<p style="color:#666;text-align:center;padding:15px;">No hay comercios registrados todavía.</p>';
+    return;
+  }
+  lista.forEach(data => {
+    const nombre = data.nombreComercio || data.comercio || data.nombre || 'Comercio';
+    const { estado, dias } = calcularEstadoComercio(data);
+    const estadoTexto = { vencido: '🔴 Vencido', premium: '⭐ Premium', suspendido: '🚫 Suspendido', prueba: '🟢 Prueba' }[estado];
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:10px; border-bottom:1px solid #eee;';
+    div.innerHTML = `<strong>${nombre}</strong> (${data.tipo || 'comercio'})<br>
+      <small>${data.direccion || 'Sin dirección'} | ${data.telefono || 'Sin teléfono'} | ${estadoTexto}${estado !== 'suspendido' && estado !== 'premium' ? ' | Días: ' + dias : ''}</small>`;
+    cont.appendChild(div);
+  });
+}
+
+window.filtrarComerciosAdmin = () => {
+  const termino = (document.getElementById('buscar-comercio-admin').value || '').trim().toLowerCase();
+  if (!termino) { renderComerciosAdmin(todosLosComerciosAdmin); return; }
+  const filtrados = todosLosComerciosAdmin.filter(data => {
+    const nombre = (data.nombreComercio || data.comercio || data.nombre || '').toLowerCase();
+    return nombre.includes(termino);
+  });
+  renderComerciosAdmin(filtrados);
 };
+
+// ========== RESUMEN GENERAL (clientes / comercios / productos) ==========
+async function loadResumenGeneral() {
+  try {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const prodsSnap = await getDocs(collection(db, 'productos'));
+    let clientes = 0, comercios = 0;
+    usersSnap.forEach(d => {
+      const r = d.data().role;
+      if (r === 'comerciante') comercios++;
+      else if (r === 'cliente' || !r) clientes++;
+    });
+    const elCli = document.getElementById('resumen-clientes');
+    const elCom = document.getElementById('resumen-comercios');
+    const elProd = document.getElementById('resumen-productos');
+    if (elCli) elCli.textContent = clientes;
+    if (elCom) elCom.textContent = comercios;
+    if (elProd) elProd.textContent = prodsSnap.size;
+  } catch (err) { console.error('Error resumen general:', err); }
+}
 
 // ========== PAGOS ==========
 async function loadPagos() {
@@ -862,3 +884,4 @@ loadGuia();
 loadAvisos();
 initBuscador();
 cargarConfiguracion();
+loadResumenGeneral();
