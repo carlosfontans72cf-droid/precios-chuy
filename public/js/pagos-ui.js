@@ -46,6 +46,19 @@ function bloquesMetodosPago() {
       </div>
     </div>
 
+    <div style="border:2px solid #FFCC29; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-bb')" class="btn" style="width:100%; text-align:left; background:#fffdf0; border:none; padding:14px;">
+        🇧🇷 Banco do Brasil
+      </button>
+      <div id="mp-bb" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="margin:5px 0;"><strong>Agência:</strong></p>
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">3778-8</p>
+        <p style="margin:10px 0 5px 0;"><strong>Conta Corrente:</strong></p>
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">12549-0</p>
+        <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
+      </div>
+    </div>
+
     <div style="border:2px solid #FFDF00; border-radius:12px; margin-bottom:12px; overflow:hidden;">
       <button onclick="toggleMetodoPago('mp-prex')" class="btn" style="width:100%; text-align:left; background:#fffdf0; border:none; padding:14px;">
         💳 PREX
