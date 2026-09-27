@@ -2,6 +2,8 @@
 import { db } from './firebase-config.js';
 import { collection, getDocs, query, orderBy, doc, getDoc, setDoc, increment, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { mostrarPremiumCliente } from './pagos-ui.js';
+import { compartirApp } from './utils.js';
+window.compartirApp = compartirApp;
 
 const userId = sessionStorage.getItem('userId');
 const userName = sessionStorage.getItem('userName');

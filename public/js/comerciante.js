@@ -4,7 +4,8 @@ import {
   collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { showAlert } from './utils.js';
+import { showAlert, compartirApp } from './utils.js';
+window.compartirApp = compartirApp;
 import { mostrarPagoComerciante } from './pagos-ui.js';
 
 const userId = sessionStorage.getItem('userId');

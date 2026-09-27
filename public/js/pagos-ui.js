@@ -35,6 +35,17 @@ function bloquesMetodosPago() {
       </div>
     </div>
 
+    <div style="border:2px solid #32BCAD; border-radius:12px; margin-bottom:12px; overflow:hidden;">
+      <button onclick="toggleMetodoPago('mp-pix')" class="btn" style="width:100%; text-align:left; background:#f0fffd; border:none; padding:14px;">
+        🇧🇷 PIX
+      </button>
+      <div id="mp-pix" class="metodo-pago-detalle" style="display:none; padding:15px;">
+        <p style="margin:5px 0;"><strong>Chave PIX (CPF):</strong></p>
+        <p style="font-family:monospace; background:#f0f0f0; padding:8px; border-radius:6px;">129.485.421-62</p>
+        <p style="margin-top:10px;"><strong>Titular:</strong> Carlos Fontans</p>
+      </div>
+    </div>
+
     <div style="border:2px solid #FFDF00; border-radius:12px; margin-bottom:12px; overflow:hidden;">
       <button onclick="toggleMetodoPago('mp-prex')" class="btn" style="width:100%; text-align:left; background:#fffdf0; border:none; padding:14px;">
         💳 PREX
